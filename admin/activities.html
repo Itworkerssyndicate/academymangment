@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>سجل النشاطات | لوحة التحكم</title>
+  <meta name="description" content="سجل نشاطات النظام">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ ADMIN ACTIVITIES ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .page-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ MINI STATS ============ */
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .mini-stat {
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .mini-stat:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .mini-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .mini-stat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .mini-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    /* ============ FILTERS ============ */
+    .filters-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 140px;
+    }
+    
+    .filter-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .filters-search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .filters-search-wrap svg {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    .filter-input,
+    .filter-select {
+      width: 100%;
+      padding: 9px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+      outline: none;
+    }
+    
+    .filter-input.has-icon {
+      padding-right: 34px;
+    }
+    
+    .filter-input:focus,
+    .filter-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .filter-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .filter-select {
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+      padding-left: 34px;
+    }
+    
+    .filter-select option {
+      background: var(--surface-elevated);
+      color: var(--text);
+    }
+    
+    .filter-actions-group {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    
+    .filter-reset-btn {
+      padding: 9px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    
+    .filter-reset-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .filter-reset-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ RESULTS TOOLBAR ============ */
+    .results-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .results-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    
+    .results-count strong {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 15px;
+    }
+    
+    /* ============ TABLE ============ */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .act-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 700px;
+    }
+    
+    .act-table thead {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .act-table thead th {
+      padding: 12px 16px;
+      text-align: right;
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    
+    .act-table tbody tr {
+      border-bottom: 1px solid var(--border-light);
+      transition: background 0.15s;
+    }
+    
+    .act-table tbody tr:last-child {
+      border-bottom: none;
+    }
+    
+    .act-table tbody tr:hover {
+      background: var(--surface-hover);
+    }
+    
+    .act-table tbody td {
+      padding: 12px 16px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+    
+    .act-table tbody td.mono {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    
+    /* ============ ACTIVITY TYPE BADGE ============ */
+    .act-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    
+    .act-type-badge svg {
+      width: 11px;
+      height: 11px;
+    }
+    
+    .act-type-badge.login { background: var(--info-soft); color: var(--info); }
+    .act-type-badge.logout { background: var(--error-soft); color: var(--error); }
+    .act-type-badge.create { background: var(--success-soft); color: var(--success); }
+    .act-type-badge.update { background: var(--warning-soft); color: var(--warning); }
+    .act-type-badge.delete { background: var(--error-soft); color: var(--error); }
+    .act-type-badge.search { background: var(--accent-glow, rgba(139,92,246,0.15)); color: #A78BFA; }
+    .act-type-badge.view { background: var(--info-soft); color: var(--info); }
+    .act-type-badge.default { background: var(--surface-hover); color: var(--text-muted); }
+    
+    /* ============ USER CELL ============ */
+    .act-user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .act-user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    
+    .act-user-info {
+      min-width: 0;
+    }
+    
+    .act-user-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .act-user-role {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    
+    /* ============ DESCRIPTION CELL ============ */
+    .act-description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      max-width: 350px;
+      word-break: break-word;
+    }
+    
+    /* ============ LOADING ============ */
+    .admin-loader {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .admin-loader.show { display: block; }
+    
+    .admin-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .admin-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ EMPTY ============ */
+    .admin-empty {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .admin-empty.show { display: block; }
+    
+    .admin-empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .admin-empty-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .admin-empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .admin-empty-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    
+    /* ============ PAGINATION ============ */
+    .admin-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .admin-page-btn {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .admin-page-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .admin-page-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .admin-page-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    
+    .admin-page-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1024px) {
+      .mini-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 768px) {
+      .filters-row { flex-direction: column; align-items: stretch; }
+      .filter-group { min-width: 100%; }
+      .filter-actions-group { width: 100%; }
+      .filter-reset-btn { flex: 1; }
+      .page-header-admin { flex-direction: column; align-items: stretch; }
+      .page-header-actions { justify-content: flex-start; }
+    }
+    
+    @media (max-width: 480px) {
+      .mini-stats { grid-template-columns: 1fr 1fr; }
+      .mini-stat-value { font-size: 18px; }
+      .act-description { max-width: 200px; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<!-- ✅ حماية الصفحة -->
+<body data-requires-auth data-required-roles="super_admin,admin">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">سجل النشاطات</h1>
+        </div>
+        <div class="app-topbar-right">
+          <button class="btn btn-outline btn-sm" id="refreshBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>تحديث</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-info">
+              <h2>سجل النشاطات</h2>
+              <p>تتبع جميع نشاطات المستخدمين في النظام</p>
+            </div>
+          </div>
+
+          <!-- Mini Stats -->
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--primary);"></span>
+                إجمالي
+              </div>
+              <div class="mini-stat-value" id="miniTotal">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--success);"></span>
+                اليوم
+              </div>
+              <div class="mini-stat-value" id="miniToday">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--info);"></span>
+                دخول
+              </div>
+              <div class="mini-stat-value" id="miniLogin">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--warning);"></span>
+                تغييرات
+              </div>
+              <div class="mini-stat-value" id="miniChanges">—</div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-card">
+            <div class="filters-row">
+              <div class="filter-group">
+                <label class="filter-label">بحث</label>
+                <div class="filters-search-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input 
+                    type="text" 
+                    class="filter-input has-icon" 
+                    id="searchInput" 
+                    placeholder="اسم المستخدم أو الوصف..."
+                    autocomplete="off"
+                  >
+                </div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">النوع</label>
+                <select class="filter-select" id="typeFilter">
+                  <option value="">كل الأنواع</option>
+                  <option value="login">دخول</option>
+                  <option value="logout">خروج</option>
+                  <option value="create">إضافة</option>
+                  <option value="update">تعديل</option>
+                  <option value="delete">حذف</option>
+                  <option value="view">عرض</option>
+                  <option value="search">بحث</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">من تاريخ</label>
+                <input type="date" class="filter-input" id="dateFrom">
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">إلى تاريخ</label>
+                <input type="date" class="filter-input" id="dateTo">
+              </div>
+              <div class="filter-actions-group">
+                <button class="filter-reset-btn" id="resetBtn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                  </svg>
+                  <span>إعادة تعيين</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Toolbar -->
+          <div class="results-toolbar" id="resultsToolbar" style="display:none;">
+            <div class="results-count">
+              <strong id="resultsCount">0</strong> نشاط
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="admin-loader" id="adminLoader">
+            <div class="admin-loader-spinner"></div>
+            <div class="admin-loader-text">جاري تحميل النشاطات...</div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-card" id="tableCard" style="display:none;">
+            <div class="table-container">
+              <table class="act-table">
+                <thead>
+                  <tr>
+                    <th>المستخدم</th>
+                    <th>النوع</th>
+                    <th>الوصف</th>
+                    <th>التاريخ والوقت</th>
+                  </tr>
+                </thead>
+                <tbody id="activitiesTableBody"></tbody>
+              </table>
+            </div>
+            <div class="admin-pagination" id="pagination">
+              <button class="admin-page-btn" id="prevBtn" type="button" aria-label="السابق">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+              <div id="pageNumbers" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;"></div>
+              <button class="admin-page-btn" id="nextBtn" type="button" aria-label="التالي">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty -->
+          <div class="admin-empty" id="adminEmpty">
+            <div class="admin-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3 class="admin-empty-title">لا توجد نشاطات</h3>
+            <p class="admin-empty-text">لم يتم العثور على نشاطات مطابقة للفلاتر. جرب تغيير معايير البحث.</p>
+            <button class="filter-reset-btn" id="emptyResetBtn" type="button" style="margin:0 auto;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+              <span>عرض كل النشاطات</span>
+            </button>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+  <script src="../assets/js/pages/admin/activities.js"></script>
+
+</body>
+</html>
