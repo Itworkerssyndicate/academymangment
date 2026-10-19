@@ -2,7 +2,7 @@
 // [25/50] ITWS Platform - Student Page Logic
 // Path: assets/js/pages/student.js
 // ============================================
-// منطق صفحة المتدرب - عرض الشهادات + CV
+// يدعم فصل النقابة عن الأكاديميات (issuer_type)
 // بدون إيموجي
 // مسارات نسبية
 // ============================================
@@ -22,9 +22,6 @@
     loading: false
   };
 
-  // ============================================
-  // 1. Helpers
-  // ============================================
   function $(id) { return document.getElementById(id); }
 
   function setText(id, t) {
@@ -48,9 +45,7 @@
       var d = date instanceof Date ? date : new Date(date);
       if (isNaN(d.getTime())) return '—';
       return d.toLocaleDateString('ar-EG', opts || {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric'
       });
     } catch (e) {
       return '—';
@@ -94,9 +89,6 @@
     return base + String(path).replace(/^\.?\//, '');
   }
 
-  // ============================================
-  // 2. Grade handling
-  // ============================================
   function gradeClass(grade) {
     if (!grade) return '';
     var g = String(grade).toUpperCase().replace(/[+-]/g, '');
@@ -131,18 +123,12 @@
     return best || '—';
   }
 
-  // ============================================
-  // 3. Dynamic content
-  // ============================================
   function applyDynamicContent() {
     setText('footerCopyright', getSetting('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات والبرمجيات'));
     setText('footerPresidentLabel', getSetting('app_identity.president_label', 'النقيب العام:'));
     setText('footerPresidentName', getSetting('app_identity.president_name', 'المحاسب / محمود جميل'));
   }
 
-  // ============================================
-  // 4. Load certificates
-  // ============================================
   function loadCertificates(nationalId) {
     if (!window.sb) {
       return Promise.reject(new Error('Supabase not available'));
@@ -156,9 +142,7 @@
       .order('issued_at', { ascending: false });
   }
 
-  // ============================================
-  // 5. Load academy + branch details (bulk)
-  // ============================================
+  // ✅ تحميل بيانات الأكاديميات فقط (النقابة مش هتكون في الجدول)
   function loadAcademiesDetails(certs) {
     if (!certs || certs.length === 0) return Promise.resolve();
 
@@ -166,18 +150,18 @@
     var branchIds = [];
 
     certs.forEach(function (c) {
+      // ✅ نضيف بس اللي عنده academy_id (شهادة من أكاديمية)
       if (c.academy_id && academyIds.indexOf(c.academy_id) === -1) academyIds.push(c.academy_id);
       if (c.branch_id && branchIds.indexOf(c.branch_id) === -1) branchIds.push(c.branch_id);
     });
 
     var promises = [];
 
-    // academies
     if (academyIds.length > 0) {
       promises.push(
         window.sb
           .from('academies')
-          .select('id, name, license_number, logo_url, category_id')
+          .select('id, name, license_number, logo_url, category_id, academy_type')
           .in('id', academyIds)
           .then(function (res) {
             if (res.data) {
@@ -192,7 +176,6 @@
       promises.push(Promise.resolve());
     }
 
-    // branches
     if (branchIds.length > 0) {
       promises.push(
         window.sb
@@ -215,9 +198,6 @@
     return Promise.all(promises);
   }
 
-  // ============================================
-  // 6. Log search
-  // ============================================
   function logSearch(nationalId, count) {
     if (!window.sb) return;
 
@@ -229,9 +209,6 @@
     }).catch(function () {});
   }
 
-  // ============================================
-  // 7. Render result
-  // ============================================
   function renderResult(nationalId) {
     var container = $('studentResult');
     if (!container) return;
@@ -240,26 +217,49 @@
     var studentName = state.studentName || 'متدرب';
     var initial = escapeHtml(studentName.charAt(0));
 
-    // إحصائيات
     var totalCerts = certs.length;
-    var totalAcademies = {};
-    certs.forEach(function (c) {
-      var key = c.academy_id || c.academy_name || 'unknown';
-      totalAcademies[key] = true;
-    });
-    var academiesCount = Object.keys(totalAcademies).length;
-    var bestGrade = getBestGrade(certs);
+    var totalIssuers = {};
+    var unionCount = 0;
+    var academyCount = 0;
 
-    // الرقم القومي مخفي
+    certs.forEach(function (c) {
+      var isUnion = c.issuer_type === 'union' || !c.academy_id;
+      if (isUnion) {
+        unionCount++;
+        totalIssuers['__union__'] = true;
+      } else {
+        academyCount++;
+        var key = c.academy_id || c.academy_name || 'unknown';
+        totalIssuers[key] = true;
+      }
+    });
+
+    var issuersCount = Object.keys(totalIssuers).length;
+    var bestGrade = getBestGrade(certs);
     var maskedId = '•••• •••• •••• ' + escapeHtml(String(nationalId).slice(-4));
 
-    // قائمة الشهادات
+    // ✅ بناء قائمة الشهادات مع مراعاة النوع
     var certsHtml = certs.map(function (cert) {
       var academy = cert.academy_id ? state.academies[cert.academy_id] : null;
       var branch = cert.branch_id ? state.branches[cert.branch_id] : null;
 
-      var academyName = academy ? academy.name : (cert.academy_name || '—');
-      var branchName = branch ? branch.governorate : (cert.branch_name || '—');
+      // ✅ تحديد نوع الجهة
+      var isUnion = cert.issuer_type === 'union' || !cert.academy_id;
+
+      var issuerLabel, issuerName, branchLabel, branchName;
+
+      if (isUnion) {
+        issuerLabel = 'الجهة المُصدرة';
+        issuerName = 'نقابة تكنولوجيا المعلومات';
+        branchLabel = null;
+        branchName = null;
+      } else {
+        issuerLabel = 'الأكاديمية';
+        issuerName = academy ? academy.name : (cert.academy_name || '—');
+        branchLabel = 'الفرع';
+        branchName = branch ? branch.governorate : (cert.branch_name || '—');
+      }
+
       var gradeCls = gradeClass(cert.grade);
       var issuedDate = formatDate(cert.issued_at);
       var courseHours = cert.course_hours ? cert.course_hours + ' ساعة' : '—';
@@ -278,13 +278,15 @@
           '</div>' +
           '<div class="cert-item-details">' +
             '<div class="cert-item-detail">' +
-              '<span class="cert-item-detail-label">الأكاديمية</span>' +
-              '<span class="cert-item-detail-value">' + escapeHtml(academyName) + '</span>' +
+              '<span class="cert-item-detail-label">' + issuerLabel + '</span>' +
+              '<span class="cert-item-detail-value">' + escapeHtml(issuerName) + '</span>' +
             '</div>' +
-            '<div class="cert-item-detail">' +
-              '<span class="cert-item-detail-label">الفرع</span>' +
-              '<span class="cert-item-detail-value">' + escapeHtml(branchName) + '</span>' +
-            '</div>' +
+            (branchName
+              ? '<div class="cert-item-detail">' +
+                  '<span class="cert-item-detail-label">' + branchLabel + '</span>' +
+                  '<span class="cert-item-detail-value">' + escapeHtml(branchName) + '</span>' +
+                '</div>'
+              : '') +
             '<div class="cert-item-detail">' +
               '<span class="cert-item-detail-label">الساعات</span>' +
               '<span class="cert-item-detail-value">' + escapeHtml(courseHours) + '</span>' +
@@ -363,8 +365,8 @@
             '<div class="profile-stat-label">شهادة معتمدة</div>' +
           '</div>' +
           '<div class="profile-stat">' +
-            '<div class="profile-stat-value">' + academiesCount + '</div>' +
-            '<div class="profile-stat-label">أكاديمية</div>' +
+            '<div class="profile-stat-value">' + issuersCount + '</div>' +
+            '<div class="profile-stat-label">جهة مُصدرة</div>' +
           '</div>' +
           '<div class="profile-stat">' +
             '<div class="profile-stat-value">' + escapeHtml(bestGrade) + '</div>' +
@@ -383,19 +385,14 @@
     container.innerHTML = html;
     container.classList.add('show');
 
-    // إخفاء رسالة الخطأ
     var error = $('studentError');
     if (error) error.classList.remove('show');
 
-    // scroll
     setTimeout(function () {
       container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   }
 
-  // ============================================
-  // 8. Show error
-  // ============================================
   function showError(title, text) {
     var error = $('studentError');
     if (!error) return;
@@ -408,9 +405,6 @@
     if (result) result.classList.remove('show');
   }
 
-  // ============================================
-  // 9. Perform search
-  // ============================================
   function performSearch(nationalId) {
     if (!nationalId) {
       toast('أدخل الرقم القومي', 'error');
@@ -435,7 +429,6 @@
     if (result) result.classList.remove('show');
     if (btn) { btn.disabled = true; btn.textContent = 'جاري البحث...'; }
 
-    // reset state
     state.certificates = [];
     state.academies = {};
     state.branches = {};
@@ -449,7 +442,7 @@
         if (certs.length === 0) {
           if (loader) loader.classList.remove('show');
           if (btn) { btn.disabled = false; btn.textContent = 'بحث'; }
-          showError('لم يتم العثور على شهادات', 'لا توجد شهادات مسجلة بهذا الرقم القومي. تواصل مع الأكاديمية المسؤولة.');
+          showError('لم يتم العثور على شهادات', 'لا توجد شهادات مسجلة بهذا الرقم القومي. تواصل مع الجهة المُصدرة.');
           logSearch(nationalId, 0);
           state.loading = false;
           return;
@@ -459,7 +452,6 @@
         state.studentName = certs[0].student_name || 'متدرب';
         state.currentNationalId = nationalId;
 
-        // تحميل بيانات الأكاديميات والفروع
         return loadAcademiesDetails(certs).then(function () {
           if (loader) loader.classList.remove('show');
           if (btn) { btn.disabled = false; btn.textContent = 'بحث'; }
@@ -477,25 +469,18 @@
       });
   }
 
-  // ============================================
-  // 10. Print certificate (يذهب لصفحة verify ويطبع)
-  // ============================================
   function printCertificate(code) {
     if (!code) return;
     var url = resolve('verify.html?code=' + encodeURIComponent(code) + '&print=1');
     window.open(url, '_blank');
   }
 
-  // ============================================
-  // 11. Download CV
-  // ============================================
   function downloadCV() {
     if (!state.certificates || state.certificates.length === 0) {
       toast('لا توجد شهادات لإنشاء السيرة الذاتية', 'error');
       return;
     }
 
-    // التحقق من تفعيل الميزة
     if (getSetting('features.enable_ai_cv', true) === false) {
       toast('ميزة السيرة الذاتية غير متاحة حالياً', 'info');
       return;
@@ -503,20 +488,16 @@
 
     toast('جاري تجهيز السيرة الذاتية...', 'info');
 
-    // نستخدم @react-pdf أو html2pdf إذا كان متاح
     if (window.html2pdf) {
       generateCVWithHtml2Pdf();
     } else {
-      // fallback: فتح صفحة الطباعة
       generateCVFallback();
     }
   }
 
   function generateCVWithHtml2Pdf() {
-    // نبني HTML للسيرة الذاتية
     var cvHtml = buildCVHtml();
 
-    // نحطه في div مؤقت
     var tempDiv = document.createElement('div');
     tempDiv.innerHTML = cvHtml;
     tempDiv.style.position = 'absolute';
@@ -565,14 +546,23 @@
       : '<div style="width:64px;height:64px;border-radius:50%;background:#CE1126;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;">نت</div>';
 
     var certsRows = certs.map(function (c, i) {
-      var academy = c.academy_id ? state.academies[c.academy_id] : null;
-      var academyName = academy ? academy.name : (c.academy_name || '—');
+      var isUnion = c.issuer_type === 'union' || !c.academy_id;
+      var issuerName;
+
+      if (isUnion) {
+        issuerName = 'نقابة تكنولوجيا المعلومات';
+      } else {
+        var academy = c.academy_id ? state.academies[c.academy_id] : null;
+        issuerName = academy ? academy.name : (c.academy_name || '—');
+      }
+
       var issuedDate = formatDate(c.issued_at);
+
       return '' +
         '<tr style="border-bottom:1px solid #e5e5e5;">' +
           '<td style="padding:10px 8px;font-size:11px;color:#666;text-align:center;">' + (i + 1) + '</td>' +
           '<td style="padding:10px 8px;font-size:12px;color:#000;font-weight:600;">' + escapeHtml(c.course_name || '—') + '</td>' +
-          '<td style="padding:10px 8px;font-size:11px;color:#333;">' + escapeHtml(academyName) + '</td>' +
+          '<td style="padding:10px 8px;font-size:11px;color:#333;">' + escapeHtml(issuerName) + '</td>' +
           '<td style="padding:10px 8px;font-size:11px;color:#333;text-align:center;">' + escapeHtml(c.course_hours ? c.course_hours + ' س' : '—') + '</td>' +
           '<td style="padding:10px 8px;font-size:12px;color:#CE1126;font-weight:700;text-align:center;">' + escapeHtml(c.grade || '—') + '</td>' +
           '<td style="padding:10px 8px;font-size:11px;color:#666;text-align:center;">' + escapeHtml(issuedDate) + '</td>' +
@@ -580,8 +570,7 @@
     }).join('');
 
     return '' +
-      '<div class="cv-paper" style="width:210mm;min-height:297mm;background:#fff;color:#1a1a1a;font-family:Cairo,sans-serif;direction:rtl;padding:20mm 18mm;box-sizing:border-box;">' +
-        // Header
+      '<div class="cv-paper" style="width:210mm;min-height:297mm;background:#fff;color:#1a1a1a;font-family:Cairo,sans-serif;direction:rtl;padding:20mm 18mm;box-sizing:border-box;position:relative;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #CE1126;padding-bottom:16px;margin-bottom:24px;">' +
           '<div style="display:flex;align-items:center;gap:14px;">' +
             logoHtml +
@@ -595,24 +584,21 @@
             '<div style="font-size:10px;color:#999;margin-top:2px;">سيرة ذاتية معتمدة</div>' +
           '</div>' +
         '</div>' +
-        
-        // Profile
+
         '<div style="background:#f8f8f8;border-right:4px solid #CE1126;padding:16px 20px;margin-bottom:24px;">' +
           '<div style="font-size:24px;font-weight:800;color:#1a1a1a;margin-bottom:6px;">' + escapeHtml(studentName) + '</div>' +
           '<div style="font-size:12px;color:#666;">الرقم القومي: ' + maskedId + '</div>' +
           '<div style="font-size:12px;color:#666;margin-top:4px;">عدد الشهادات المعتمدة: <strong style="color:#CE1126;">' + certs.length + '</strong></div>' +
         '</div>' +
-        
-        // Summary
+
         '<div style="margin-bottom:24px;">' +
           '<div style="font-size:14px;font-weight:700;color:#CE1126;border-bottom:2px solid #CE1126;padding-bottom:6px;margin-bottom:12px;">الملخص المهني</div>' +
           '<p style="font-size:12px;color:#333;line-height:1.8;margin:0;">' +
-            'حاصل على ' + certs.length + ' شهادة تدريبية معتمدة من أكاديميات معتمدة رسمياً من ' + escapeHtml(unionName) + '. ' +
+            'حاصل على ' + certs.length + ' شهادة تدريبية معتمدة من جهات معتمدة رسمياً من ' + escapeHtml(unionName) + '. ' +
             'جميع الشهادات موثقة رسمياً ومُتحقق منها إلكترونياً.' +
           '</p>' +
         '</div>' +
-        
-        // Certificates
+
         '<div style="margin-bottom:24px;">' +
           '<div style="font-size:14px;font-weight:700;color:#CE1126;border-bottom:2px solid #CE1126;padding-bottom:6px;margin-bottom:12px;">الشهادات التدريبية</div>' +
           '<table style="width:100%;border-collapse:collapse;">' +
@@ -620,7 +606,7 @@
               '<tr style="background:#CE1126;color:#fff;">' +
                 '<th style="padding:8px;font-size:10px;font-weight:700;text-align:center;">#</th>' +
                 '<th style="padding:8px;font-size:10px;font-weight:700;text-align:right;">اسم الدورة</th>' +
-                '<th style="padding:8px;font-size:10px;font-weight:700;text-align:right;">الأكاديمية</th>' +
+                '<th style="padding:8px;font-size:10px;font-weight:700;text-align:right;">الجهة المُصدرة</th>' +
                 '<th style="padding:8px;font-size:10px;font-weight:700;text-align:center;">الساعات</th>' +
                 '<th style="padding:8px;font-size:10px;font-weight:700;text-align:center;">التقدير</th>' +
                 '<th style="padding:8px;font-size:10px;font-weight:700;text-align:center;">التاريخ</th>' +
@@ -629,8 +615,7 @@
             '<tbody>' + certsRows + '</tbody>' +
           '</table>' +
         '</div>' +
-        
-        // Footer
+
         '<div style="position:absolute;bottom:18mm;left:18mm;right:18mm;border-top:2px solid #CE1126;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">' +
           '<div>' +
             '<div style="font-size:10px;color:#666;">النقيب العام</div>' +
@@ -645,7 +630,6 @@
   }
 
   function generateCVFallback() {
-    // fallback: بناء صفحة HTML وفتحها في نافذة جديدة للطباعة
     var html = '<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>CV - ' + escapeHtml(state.studentName) + '</title>' +
       '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">' +
       '<style>body{margin:0;background:#fff;font-family:Cairo,sans-serif;}@media print{@page{margin:0;size:A4;}.cv-paper{margin:0!important;box-shadow:none!important;}}</style>' +
@@ -666,9 +650,6 @@
     };
   }
 
-  // ============================================
-  // 12. Share page
-  // ============================================
   function sharePage() {
     if (!state.currentNationalId) return;
     var url = window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(state.currentNationalId);
@@ -690,9 +671,6 @@
     }
   }
 
-  // ============================================
-  // 13. Form submit
-  // ============================================
   function handleSubmit(e) {
     if (e) e.preventDefault();
     var input = $('nationalIdInput');
@@ -706,9 +684,6 @@
     return false;
   }
 
-  // ============================================
-  // 14. Init
-  // ============================================
   function init() {
     if (state.initialized) return;
     state.initialized = true;
@@ -718,7 +693,6 @@
     var form = $('studentForm');
     if (form) form.addEventListener('submit', handleSubmit);
 
-    // input filtering
     var input = $('nationalIdInput');
     if (input) {
       input.addEventListener('input', function () {
@@ -733,14 +707,12 @@
       });
     }
 
-    // AppSettings changes
     if (window.AppSettings && window.AppSettings.onChange) {
       window.AppSettings.onChange(function (cache, key) {
         if (!key || key === 'app_identity') applyDynamicContent();
       });
     }
 
-    // Auto-verify from URL
     var params = new URLSearchParams(window.location.search);
     var id = params.get('id') || params.get('nationalId');
     if (id && /^\d{14}$/.test(id)) {
@@ -751,9 +723,6 @@
     logDebug('Student page initialized');
   }
 
-  // ============================================
-  // 15. Public API
-  // ============================================
   window.StudentPage = {
     initialized: true,
     init: init,
