@@ -2,7 +2,8 @@
 // [29/50] ITWS Platform - Academy Details Logic
 // Path: assets/js/pages/academy-details.js
 // ============================================
-// منطق صفحة تفاصيل الأكاديمية
+// محدث: يتعامل مع الأكاديميات بس (النقابة مش في academies)
+// يتحقق من is_deleted و status
 // بدون إيموجي
 // مسارات نسبية
 // ============================================
@@ -23,9 +24,6 @@
     initialized: false
   };
 
-  // ============================================
-  // 1. Helpers
-  // ============================================
   function $(id) { return document.getElementById(id); }
 
   function setText(id, t) {
@@ -49,9 +47,7 @@
       var d = date instanceof Date ? date : new Date(date);
       if (isNaN(d.getTime())) return '—';
       return d.toLocaleDateString('ar-EG', opts || {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric'
       });
     } catch (e) {
       return '—';
@@ -95,14 +91,6 @@
     return base + String(path).replace(/^\.?\//, '');
   }
 
-  function isValidUUID(str) {
-    if (!str) return false;
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-  }
-
-  // ============================================
-  // 2. Read URL
-  // ============================================
   function readAcademyId() {
     try {
       var params = new URLSearchParams(window.location.search);
@@ -113,15 +101,13 @@
     }
   }
 
-  // ============================================
-  // 3. Load academy (with category)
-  // ============================================
+  // ✅ تحميل الأكاديمية (يستثني is_deleted)
   function loadAcademy(id) {
     if (!window.sb) return Promise.reject(new Error('Supabase not available'));
 
     return window.sb
       .from('academies')
-      .select('id, name, license_number, tax_number, description, logo_url, category_id, status, is_deleted, created_at, approved_at, expires_at, owner_name, founded_year, email, phone, website_url, facebook_url')
+      .select('id, name, license_number, tax_number, description, logo_url, category_id, status, is_deleted, created_at, approved_at, expires_at, owner_name, founded_year, email, phone, website_url, facebook_url, academy_type')
       .eq('id', id)
       .eq('is_deleted', false)
       .maybeSingle()
@@ -131,9 +117,6 @@
       });
   }
 
-  // ============================================
-  // 4. Load category
-  // ============================================
   function loadCategory(categoryId) {
     if (!categoryId || !window.sb) return Promise.resolve(null);
 
@@ -149,9 +132,6 @@
       .catch(function () { return null; });
   }
 
-  // ============================================
-  // 5. Load branches
-  // ============================================
   function loadBranches(academyId) {
     if (!window.sb) return Promise.resolve([]);
 
@@ -168,9 +148,6 @@
       .catch(function () { return []; });
   }
 
-  // ============================================
-  // 6. Load courses
-  // ============================================
   function loadCourses(academyId) {
     if (!window.sb) return Promise.resolve([]);
 
@@ -186,9 +163,7 @@
       .catch(function () { return []; });
   }
 
-  // ============================================
-  // 7. Count certificates (اختياري)
-  // ============================================
+  // ✅ عد الشهادات (بس اللي من الأكاديمية دي - مش من النقابة)
   function countCertificates(academyId) {
     if (!window.sb) return Promise.resolve(0);
 
@@ -204,9 +179,6 @@
       .catch(function () { return 0; });
   }
 
-  // ============================================
-  // 8. Log search
-  // ============================================
   function logSearch(academyName) {
     if (!window.sb) return;
 
@@ -218,9 +190,6 @@
     }).catch(function () {});
   }
 
-  // ============================================
-  // 9. Dynamic SEO
-  // ============================================
   function updateSEO(academy) {
     if (!academy) return;
 
@@ -232,11 +201,9 @@
 
     document.title = title;
 
-    // Meta description
     var descEl = document.querySelector('meta[name="description"]');
     if (descEl) descEl.setAttribute('content', desc);
 
-    // OG tags
     var ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', title);
 
@@ -253,24 +220,18 @@
     if (ogType) ogType.setAttribute('content', 'website');
   }
 
-  // ============================================
-  // 10. Render hero
-  // ============================================
   function renderHero() {
     var academy = state.academy;
     if (!academy) return;
 
-    // Show hero
     var hero = $('acadHero');
     if (hero) hero.style.display = 'block';
 
     var main = $('acadMain');
     if (main) main.style.display = 'block';
 
-    // Breadcrumb
     setText('breadcrumbCurrent', academy.name || 'تفاصيل الأكاديمية');
 
-    // Logo
     var logoEl = $('acadLogo');
     if (logoEl) {
       if (academy.logo_url) {
@@ -280,20 +241,16 @@
       }
     }
 
-    // Name
     setText('acadName', academy.name || 'أكاديمية');
 
-    // Description
     var descEl = $('acadDescription');
     if (descEl && academy.description) {
       descEl.textContent = academy.description;
       descEl.style.display = 'block';
     }
 
-    // License
     setText('acadLicense', academy.license_number || '—');
 
-    // Category
     if (state.category) {
       var catWrap = $('acadCategoryWrap');
       var catEl = $('acadCategory');
@@ -302,9 +259,6 @@
     }
   }
 
-  // ============================================
-  // 11. Render info grid
-  // ============================================
   function renderInfoGrid() {
     var grid = $('infoGrid');
     if (!grid || !state.academy) return;
@@ -312,7 +266,6 @@
     var academy = state.academy;
     var cards = [];
 
-    // رقم الاعتماد
     if (academy.license_number) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
@@ -322,7 +275,6 @@
       ));
     }
 
-    // البطاقة الضريبية
     if (academy.tax_number) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>',
@@ -332,7 +284,6 @@
       ));
     }
 
-    // تاريخ الاعتماد
     if (academy.approved_at) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
@@ -341,7 +292,6 @@
       ));
     }
 
-    // الشهادات الصادرة
     if (state.certificatesCount > 0) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>',
@@ -350,7 +300,6 @@
       ));
     }
 
-    // سنة التأسيس
     if (academy.founded_year) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
@@ -359,7 +308,6 @@
       ));
     }
 
-    // عدد الفروع
     if (state.branches.length > 0) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
@@ -368,7 +316,6 @@
       ));
     }
 
-    // البريد الإلكتروني
     if (academy.email) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
@@ -379,7 +326,6 @@
       ));
     }
 
-    // الهاتف
     if (academy.phone) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
@@ -390,7 +336,6 @@
       ));
     }
 
-    // الموقع الإلكتروني
     if (academy.website_url) {
       cards.push(makeInfoCard(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
@@ -417,9 +362,6 @@
       '</div>';
   }
 
-  // ============================================
-  // 12. Render branches
-  // ============================================
   function renderBranches() {
     var grid = $('branchesGrid');
     var countEl = $('branchesCount');
@@ -481,9 +423,6 @@
     }).join('');
   }
 
-  // ============================================
-  // 13. Render courses
-  // ============================================
   function renderCourses() {
     var section = $('coursesSection');
     var grid = $('coursesGrid');
@@ -546,9 +485,6 @@
     }).join('');
   }
 
-  // ============================================
-  // 14. Share
-  // ============================================
   function shareAcademy() {
     if (!state.academy) return;
 
@@ -573,9 +509,6 @@
     }
   }
 
-  // ============================================
-  // 15. Show error
-  // ============================================
   function showError(message) {
     var loader = $('acadLoader');
     var error = $('acadError');
@@ -595,9 +528,6 @@
     }
   }
 
-  // ============================================
-  // 16. Load all data
-  // ============================================
   function loadAll() {
     if (!state.academyId) {
       showError('لم يتم تحديد الأكاديمية. تأكد من الرابط.');
@@ -611,17 +541,18 @@
 
     loadAcademy(state.academyId)
       .then(function (academy) {
+        // ✅ التحقق من وجود الأكاديمية
         if (!academy) {
-          throw new Error('الأكاديمية غير موجودة أو غير معتمدة');
+          throw new Error('الأكاديمية غير موجودة أو تم حذفها');
         }
 
+        // ✅ التحقق من حالة الاعتماد
         if (academy.status !== 'approved') {
           throw new Error('هذه الأكاديمية ليست معتمدة حالياً');
         }
 
         state.academy = academy;
 
-        // Load related data in parallel
         return Promise.all([
           loadCategory(academy.category_id),
           loadBranches(state.academyId),
@@ -633,17 +564,14 @@
           state.courses = results[2] || [];
           state.certificatesCount = results[3] || 0;
 
-          // Hide loader
           if (loader) loader.classList.remove('show');
 
-          // Render
           renderHero();
           renderInfoGrid();
           renderBranches();
           renderCourses();
           updateSEO(academy);
 
-          // Log search
           logSearch(academy.name);
 
           state.loading = false;
@@ -656,28 +584,22 @@
       });
   }
 
-  // ============================================
-  // 17. Init
-  // ============================================
   function init() {
     if (state.initialized) return;
     state.initialized = true;
 
     state.academyId = readAcademyId();
 
-    // Check ID format
     if (!state.academyId) {
       showError('لم يتم تحديد الأكاديمية. تأكد من الرابط.');
       return;
     }
 
-    // Bind share button
     var shareBtn = $('shareBtn');
     if (shareBtn) {
       shareBtn.addEventListener('click', shareAcademy);
     }
 
-    // Wait for Supabase
     waitForSupabase(function () {
       loadAll();
     });
@@ -698,9 +620,6 @@
     }, 100);
   }
 
-  // ============================================
-  // 18. Public API
-  // ============================================
   window.AcademyDetailsPage = {
     initialized: true,
     init: init,
