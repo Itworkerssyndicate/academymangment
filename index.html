@@ -825,7 +825,7 @@
       var S = window.AppSettings || { get: function (p, f) { return f; } };
       var redirectGuest = S.get('behavior.redirect_guest_to', ROUTES.HOME || 'academymangment/home.html');
       var redirectAdmin = S.get('behavior.redirect_admin_to', ROUTES.ADMIN || 'academymangment/admin/index.html');
-      var redirectUser = S.get('behavior.redirect_user_to', ROUTES.HOME || '/home.html');
+      var redirectUser = S.get('behavior.redirect_user_to', ROUTES.HOME || 'academymangment/home.html');
       
       function determineRoute(user) {
         if (!user) return redirectGuest;
