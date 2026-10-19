@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>التصنيفات | لوحة التحكم</title>
+  <meta name="description" content="إدارة تصنيفات الأكاديميات">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ ADMIN CATEGORIES ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .page-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ MINI STATS ============ */
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .mini-stat {
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .mini-stat:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .mini-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .mini-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .mini-stat-value.primary { color: var(--primary); }
+    .mini-stat-value.success { color: var(--success); }
+    .mini-stat-value.info { color: var(--info); }
+    .mini-stat-value.warning { color: var(--warning); }
+    
+    /* ============ CATEGORIES GRID ============ */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .category-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .category-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, var(--cat-color, var(--primary)) 0%, transparent 70%);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+    
+    .category-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    
+    .category-card.inactive {
+      opacity: 0.65;
+    }
+    
+    .category-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .category-color {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--cat-color, var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .category-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .category-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      margin: 0 0 4px;
+    }
+    
+    .category-name-en {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.3px;
+    }
+    
+    .category-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    
+    .category-status.active {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    
+    .category-status.inactive {
+      background: var(--error-soft);
+      color: var(--error);
+    }
+    
+    .category-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+    }
+    
+    .category-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .category-info-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .category-info-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .category-info-value.mono {
+      font-family: 'Courier New', monospace;
+      color: var(--text-secondary);
+    }
+    
+    .category-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      grid-column: 1 / -1;
+      padding-top: 4px;
+      border-top: 1px solid var(--border-light);
+      margin-top: 4px;
+    }
+    
+    .category-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    
+    .category-usage {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    .category-usage svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .category-actions {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      padding: 0;
+    }
+    
+    .icon-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .icon-btn.danger:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .icon-btn.success:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-soft);
+    }
+    
+    .icon-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    
+    .icon-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ LOADING ============ */
+    .admin-loader {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .admin-loader.show { display: block; }
+    
+    .admin-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .admin-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ EMPTY ============ */
+    .admin-empty {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .admin-empty.show { display: block; }
+    
+    .admin-empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .admin-empty-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .admin-empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .admin-empty-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    
+    /* ============ MODAL ============ */
+    .modal-overlay-cat {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .modal-overlay-cat.show {
+      display: flex;
+    }
+    
+    .modal-cat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.3s ease;
+    }
+    
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    
+    .modal-cat-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    
+    .modal-cat-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .modal-cat-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--primary);
+    }
+    
+    .modal-cat-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    
+    .modal-cat-close:hover {
+      background: var(--error-soft);
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    .modal-cat-close svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .modal-cat-body {
+      padding: 24px;
+    }
+    
+    .form-field {
+      margin-bottom: 16px;
+    }
+    
+    .form-field:last-child {
+      margin-bottom: 0;
+    }
+    
+    .form-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    
+    .form-field label.required::after {
+      content: " *";
+      color: var(--error);
+    }
+    
+    .form-field input[type="text"],
+    .form-field input[type="number"],
+    .form-field textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+      outline: none;
+    }
+    
+    .form-field input:focus,
+    .form-field textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .form-field input.error {
+      border-color: var(--error);
+    }
+    
+    .form-field textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    .form-error {
+      font-size: 11px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+    
+    .form-error.show {
+      display: block;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    /* ============ COLOR PICKER ============ */
+    .color-picker-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .color-preview {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+    }
+    
+    .color-preview:hover {
+      transform: scale(1.05);
+    }
+    
+    .color-presets {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      flex: 1;
+    }
+    
+    .color-preset {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      padding: 0;
+    }
+    
+    .color-preset:hover {
+      transform: scale(1.1);
+    }
+    
+    .color-preset.active {
+      border-color: var(--text);
+      box-shadow: 0 0 0 2px var(--surface);
+    }
+    
+    .custom-color-input {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      padding: 2px;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    
+    /* ============ TOGGLE SWITCH ============ */
+    .toggle-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .toggle-switch input {
+      display: none;
+    }
+    
+    .toggle-track {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: var(--surface-hover);
+      border-radius: 999px;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    
+    .toggle-track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    
+    .toggle-switch input:checked + .toggle-track {
+      background: var(--success);
+    }
+    
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(-18px);
+      background: #fff;
+    }
+    
+    .toggle-label {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    
+    .modal-cat-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    
+    .modal-cat-footer .btn {
+      min-width: 100px;
+      justify-content: center;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1024px) {
+      .mini-stats { grid-template-columns: repeat(2, 1fr); }
+      .categories-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    }
+    
+    @media (max-width: 640px) {
+      .mini-stats { grid-template-columns: 1fr 1fr; }
+      .categories-grid { grid-template-columns: 1fr; }
+      .page-header-admin { flex-direction: column; align-items: stretch; }
+      .page-header-actions { justify-content: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .category-body { grid-template-columns: 1fr; }
+      .modal-cat { max-width: 100%; }
+      .modal-cat-body { padding: 20px; }
+      .modal-cat-header, .modal-cat-footer { padding: 16px 20px; }
+      .color-presets { grid-template-columns: repeat(6, 1fr); }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<!-- ✅ حماية الصفحة -->
+<body data-requires-auth data-required-roles="super_admin,admin">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">إدارة التصنيفات</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="../home.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span>الموقع</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-info">
+              <h2>تصنيفات الأكاديميات</h2>
+              <p>إدارة تصنيفات الأكاديميات (أمن سيبراني، تطوير، تصميم، إلخ)</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn btn-primary btn-sm" id="addCategoryBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>إضافة تصنيف</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mini Stats -->
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">إجمالي التصنيفات</div>
+              <div class="mini-stat-value primary" id="miniTotal">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">نشطة</div>
+              <div class="mini-stat-value success" id="miniActive">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">غير نشطة</div>
+              <div class="mini-stat-value warning" id="miniInactive">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">الأكثر استخداماً</div>
+              <div class="mini-stat-value info" id="miniTopUsed" style="font-size:14px;">—</div>
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="admin-loader" id="adminLoader">
+            <div class="admin-loader-spinner"></div>
+            <div class="admin-loader-text">جاري تحميل التصنيفات...</div>
+          </div>
+
+          <!-- Grid -->
+          <div class="categories-grid" id="categoriesGrid" style="display:none;"></div>
+
+          <!-- Empty -->
+          <div class="admin-empty" id="adminEmpty">
+            <div class="admin-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+              </svg>
+            </div>
+            <h3 class="admin-empty-title">لا توجد تصنيفات</h3>
+            <p class="admin-empty-text">لم يتم إضافة أي تصنيفات بعد. اضغط "إضافة تصنيف" للبدء.</p>
+            <button class="btn btn-primary" id="emptyAddBtn" type="button" style="margin:0 auto;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>إضافة تصنيف</span>
+            </button>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ============ CATEGORY MODAL ============ -->
+  <div class="modal-overlay-cat" id="categoryModal">
+    <div class="modal-cat">
+      <div class="modal-cat-header">
+        <h3 class="modal-cat-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+          </svg>
+          <span id="modalTitleText">إضافة تصنيف جديد</span>
+        </h3>
+        <button class="modal-cat-close" id="modalCloseBtn" type="button" aria-label="إغلاق">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="categoryForm" novalidate>
+        <div class="modal-cat-body">
+          <input type="hidden" id="editCategoryId" value="">
+
+          <div class="form-field">
+            <label class="required">الاسم بالعربية</label>
+            <input type="text" id="categoryNameAr" placeholder="مثال: أمن سيبراني" required maxlength="100" autocomplete="off">
+            <div class="form-error" id="categoryNameArError"></div>
+          </div>
+
+          <div class="form-field">
+            <label>الاسم بالإنجليزية</label>
+            <input type="text" id="categoryNameEn" placeholder="Example: Cybersecurity" maxlength="100" autocomplete="off" style="direction:ltr;text-align:left;">
+          </div>
+
+          <div class="form-field">
+            <label>الوصف</label>
+            <textarea id="categoryDesc" placeholder="وصف مختصر للتصنيف" maxlength="300"></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="required">اللون</label>
+            <div class="color-picker-wrap">
+              <div class="color-preview" id="colorPreview" style="background:#CE1126;"></div>
+              <div class="color-presets" id="colorPresets"></div>
+              <input type="color" class="custom-color-input" id="customColorInput" value="#CE1126" title="اختر لون مخصص">
+            </div>
+            <div class="form-hint">يظهر هذا اللون في اختيار تصنيف الأكاديمية</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>ترتيب العرض</label>
+              <input type="number" id="categorySortOrder" placeholder="1" min="0" max="9999" value="1">
+              <div class="form-hint">الرقم الأصغر يظهر أولاً</div>
+            </div>
+            <div class="form-field">
+              <label>الحالة</label>
+              <label class="toggle-switch" style="margin-top:8px;">
+                <input type="checkbox" id="categoryActive" checked>
+                <span class="toggle-track"></span>
+                <span class="toggle-label" id="activeLabel">نشط</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-cat-footer">
+          <button type="button" class="btn btn-outline" id="cancelBtn">
+            <span>إلغاء</span>
+          </button>
+          <button type="submit" class="btn btn-primary" id="saveCategoryBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span id="saveCategoryBtnText">إضافة التصنيف</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+
+  <!-- ============ INLINE JS ============ -->
+  <script>
+    (function () {
+      'use strict';
+
+      if (window.AdminCategories && window.AdminCategories.initialized) return;
+
+      var PRESET_COLORS = [
+        '#CE1126', '#10B981', '#3B82F6', '#F59E0B',
+        '#8B5CF6', '#EC4899', '#06B6D4', '#F97316',
+        '#6366F1', '#14B8A6', '#84CC16', '#EF4444'
+      ];
+
+      var state = {
+        allCategories: [],
+        academies: [],
+        currentUser: null,
+        editingCategoryId: null,
+        selectedColor: '#CE1126',
+        submitting: false,
+        loading: false,
+        initialized: false
+      };
+
+      function $(id) { return document.getElementById(id); }
+
+      function setText(id, t) {
+        var el = $(id);
+        if (el) el.textContent = t;
+      }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function formatNumber(n) {
+        if (n == null) return '0';
+        return Number(n).toLocaleString('ar-EG');
+      }
+
+      function toast(msg, type) {
+        if (window.Utils && window.Utils.showToast) {
+          window.Utils.showToast(msg, type || 'info');
+        } else if (type === 'error') {
+          alert(msg);
+        }
+      }
+
+      function logDebug() {
+        if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
+          console.log.apply(console, ['[AdminCategories]'].concat(Array.prototype.slice.call(arguments)));
+        }
+      }
+
+      // ============ Load Data ============
+      function loadCategories() {
+        if (!window.sb) return Promise.resolve([]);
+        return window.sb
+          .from('academy_categories')
+          .select('id, name, name_en, description, color, sort_order, is_active, created_at')
+          .order('sort_order', { ascending: true })
+          .then(function (res) {
+            if (res.error) return [];
+            return res.data || [];
+          })
+          .catch(function () { return []; });
+      }
+
+      function loadAcademies() {
+        if (!window.sb) return Promise.resolve([]);
+        return window.sb
+          .from('academies')
+          .select('id, category_id')
+          .eq('is_deleted', false)
+          .then(function (res) {
+            if (res.error) return [];
+            return res.data || [];
+          })
+          .catch(function () { return []; });
+      }
+
+      // ============ Stats ============
+      function updateStats() {
+        var all = state.allCategories;
+        var total = all.length;
+        var active = all.filter(function (c) { return c.is_active !== false; }).length;
+        var inactive = total - active;
+
+        // Top used category
+        var usage = {};
+        state.academies.forEach(function (a) {
+          if (a.category_id) usage[a.category_id] = (usage[a.category_id] || 0) + 1;
+        });
+
+        var topName = '—';
+        var topCount = 0;
+        all.forEach(function (c) {
+          var count = usage[c.id] || 0;
+          if (count > topCount) {
+            topCount = count;
+            topName = c.name;
+          }
+        });
+
+        setText('miniTotal', formatNumber(total));
+        setText('miniActive', formatNumber(active));
+        setText('miniInactive', formatNumber(inactive));
+        setText('miniTopUsed', topName);
+      }
+
+      // ============ Render Grid ============
+      function render() {
+        var grid = $('categoriesGrid');
+        var empty = $('adminEmpty');
+        var loader = $('adminLoader');
+
+        if (!grid) return;
+        if (loader) loader.classList.remove('show');
+
+        if (state.allCategories.length === 0) {
+          grid.style.display = 'none';
+          if (empty) empty.classList.add('show');
+          return;
+        }
+
+        grid.style.display = 'grid';
+        if (empty) empty.classList.remove('show');
+
+        // Usage per category
+        var usage = {};
+        state.academies.forEach(function (a) {
+          if (a.category_id) usage[a.category_id] = (usage[a.category_id] || 0) + 1;
+        });
+
+        grid.innerHTML = state.allCategories.map(function (cat) {
+          return renderCard(cat, usage[cat.id] || 0);
+        }).join('');
+
+        bindCardActions();
+      }
+
+      function renderCard(cat, usageCount) {
+        var isActive = cat.is_active !== false;
+        var cardClass = 'category-card' + (isActive ? '' : ' inactive');
+        var color = cat.color || '#CE1126';
+        var initial = escapeHtml((cat.name || '?').charAt(0));
+
+        var statusBadge = isActive
+          ? '<span class="category-status active">نشط</span>'
+          : '<span class="category-status inactive">معطل</span>';
+
+        return '' +
+          '<div class="' + cardClass + '" data-category-id="' + escapeHtml(cat.id) + '" style="--cat-color:' + escapeHtml(color) + ';">' +
+            '<div class="category-header">' +
+              '<div class="category-color">' + initial + '</div>' +
+              '<div class="category-info">' +
+                '<div class="category-name">' + escapeHtml(cat.name || '—') + '</div>' +
+                (cat.name_en ? '<div class="category-name-en">' + escapeHtml(cat.name_en) + '</div>' : '') +
+              '</div>' +
+              statusBadge +
+            '</div>' +
+            '<div class="category-body">' +
+              '<div class="category-info-item">' +
+                '<div class="category-info-label">ترتيب العرض</div>' +
+                '<div class="category-info-value mono">' + escapeHtml(String(cat.sort_order || 0)) + '</div>' +
+              '</div>' +
+              '<div class="category-info-item">' +
+                '<div class="category-info-label">اللون</div>' +
+                '<div class="category-info-value mono">' + escapeHtml(color) + '</div>' +
+              '</div>' +
+              (cat.description
+                ? '<div class="category-desc">' + escapeHtml(cat.description) + '</div>'
+                : '') +
+            '</div>' +
+            '<div class="category-footer">' +
+              '<div class="category-usage">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>' +
+                '</svg>' +
+                '<span>' + formatNumber(usageCount) + ' أكاديمية</span>' +
+              '</div>' +
+              '<div class="category-actions">' +
+                '<button class="icon-btn" data-action="edit" data-id="' + escapeHtml(cat.id) + '" title="تعديل">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                    '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+                    '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+                  '</svg>' +
+                '</button>' +
+                '<button class="icon-btn ' + (isActive ? 'danger' : 'success') + '" data-action="toggle" data-id="' + escapeHtml(cat.id) + '" title="' + (isActive ? 'تعطيل' : 'تفعيل') + '">' +
+                  (isActive
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>') +
+                '</button>' +
+                '<button class="icon-btn danger" data-action="delete" data-id="' + escapeHtml(cat.id) + '" title="حذف">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                    '<polyline points="3 6 5 6 21 6"></polyline>' +
+                    '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>' +
+                  '</svg>' +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+      }
+
+      function bindCardActions() {
+        document.querySelectorAll('#categoriesGrid [data-action]').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var action = btn.getAttribute('data-action');
+            var id = btn.getAttribute('data-id');
+            if (!id) return;
+
+            if (action === 'edit') openEditModal(id);
+            else if (action === 'toggle') toggleActive(id);
+            else if (action === 'delete') deleteCategory(id);
+          });
+        });
+      }
+
+      // ============ Color Picker ============
+      function buildColorPresets() {
+        var container = $('colorPresets');
+        if (!container) return;
+
+        container.innerHTML = PRESET_COLORS.map(function (c) {
+          return '<button type="button" class="color-preset" data-color="' + c + '" style="background:' + c + ';" title="' + c + '"></button>';
+        }).join('');
+
+        container.querySelectorAll('[data-color]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var color = btn.getAttribute('data-color');
+            setColor(color);
+          });
+        });
+      }
+
+      function setColor(color) {
+        state.selectedColor = color;
+        var preview = $('colorPreview');
+        if (preview) preview.style.background = color;
+        var customInput = $('customColorInput');
+        if (customInput) customInput.value = color;
+
+        // Update active preset
+        document.querySelectorAll('.color-preset').forEach(function (b) {
+          b.classList.toggle('active', b.getAttribute('data-color') === color);
+        });
+      }
+
+      // ============ Modal ============
+      function openAddModal() {
+        state.editingCategoryId = null;
+
+        setText('modalTitleText', 'إضافة تصنيف جديد');
+        setText('saveCategoryBtnText', 'إضافة التصنيف');
+
+        $('editCategoryId').value = '';
+        $('categoryNameAr').value = '';
+        $('categoryNameEn').value = '';
+        $('categoryDesc').value = '';
+        $('categorySortOrder').value = state.allCategories.length + 1;
+        $('categoryActive').checked = true;
+        setText('activeLabel', 'نشط');
+
+        setColor('#CE1126');
+
+        clearErrors();
+        $('categoryModal').classList.add('show');
+        setTimeout(function () { $('categoryNameAr').focus(); }, 100);
+      }
+
+      function openEditModal(id) {
+        var cat = state.allCategories.find(function (c) { return c.id === id; });
+        if (!cat) { toast('التصنيف غير موجود', 'error'); return; }
+
+        state.editingCategoryId = id;
+
+        setText('modalTitleText', 'تعديل التصنيف');
+        setText('saveCategoryBtnText', 'حفظ التغييرات');
+
+        $('editCategoryId').value = id;
+        $('categoryNameAr').value = cat.name || '';
+        $('categoryNameEn').value = cat.name_en || '';
+        $('categoryDesc').value = cat.description || '';
+        $('categorySortOrder').value = cat.sort_order || 0;
+        $('categoryActive').checked = cat.is_active !== false;
+        setText('activeLabel', cat.is_active !== false ? 'نشط' : 'معطل');
+
+        setColor(cat.color || '#CE1126');
+
+        clearErrors();
+        $('categoryModal').classList.add('show');
+        setTimeout(function () { $('categoryNameAr').focus(); }, 100);
+      }
+
+      function closeModal() {
+        $('categoryModal').classList.remove('show');
+        state.editingCategoryId = null;
+        state.submitting = false;
+      }
+
+      // ============ Validation ============
+      function clearErrors() {
+        ['categoryNameArError'].forEach(function (id) {
+          var el = $(id);
+          if (el) { el.classList.remove('show'); el.textContent = ''; }
+        });
+        $('categoryNameAr').classList.remove('error');
+      }
+
+      function validate() {
+        clearErrors();
+        var valid = true;
+        var name = $('categoryNameAr').value.trim();
+
+        if (!name || name.length < 2) {
+          $('categoryNameAr').classList.add('error');
+          var errEl = $('categoryNameArError');
+          errEl.textContent = 'الاسم يجب أن يكون حرفين على الأقل';
+          errEl.classList.add('show');
+          valid = false;
+        }
+
+        return valid;
+      }
+
+      // ============ Submit ============
+      function handleSubmit(e) {
+        if (e) e.preventDefault();
+        if (state.submitting) return;
+        if (!validate()) return;
+        if (!window.sb) { toast('تعذر الاتصال بالخادم', 'error'); return; }
+
+        state.submitting = true;
+        disableSaveBtn(true);
+
+        var name = $('categoryNameAr').value.trim();
+        var nameEn = $('categoryNameEn').value.trim() || null;
+        var desc = $('categoryDesc').value.trim() || null;
+        var sortOrder = parseInt($('categorySortOrder').value, 10) || 0;
+        var isActive = $('categoryActive').checked;
+        var color = state.selectedColor;
+
+        var data = {
+          name: name,
+          name_en: nameEn,
+          description: desc,
+          color: color,
+          sort_order: sortOrder,
+          is_active: isActive
+        };
+
+        if (state.editingCategoryId) {
+          // Update
+          window.sb.from('academy_categories').update(data).eq('id', state.editingCategoryId)
+            .then(function (res) {
+              if (res.error) throw new Error(res.error.message);
+              toast('تم تحديث التصنيف', 'success');
+              logActivity('update_category', 'تحديث تصنيف: ' + name, { category_id: state.editingCategoryId });
+              closeModal();
+              return loadAll();
+            })
+            .catch(function (err) {
+              toast('فشل التحديث: ' + err.message, 'error');
+              state.submitting = false;
+              disableSaveBtn(false);
+            });
+        } else {
+          // Create
+          data.created_at = new Date().toISOString();
+          window.sb.from('academy_categories').insert(data)
+            .then(function (res) {
+              if (res.error) throw new Error(res.error.message);
+              toast('تم إضافة التصنيف', 'success');
+              logActivity('create_category', 'إضافة تصنيف: ' + name, { name: name });
+              closeModal();
+              return loadAll();
+            })
+            .catch(function (err) {
+              toast('فشل الإضافة: ' + err.message, 'error');
+              state.submitting = false;
+              disableSaveBtn(false);
+            });
+        }
+      }
+
+      // ============ Toggle Active ============
+      function toggleActive(id) {
+        var cat = state.allCategories.find(function (c) { return c.id === id; });
+        if (!cat) return;
+
+        var isActive = cat.is_active !== false;
+        var newState = !isActive;
+        var msg = newState
+          ? 'تفعيل التصنيف "' + cat.name + '"?'
+          : 'تعطيل التصنيف "' + cat.name + '"? لن يظهر كخيار عند إضافة أكاديمية.';
+
+        if (!window.Modal || !window.Modal.confirm) {
+          if (!confirm(msg)) return;
+          performToggle(id, newState);
+          return;
+        }
+
+        window.Modal.confirm({
+          title: newState ? 'تفعيل تصنيف' : 'تعطيل تصنيف',
+          message: msg,
+          confirmText: newState ? 'تفعيل' : 'تعطيل',
+          cancelText: 'إلغاء',
+          icon: newState ? 'success' : 'warning',
+          danger: !newState
+        }).then(function (confirmed) {
+          if (confirmed) performToggle(id, newState);
+        });
+      }
+
+      function performToggle(id, isActive) {
+        window.sb.from('academy_categories').update({ is_active: isActive }).eq('id', id)
+          .then(function (res) {
+            if (res.error) {
+              toast('فشل: ' + res.error.message, 'error');
+              return;
+            }
+
+            var cat = state.allCategories.find(function (c) { return c.id === id; });
+            if (cat) cat.is_active = isActive;
+
+            toast('تم ' + (isActive ? 'تفعيل' : 'تعطيل') + ' التصنيف', 'success');
+            updateStats();
+            render();
+
+            logActivity(isActive ? 'activate_category' : 'deactivate_category',
+              (isActive ? 'تفعيل' : 'تعطيل') + ' تصنيف: ' + (cat ? cat.name : ''),
+              { category_id: id });
+          })
+          .catch(function (err) {
+            toast('حدث خطأ: ' + err.message, 'error');
+          });
+      }
+
+      // ============ Delete ============
+      function deleteCategory(id) {
+        var cat = state.allCategories.find(function (c) { return c.id === id; });
+        if (!cat) return;
+
+        // Check if used
+        var usage = state.academies.filter(function (a) { return a.category_id === id; }).length;
+
+        if (usage > 0) {
+          toast('لا يمكن حذف "' + cat.name + '" - مستخدم في ' + usage + ' أكاديمية', 'error');
+          return;
+        }
+
+        var msg = 'حذف التصنيف "' + cat.name + '"? لا يمكن التراجع.';
+
+        if (!window.Modal || !window.Modal.confirm) {
+          if (!confirm(msg)) return;
+          performDelete(id, cat);
+          return;
+        }
+
+        window.Modal.confirm({
+          title: 'حذف تصنيف',
+          message: msg,
+          confirmText: 'حذف نهائي',
+          cancelText: 'إلغاء',
+          icon: 'error',
+          danger: true
+        }).then(function (confirmed) {
+          if (confirmed) performDelete(id, cat);
+        });
+      }
+
+      function performDelete(id, cat) {
+        window.sb.from('academy_categories').delete().eq('id', id)
+          .then(function (res) {
+            if (res.error) {
+              toast('فشل الحذف: ' + res.error.message, 'error');
+              return;
+            }
+
+            state.allCategories = state.allCategories.filter(function (c) { return c.id !== id; });
+
+            toast('تم حذف التصنيف', 'success');
+            updateStats();
+            render();
+
+            logActivity('delete_category', 'حذف تصنيف: ' + cat.name, {
+              category_id: id,
+              name: cat.name
+            });
+          })
+          .catch(function (err) {
+            toast('حدث خطأ: ' + err.message, 'error');
+          });
+      }
+
+      // ============ Helpers ============
+      function disableSaveBtn(disable) {
+        var btn = $('saveCategoryBtn');
+        if (!btn) return;
+        btn.disabled = disable;
+        if (disable) {
+          btn.innerHTML = '<span>جاري الحفظ...</span>';
+        } else {
+          btn.innerHTML = '' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">' +
+              '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>' +
+              '<polyline points="17 21 17 13 7 13 7 21"></polyline>' +
+              '<polyline points="7 3 7 8 15 8"></polyline>' +
+            '</svg>' +
+            '<span>' + (state.editingCategoryId ? 'حفظ التغييرات' : 'إضافة التصنيف') + '</span>';
+        }
+      }
+
+      function logActivity(type, description, details) {
+        if (!window.sb || !state.currentUser) return;
+        window.sb.from('activities').insert({
+          user_id: state.currentUser.id,
+          user_name: state.currentUser.full_name,
+          user_role: state.currentUser.role,
+          action_type: type,
+          description: description,
+          details: details || {}
+        }).catch(function () {});
+      }
+
+      // ============ Bind Events ============
+      function bindEvents() {
+        // Add buttons
+        var addBtn = $('addCategoryBtn');
+        if (addBtn) addBtn.addEventListener('click', openAddModal);
+
+        var emptyAddBtn = $('emptyAddBtn');
+        if (emptyAddBtn) emptyAddBtn.addEventListener('click', openAddModal);
+
+        // Close
+        var closeBtn = $('modalCloseBtn');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+        var cancelBtn = $('cancelBtn');
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+        // Backdrop
+        var modal = $('categoryModal');
+        if (modal) {
+          modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+          });
+        }
+
+        // Esc
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && modal && modal.classList.contains('show')) closeModal();
+        });
+
+        // Form submit
+        var form = $('categoryForm');
+        if (form) form.addEventListener('submit', handleSubmit);
+
+        // Custom color picker
+        var customInput = $('customColorInput');
+        if (customInput) {
+          customInput.addEventListener('input', function () {
+            setColor(this.value);
+          });
+        }
+
+        // Toggle active label
+        var activeCheckbox = $('categoryActive');
+        if (activeCheckbox) {
+          activeCheckbox.addEventListener('change', function () {
+            setText('activeLabel', this.checked ? 'نشط' : 'معطل');
+          });
+        }
+      }
+
+      // ============ Load All ============
+      function loadAll() {
+        var loader = $('adminLoader');
+        if (loader) loader.classList.add('show');
+
+        return Promise.all([loadCategories(), loadAcademies()])
+          .then(function (results) {
+            state.allCategories = results[0] || [];
+            state.academies = results[1] || [];
+
+            if (loader) loader.classList.remove('show');
+
+            updateStats();
+            render();
+
+            logDebug('Loaded:', {
+              categories: state.allCategories.length,
+              academies: state.academies.length
+            });
+          })
+          .catch(function (err) {
+            if (loader) loader.classList.remove('show');
+            toast('حدث خطأ في التحميل', 'error');
+            logDebug('Load error:', err.message);
+          });
+      }
+
+      // ============ Init ============
+      function init() {
+        if (state.initialized) return;
+        state.initialized = true;
+
+        if (window.AuthGuard && window.AuthGuard.getUser) {
+          state.currentUser = window.AuthGuard.getUser();
+        }
+
+        buildColorPresets();
+        setColor('#CE1126');
+        bindEvents();
+
+        waitForSupabase(function () {
+          loadAll();
+        });
+
+        logDebug('Admin categories initialized');
+      }
+
+      function waitForSupabase(cb) {
+        if (window.sb) { cb(); return; }
+        var w = 0;
+        var i = setInterval(function () {
+          w += 100;
+          if (window.sb || w >= 3000) {
+            clearInterval(i);
+            if (window.sb) cb();
+          }
+        }, 100);
+      }
+
+      window.AdminCategories = {
+        initialized: true,
+        init: init,
+        refresh: loadAll,
+        getState: function () { return state; }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
