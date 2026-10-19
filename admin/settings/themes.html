@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>إدارة الثيمات | الإعدادات</title>
+  <meta name="description" content="إدارة ثيمات النظام">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ THEMES MANAGEMENT ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .page-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ MINI STATS ============ */
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .mini-stat {
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .mini-stat:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .mini-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .mini-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .mini-stat-value.primary { color: var(--primary); }
+    .mini-stat-value.success { color: var(--success); }
+    .mini-stat-value.info { color: var(--info); }
+    .mini-stat-value.warning { color: var(--warning); }
+    
+    /* ============ THEMES GRID ============ */
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .theme-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    
+    .theme-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    
+    .theme-card.is-default {
+      border-color: var(--success);
+    }
+    
+    .theme-card.is-default::before {
+      content: "افتراضي";
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--success);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      z-index: 3;
+    }
+    
+    .theme-card.inactive {
+      opacity: 0.6;
+    }
+    
+    /* ============ COLOR PREVIEW STRIP ============ */
+    .theme-preview-strip {
+      height: 100px;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .theme-preview-strip .swatch {
+      flex: 1;
+    }
+    
+    .theme-preview-strip .swatch-text {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      border-radius: 6px;
+      backdrop-filter: blur(8px);
+    }
+    
+    /* ============ CARD BODY ============ */
+    .theme-card-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+    
+    .theme-name-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    
+    .theme-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.3;
+    }
+    
+    .theme-name-en {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+      margin-top: 2px;
+    }
+    
+    .theme-id-badge {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: var(--primary);
+      padding: 2px 8px;
+      background: var(--primary-soft);
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    
+    .theme-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .theme-status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .theme-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    
+    .theme-status-badge.active {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    
+    .theme-status-badge.inactive {
+      background: var(--error-soft);
+      color: var(--error);
+    }
+    
+    .theme-status-badge.is-light {
+      background: var(--info-soft);
+      color: var(--info);
+    }
+    
+    .theme-status-badge.is-dark {
+      background: rgba(139, 92, 246, 0.15);
+      color: #A78BFA;
+    }
+    
+    /* ============ CARD FOOTER ============ */
+    .theme-card-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--bg);
+    }
+    
+    .theme-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .theme-action-btn {
+      padding: 6px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .theme-action-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .theme-action-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .theme-action-btn.primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+    
+    .theme-action-btn.success {
+      background: var(--success-soft);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    
+    .theme-action-btn.success:hover {
+      background: var(--success);
+      color: #fff;
+    }
+    
+    .theme-action-btn.danger {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+    
+    .theme-action-btn.danger:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .theme-action-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* ============ LOADER ============ */
+    .admin-loader {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .admin-loader.show { display: block; }
+    
+    .admin-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .admin-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ EMPTY ============ */
+    .admin-empty {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .admin-empty.show { display: block; }
+    
+    .admin-empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .admin-empty-icon svg { width: 32px; height: 32px; }
+    
+    .admin-empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .admin-empty-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    
+    /* ============ MODAL ============ */
+    .theme-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .theme-modal-overlay.show {
+      display: flex;
+    }
+    
+    .theme-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.3s ease;
+      margin: auto;
+    }
+    
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    
+    .theme-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 2;
+    }
+    
+    .theme-modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .theme-modal-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--primary);
+    }
+    
+    .theme-modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    
+    .theme-modal-close:hover {
+      background: var(--error-soft);
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    .theme-modal-close svg { width: 16px; height: 16px; }
+    
+    .theme-modal-body {
+      padding: 24px;
+    }
+    
+    .theme-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      position: sticky;
+      bottom: 0;
+      background: var(--surface);
+    }
+    
+    .theme-modal-footer .btn {
+      min-width: 110px;
+      justify-content: center;
+    }
+    
+    /* ============ FORM ============ */
+    .form-field {
+      margin-bottom: 16px;
+    }
+    
+    .form-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    
+    .form-field label.required::after {
+      content: " *";
+      color: var(--error);
+    }
+    
+    .form-field input[type="text"],
+    .form-field textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+      outline: none;
+    }
+    
+    .form-field input[type="text"]:focus,
+    .form-field textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .form-field input.error {
+      border-color: var(--error);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .form-error {
+      font-size: 11px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+    
+    .form-error.show { display: block; }
+    
+    /* ============ COLOR GROUPS ============ */
+    .color-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 8px;
+    }
+    
+    .color-group {
+      padding: 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    
+    .color-group-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .color-group-title svg {
+      width: 14px;
+      height: 14px;
+      color: var(--primary);
+    }
+    
+    .color-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    
+    .color-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .color-field-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .color-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .color-input-wrap input[type="color"] {
+      width: 40px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+      cursor: pointer;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    
+    .color-input-wrap input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      direction: ltr;
+      text-align: left;
+    }
+    
+    .color-input-wrap input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    /* ============ LIVE PREVIEW ============ */
+    .live-preview {
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      margin-top: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    
+    .live-preview-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid currentColor;
+      border-color: rgba(128, 128, 128, 0.2);
+      opacity: 0.9;
+    }
+    
+    .live-preview-content {
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    
+    .live-preview-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .live-preview-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: default;
+    }
+    
+    /* ============ TOGGLE ============ */
+    .toggle-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .toggle-switch input {
+      display: none;
+    }
+    
+    .toggle-track {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: var(--surface-hover);
+      border-radius: 999px;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    
+    .toggle-track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    
+    .toggle-switch input:checked + .toggle-track {
+      background: var(--success);
+    }
+    
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(-18px);
+      background: #fff;
+    }
+    
+    .toggle-label {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1024px) {
+      .mini-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 768px) {
+      .themes-grid { grid-template-columns: 1fr; }
+      .page-header-admin { flex-direction: column; align-items: stretch; }
+      .page-header-actions { justify-content: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .theme-modal { max-width: 100%; }
+      .theme-modal-body { padding: 16px; }
+      .theme-modal-header, .theme-modal-footer { padding: 14px 16px; }
+    }
+    
+    @media (max-width: 480px) {
+      .mini-stats { grid-template-columns: 1fr 1fr; }
+      .mini-stat-value { font-size: 18px; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body data-requires-auth data-required-roles="super_admin">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">إدارة الثيمات</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="index.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>رجوع للإعدادات</span>
+          </a>
+        </div>
+      </div>
+
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-info">
+              <h2>إدارة الثيمات</h2>
+              <p>تحكم في ثيمات المنصة والافتراضي منها</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn btn-primary btn-sm" id="addThemeBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>إضافة ثيم</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mini Stats -->
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">إجمالي الثيمات</div>
+              <div class="mini-stat-value primary" id="miniTotal">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">نشطة</div>
+              <div class="mini-stat-value success" id="miniActive">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">الثيم الافتراضي</div>
+              <div class="mini-stat-value info" id="miniDefault" style="font-size:14px;">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">داكنة / فاتحة</div>
+              <div class="mini-stat-value warning" id="miniDarkLight">—</div>
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="admin-loader" id="adminLoader">
+            <div class="admin-loader-spinner"></div>
+            <div class="admin-loader-text">جاري تحميل الثيمات...</div>
+          </div>
+
+          <!-- Grid -->
+          <div class="themes-grid" id="themesGrid" style="display:none;"></div>
+
+          <!-- Empty -->
+          <div class="admin-empty" id="adminEmpty">
+            <div class="admin-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="13.5" cy="6.5" r=".5"></circle>
+                <circle cx="17.5" cy="10.5" r=".5"></circle>
+                <circle cx="8.5" cy="7.5" r=".5"></circle>
+                <circle cx="6.5" cy="12.5" r=".5"></circle>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+              </svg>
+            </div>
+            <h3 class="admin-empty-title">لا توجد ثيمات</h3>
+            <p class="admin-empty-text">لم يتم إضافة أي ثيمات بعد. اضغط "إضافة ثيم" للبدء.</p>
+            <button class="btn btn-primary" id="emptyAddBtn" type="button" style="margin:0 auto;">
+              <span>إضافة ثيم</span>
+            </button>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ============ MODAL ============ -->
+  <div class="theme-modal-overlay" id="themeModal">
+    <div class="theme-modal">
+      <div class="theme-modal-header">
+        <h3 class="theme-modal-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r=".5"></circle>
+            <circle cx="17.5" cy="10.5" r=".5"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+          </svg>
+          <span id="modalTitleText">إضافة ثيم جديد</span>
+        </h3>
+        <button class="theme-modal-close" id="modalCloseBtn" type="button" aria-label="إغلاق">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="themeForm" novalidate>
+        <div class="theme-modal-body">
+          <input type="hidden" id="editThemeId" value="">
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="required">المعرّف (ID)</label>
+              <input type="text" id="themeId" placeholder="مثال: royal_navy" required maxlength="50" autocomplete="off" style="direction:ltr;text-align:left;font-family:'Courier New',monospace;">
+              <div class="form-error" id="themeIdError"></div>
+            </div>
+            <div class="form-field">
+              <label class="required">الاسم بالعربية</label>
+              <input type="text" id="themeName" placeholder="مثال: كحلي ملكي" required maxlength="100">
+              <div class="form-error" id="themeNameError"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>الاسم بالإنجليزية</label>
+              <input type="text" id="themeNameEn" placeholder="Royal Navy" maxlength="100" style="direction:ltr;text-align:left;">
+            </div>
+            <div class="form-field">
+              <label>ترتيب العرض</label>
+              <input type="text" id="themeSortOrder" placeholder="1" inputmode="numeric" value="1">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>الوصف</label>
+            <input type="text" id="themeDesc" placeholder="وصف مختصر للثيم" maxlength="200">
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>نوع الثيم</label>
+              <select id="themeIsLight" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:13px;outline:none;cursor:pointer;">
+                <option value="dark">داكن (Dark)</option>
+                <option value="light">فاتح (Light)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>الحالة</label>
+              <label class="toggle-switch" style="margin-top:8px;">
+                <input type="checkbox" id="themeActive" checked>
+                <span class="toggle-track"></span>
+                <span class="toggle-label" id="activeLabel">نشط</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Color Groups -->
+          <div class="color-groups">
+            
+            <!-- Primary -->
+            <div class="color-group">
+              <h4 class="color-group-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                الألوان الأساسية
+              </h4>
+              <div class="color-fields" id="group-primary"></div>
+            </div>
+
+            <!-- Accent -->
+            <div class="color-group">
+              <h4 class="color-group-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                الألوان الثانوية (Accent)
+              </h4>
+              <div class="color-fields" id="group-accent"></div>
+            </div>
+
+            <!-- Backgrounds -->
+            <div class="color-group">
+              <h4 class="color-group-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                الخلفيات
+              </h4>
+              <div class="color-fields" id="group-bg"></div>
+            </div>
+
+            <!-- Text -->
+            <div class="color-group">
+              <h4 class="color-group-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                النصوص
+              </h4>
+              <div class="color-fields" id="group-text"></div>
+            </div>
+
+            <!-- Borders -->
+            <div class="color-group">
+              <h4 class="color-group-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                الحدود
+              </h4>
+              <div class="color-fields" id="group-border"></div>
+            </div>
+
+            <!-- Status -->
+            <div class="color-group">
+              <h4 class="color-group-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                ألوان الحالات
+              </h4>
+              <div class="color-fields" id="group-status"></div>
+            </div>
+
+          </div>
+
+          <!-- Live Preview -->
+          <div class="live-preview" id="livePreview">
+            <div class="live-preview-title">معاينة مباشرة</div>
+            <div class="live-preview-content">
+              هذا نص تجريبي لمعاينة الثيم — يمكنك تعديل الألوان وستجد التغيير هنا فوراً.
+            </div>
+            <div class="live-preview-buttons">
+              <button type="button" class="live-preview-btn" id="previewBtnPrimary">زر أساسي</button>
+              <button type="button" class="live-preview-btn" id="previewBtnAccent">زر ثانوي</button>
+              <button type="button" class="live-preview-btn" id="previewBtnSuccess">نجاح</button>
+              <button type="button" class="live-preview-btn" id="previewBtnError">خطأ</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="theme-modal-footer">
+          <button type="button" class="btn btn-outline" id="cancelBtn">
+            <span>إلغاء</span>
+          </button>
+          <button type="submit" class="btn btn-primary" id="saveThemeBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span id="saveThemeBtnText">إضافة الثيم</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+
+  <!-- ============ INLINE JS ============ -->
+  <script>
+    (function () {
+      'use strict';
+
+      if (window.AdminThemes && window.AdminThemes.initialized) return;
+
+      // ============ تعريف مجموعات الألوان ============
+      var COLOR_GROUPS = {
+        primary: [
+          { key: 'primary', label: 'primary', type: 'color' },
+          { key: 'primary-hover', label: 'primary-hover', type: 'color' },
+          { key: 'primary-soft', label: 'primary-soft', type: 'text' },
+          { key: 'primary-text', label: 'primary-text', type: 'color' }
+        ],
+        accent: [
+          { key: 'accent', label: 'accent', type: 'color' },
+          { key: 'accent-hover', label: 'accent-hover', type: 'color' },
+          { key: 'accent-soft', label: 'accent-soft', type: 'text' }
+        ],
+        bg: [
+          { key: 'bg', label: 'bg', type: 'color' },
+          { key: 'bg-alt', label: 'bg-alt', type: 'color' },
+          { key: 'surface', label: 'surface', type: 'color' },
+          { key: 'surface-elevated', label: 'surface-elevated', type: 'color' },
+          { key: 'surface-hover', label: 'surface-hover', type: 'color' }
+        ],
+        text: [
+          { key: 'text', label: 'text', type: 'color' },
+          { key: 'text-secondary', label: 'text-secondary', type: 'color' },
+          { key: 'text-muted', label: 'text-muted', type: 'color' },
+          { key: 'text-inverse', label: 'text-inverse', type: 'color' }
+        ],
+        border: [
+          { key: 'border', label: 'border', type: 'text' },
+          { key: 'border-strong', label: 'border-strong', type: 'text' },
+          { key: 'border-focus', label: 'border-focus', type: 'color' }
+        ],
+        status: [
+          { key: 'success', label: 'success', type: 'color' },
+          { key: 'success-soft', label: 'success-soft', type: 'text' },
+          { key: 'error', label: 'error', type: 'color' },
+          { key: 'error-soft', label: 'error-soft', type: 'text' },
+          { key: 'warning', label: 'warning', type: 'color' },
+          { key: 'warning-soft', label: 'warning-soft', type: 'text' },
+          { key: 'info', label: 'info', type: 'color' },
+          { key: 'info-soft', label: 'info-soft', type: 'text' }
+        ]
+      };
+
+      // الثيم الافتراضي عند الإضافة
+      var DEFAULT_NEW_THEME = {
+        primary: '#CE1126',
+        'primary-hover': '#E63946',
+        'primary-soft': 'rgba(206, 17, 38, 0.14)',
+        'primary-text': '#FFFFFF',
+        accent: '#FFFFFF',
+        'accent-hover': '#E5E7EB',
+        'accent-soft': 'rgba(255, 255, 255, 0.08)',
+        bg: '#0A0E14',
+        'bg-alt': '#05080D',
+        surface: '#131820',
+        'surface-elevated': '#1C2430',
+        'surface-hover': '#252F3D',
+        text: '#F8FAFC',
+        'text-secondary': '#94A3B8',
+        'text-muted': '#64748B',
+        'text-inverse': '#0A0E14',
+        border: 'rgba(255, 255, 255, 0.08)',
+        'border-strong': 'rgba(255, 255, 255, 0.16)',
+        'border-focus': '#CE1126',
+        success: '#10B981',
+        'success-soft': 'rgba(16, 185, 129, 0.12)',
+        error: '#EF4444',
+        'error-soft': 'rgba(239, 68, 68, 0.12)',
+        warning: '#F59E0B',
+        'warning-soft': 'rgba(245, 158, 11, 0.12)',
+        info: '#3B82F6',
+        'info-soft': 'rgba(59, 130, 246, 0.12)',
+        shadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+        'shadow-lg': '0 20px 60px rgba(0, 0, 0, 0.6)'
+      };
+
+      var state = {
+        allThemes: [],
+        defaultThemeId: null,
+        currentUser: null,
+        editingThemeId: null,
+        currentColors: {},
+        submitting: false,
+        loading: false,
+        initialized: false
+      };
+
+      function $(id) { return document.getElementById(id); }
+      function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      }
+
+      function formatNumber(n) { return Number(n || 0).toLocaleString('ar-EG'); }
+
+      function toast(msg, type) {
+        if (window.Utils && window.Utils.showToast) window.Utils.showToast(msg, type || 'info');
+        else if (type === 'error') alert(msg);
+      }
+
+      function logDebug() {
+        if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
+          console.log.apply(console, ['[AdminThemes]'].concat(Array.prototype.slice.call(arguments)));
+        }
+      }
+
+      // ============ Load Themes ============
+      function loadThemes() {
+        if (!window.sb) return Promise.resolve([]);
+        return window.sb
+          .from('themes')
+          .select('id, name, name_en, description, colors, is_active, sort_order, is_light, created_at')
+          .order('sort_order', { ascending: true })
+          .then(function (res) {
+            if (res.error) return [];
+            return res.data || [];
+          })
+          .catch(function () { return []; });
+      }
+
+      function loadDefaultTheme() {
+        if (!window.sb) return Promise.resolve(null);
+        return window.sb
+          .from('settings')
+          .select('value')
+          .eq('key', 'theme')
+          .maybeSingle()
+          .then(function (res) {
+            if (res.error || !res.data || !res.data.value) return null;
+            return res.data.value.default_theme || null;
+          })
+          .catch(function () { return null; });
+      }
+
+      // ============ Stats ============
+      function updateStats() {
+        var all = state.allThemes;
+        var total = all.length;
+        var active = all.filter(function (t) { return t.is_active !== false; }).length;
+        var isDefaultName = '—';
+        if (state.defaultThemeId) {
+          var def = all.find(function (t) { return t.id === state.defaultThemeId; });
+          isDefaultName = def ? def.name : state.defaultThemeId;
+        }
+        var darkCount = all.filter(function (t) { return !t.is_light; }).length;
+        var lightCount = all.filter(function (t) { return t.is_light; }).length;
+
+        setText('miniTotal', formatNumber(total));
+        setText('miniActive', formatNumber(active));
+        setText('miniDefault', isDefaultName);
+        setText('miniDarkLight', darkCount + ' / ' + lightCount);
+      }
+
+      // ============ Render ============
+      function render() {
+        var grid = $('themesGrid');
+        var empty = $('adminEmpty');
+        var loader = $('adminLoader');
+
+        if (!grid) return;
+        if (loader) loader.classList.remove('show');
+
+        if (state.allThemes.length === 0) {
+          grid.style.display = 'none';
+          if (empty) empty.classList.add('show');
+          return;
+        }
+
+        grid.style.display = 'grid';
+        if (empty) empty.classList.remove('show');
+
+        grid.innerHTML = state.allThemes.map(renderCard).join('');
+        bindCardActions();
+      }
+
+      function renderCard(theme) {
+        var isDefault = theme.id === state.defaultThemeId;
+        var isActive = theme.is_active !== false;
+        var colors = theme.colors || {};
+        var preview = [
+          colors.bg || '#0A0E14',
+          colors.primary || '#CE1126',
+          colors.accent || '#FFFFFF',
+          colors.surface || '#131820'
+        ];
+
+        var cardClass = 'theme-card';
+        if (isDefault) cardClass += ' is-default';
+        if (!isActive) cardClass += ' inactive';
+
+        var previewStrip = preview.map(function (c) {
+          return '<div class="swatch" style="background:' + escapeHtml(c) + ';"></div>';
+        }).join('');
+
+        var statusBadges = '';
+        if (isActive) statusBadges += '<span class="theme-status-badge active">نشط</span>';
+        else statusBadges += '<span class="theme-status-badge inactive">معطل</span>';
+
+        if (theme.is_light) statusBadges += '<span class="theme-status-badge is-light">فاتح</span>';
+        else statusBadges += '<span class="theme-status-badge is-dark">داكن</span>';
+
+        // Actions
+        var actionsHtml = '';
+        actionsHtml += '<button class="theme-action-btn" data-action="edit" data-id="' + escapeHtml(theme.id) + '">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>' +
+          'تعديل</button>';
+
+        if (!isDefault) {
+          actionsHtml += '<button class="theme-action-btn success" data-action="default" data-id="' + escapeHtml(theme.id) + '">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
+            'اجعله افتراضي</button>';
+        }
+
+        actionsHtml += '<button class="theme-action-btn ' + (isActive ? 'danger' : 'success') + '" data-action="toggle" data-id="' + escapeHtml(theme.id) + '">' +
+          (isActive
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>تعطيل'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>تفعيل') +
+          '</button>';
+
+        if (!isDefault) {
+          actionsHtml += '<button class="theme-action-btn danger" data-action="delete" data-id="' + escapeHtml(theme.id) + '" title="حذف">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>';
+        }
+
+        return '' +
+          '<div class="' + cardClass + '" data-theme-id="' + escapeHtml(theme.id) + '">' +
+            '<div class="theme-preview-strip">' + previewStrip +
+              '<span class="swatch-text">' + escapeHtml(theme.name || '—') + '</span>' +
+            '</div>' +
+            '<div class="theme-card-body">' +
+              '<div class="theme-name-row">' +
+                '<div>' +
+                  '<h3 class="theme-name">' + escapeHtml(theme.name || '—') + '</h3>' +
+                  (theme.name_en ? '<div class="theme-name-en">' + escapeHtml(theme.name_en) + '</div>' : '') +
+                '</div>' +
+                '<span class="theme-id-badge">' + escapeHtml(theme.id) + '</span>' +
+              '</div>' +
+              (theme.description ? '<p class="theme-desc">' + escapeHtml(theme.description) + '</p>' : '') +
+              '<div class="theme-status-row">' + statusBadges + '</div>' +
+            '</div>' +
+            '<div class="theme-card-footer">' +
+              '<div class="theme-card-actions">' + actionsHtml + '</div>' +
+            '</div>' +
+          '</div>';
+      }
+
+      // ============ Bind Actions ============
+      function bindCardActions() {
+        document.querySelectorAll('#themesGrid [data-action]').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var action = btn.getAttribute('data-action');
+            var id = btn.getAttribute('data-id');
+            if (!id) return;
+
+            if (action === 'edit') openEditModal(id);
+            else if (action === 'default') setAsDefault(id);
+            else if (action === 'toggle') toggleActive(id);
+            else if (action === 'delete') deleteTheme(id);
+          });
+        });
+      }
+
+      // ============ Color Groups Rendering ============
+      function renderColorGroups(colors) {
+        Object.keys(COLOR_GROUPS).forEach(function (groupName) {
+          var container = $('group-' + groupName);
+          if (!container) return;
+
+          container.innerHTML = COLOR_GROUPS[groupName].map(function (field) {
+            var value = colors[field.key] || '';
+            return renderColorField(field, value);
+          }).join('');
+        });
+
+        // Bind color inputs
+        document.querySelectorAll('.color-input-wrap input[type="color"]').forEach(function (input) {
+          input.addEventListener('input', function () {
+            var key = this.getAttribute('data-color-key');
+            var textInput = document.querySelector('[data-text-key="' + key + '"]');
+            if (textInput) textInput.value = this.value;
+            state.currentColors[key] = this.value;
+            updateLivePreview();
+          });
+        });
+
+        document.querySelectorAll('.color-input-wrap input[type="text"]').forEach(function (input) {
+          input.addEventListener('input', function () {
+            var key = this.getAttribute('data-text-key');
+            var colorInput = document.querySelector('[data-color-key="' + key + '"]');
+            // لو القيمة hex صحيحة، حدّث الـ color picker
+            if (colorInput && /^#[0-9a-f]{6}$/i.test(this.value)) {
+              colorInput.value = this.value;
+            }
+            state.currentColors[key] = this.value;
+            updateLivePreview();
+          });
+        });
+      }
+
+      function renderColorField(field, value) {
+        if (field.type === 'color') {
+          var hexValue = /^#[0-9a-f]{6}$/i.test(value) ? value : '#000000';
+          return '' +
+            '<div class="color-field">' +
+              '<div class="color-field-label">' + escapeHtml(field.label) + '</div>' +
+              '<div class="color-input-wrap">' +
+                '<input type="color" data-color-key="' + escapeHtml(field.key) + '" value="' + hexValue + '">' +
+                '<input type="text" data-text-key="' + escapeHtml(field.key) + '" value="' + escapeHtml(value) + '">' +
+              '</div>' +
+            '</div>';
+        }
+        return '' +
+          '<div class="color-field">' +
+            '<div class="color-field-label">' + escapeHtml(field.label) + '</div>' +
+            '<div class="color-input-wrap">' +
+              '<input type="text" data-text-key="' + escapeHtml(field.key) + '" value="' + escapeHtml(value) + '" style="width:100%;">' +
+            '</div>' +
+          '</div>';
+      }
+
+      // ============ Live Preview ============
+      function updateLivePreview() {
+        var preview = $('livePreview');
+        if (!preview) return;
+
+        var colors = state.currentColors;
+
+        preview.style.background = colors.bg || 'var(--bg)';
+        preview.style.color = colors.text || 'var(--text)';
+
+        var title = preview.querySelector('.live-preview-title');
+        if (title) title.style.color = colors.primary || 'var(--primary)';
+
+        var content = preview.querySelector('.live-preview-content');
+        if (content) content.style.color = colors['text-secondary'] || 'var(--text-secondary)';
+
+        var btnPrimary = $('previewBtnPrimary');
+        if (btnPrimary) {
+          btnPrimary.style.background = colors.primary || 'var(--primary)';
+          btnPrimary.style.color = colors['primary-text'] || '#fff';
+        }
+
+        var btnAccent = $('previewBtnAccent');
+        if (btnAccent) {
+          btnAccent.style.background = colors.accent || 'var(--accent)';
+          btnAccent.style.color = colors.text || 'var(--text)';
+          btnAccent.style.borderColor = colors['border-strong'] || 'rgba(255,255,255,0.15)';
+        }
+
+        var btnSuccess = $('previewBtnSuccess');
+        if (btnSuccess) {
+          btnSuccess.style.background = colors.success || 'var(--success)';
+          btnSuccess.style.color = '#fff';
+        }
+
+        var btnError = $('previewBtnError');
+        if (btnError) {
+          btnError.style.background = colors.error || 'var(--error)';
+          btnError.style.color = '#fff';
+        }
+      }
+
+      // ============ Modal ============
+      function openAddModal() {
+        state.editingThemeId = null;
+        state.currentColors = JSON.parse(JSON.stringify(DEFAULT_NEW_THEME));
+
+        setText('modalTitleText', 'إضافة ثيم جديد');
+        setText('saveThemeBtnText', 'إضافة الثيم');
+
+        $('editThemeId').value = '';
+        $('themeId').value = '';
+        $('themeId').disabled = false;
+        $('themeName').value = '';
+        $('themeNameEn').value = '';
+        $('themeDesc').value = '';
+        $('themeSortOrder').value = state.allThemes.length + 1;
+        $('themeIsLight').value = 'dark';
+        $('themeActive').checked = true;
+        setText('activeLabel', 'نشط');
+
+        renderColorGroups(state.currentColors);
+        updateLivePreview();
+        clearErrors();
+
+        $('themeModal').classList.add('show');
+        setTimeout(function () { $('themeId').focus(); }, 100);
+      }
+
+      function openEditModal(themeId) {
+        var theme = state.allThemes.find(function (t) { return t.id === themeId; });
+        if (!theme) { toast('الثيم غير موجود', 'error'); return; }
+
+        state.editingThemeId = themeId;
+        state.currentColors = JSON.parse(JSON.stringify(theme.colors || DEFAULT_NEW_THEME));
+
+        setText('modalTitleText', 'تعديل الثيم');
+        setText('saveThemeBtnText', 'حفظ التغييرات');
+
+        $('editThemeId').value = themeId;
+        $('themeId').value = theme.id || '';
+        $('themeId').disabled = true;
+        $('themeName').value = theme.name || '';
+        $('themeNameEn').value = theme.name_en || '';
+        $('themeDesc').value = theme.description || '';
+        $('themeSortOrder').value = theme.sort_order || 0;
+        $('themeIsLight').value = theme.is_light ? 'light' : 'dark';
+        $('themeActive').checked = theme.is_active !== false;
+        setText('activeLabel', theme.is_active !== false ? 'نشط' : 'معطل');
+
+        renderColorGroups(state.currentColors);
+        updateLivePreview();
+        clearErrors();
+
+        $('themeModal').classList.add('show');
+        setTimeout(function () { $('themeName').focus(); }, 100);
+      }
+
+      function closeModal() {
+        $('themeModal').classList.remove('show');
+        state.editingThemeId = null;
+        state.submitting = false;
+      }
+
+      // ============ Validation ============
+      function clearErrors() {
+        ['themeIdError', 'themeNameError'].forEach(function (id) {
+          var el = $(id);
+          if (el) { el.classList.remove('show'); el.textContent = ''; }
+        });
+        ['themeId', 'themeName'].forEach(function (id) {
+          var el = $(id);
+          if (el) el.classList.remove('error');
+        });
+      }
+
+      function setError(fieldId, errorId, msg) {
+        var f = $(fieldId), e = $(errorId);
+        if (f) f.classList.add('error');
+        if (e) { e.textContent = msg; e.classList.add('show'); }
+      }
+
+      function validate() {
+        clearErrors();
+        var valid = true;
+
+        if (!state.editingThemeId) {
+          var id = $('themeId').value.trim();
+          if (!id || !/^[a-z0-9_]{2,50}$/i.test(id)) {
+            setError('themeId', 'themeIdError', 'معرّف بالإنجليزية والأرقام فقط (حرفين على الأقل)');
+            valid = false;
+          } else {
+            var exists = state.allThemes.some(function (t) { return t.id === id; });
+            if (exists) {
+              setError('themeId', 'themeIdError', 'هذا المعرّف مستخدم بالفعل');
+              valid = false;
+            }
+          }
+        }
+
+        var name = $('themeName').value.trim();
+        if (!name || name.length < 2) {
+          setError('themeName', 'themeNameError', 'الاسم حرفين على الأقل');
+          valid = false;
+        }
+
+        return valid;
+      }
+
+      // ============ Submit ============
+      function handleSubmit(e) {
+        if (e) e.preventDefault();
+        if (state.submitting) return;
+        if (!validate()) return;
+        if (!window.sb) { toast('تعذر الاتصال بالخادم', 'error'); return; }
+
+        // فحص إن كل الألوان الأساسية موجودة
+        var requiredKeys = ['primary', 'accent', 'bg', 'surface', 'text'];
+        var missing = requiredKeys.filter(function (k) {
+          return !state.currentColors[k];
+        });
+        if (missing.length > 0) {
+          toast('يجب ملء الألوان: ' + missing.join(', '), 'error');
+          return;
+        }
+
+        state.submitting = true;
+        disableSaveBtn(true);
+
+        var themeData = {
+          name: $('themeName').value.trim(),
+          name_en: $('themeNameEn').value.trim() || null,
+          description: $('themeDesc').value.trim() || null,
+          colors: state.currentColors,
+          sort_order: parseInt($('themeSortOrder').value, 10) || 0,
+          is_active: $('themeActive').checked,
+          is_light: $('themeIsLight').value === 'light'
+        };
+
+        var promise;
+        if (state.editingThemeId) {
+          promise = window.sb.from('themes').update(themeData).eq('id', state.editingThemeId);
+        } else {
+          themeData.id = $('themeId').value.trim();
+          themeData.created_at = new Date().toISOString();
+          promise = window.sb.from('themes').insert(themeData);
+        }
+
+        promise
+          .then(function (res) {
+            if (res.error) throw new Error(res.error.message);
+
+            toast(state.editingThemeId ? 'تم تحديث الثيم' : 'تم إضافة الثيم', 'success');
+
+            logActivity(
+              state.editingThemeId ? 'update_theme' : 'create_theme',
+              (state.editingThemeId ? 'تحديث ثيم: ' : 'إضافة ثيم: ') + themeData.name,
+              { theme_id: state.editingThemeId || themeData.id }
+            );
+
+            closeModal();
+            return loadAll();
+          })
+          .catch(function (err) {
+            toast('فشل الحفظ: ' + err.message, 'error');
+            state.submitting = false;
+            disableSaveBtn(false);
+          });
+      }
+
+      // ============ Set as Default ============
+      function setAsDefault(themeId) {
+        var theme = state.allThemes.find(function (t) { return t.id === themeId; });
+        if (!theme) return;
+
+        var msg = 'جعل "' + theme.name + '" هو الثيم الافتراضي؟ سيتم تطبيقه على كل الزوار الجدد.';
+
+        if (!window.Modal || !window.Modal.confirm) {
+          if (!confirm(msg)) return;
+          performSetDefault(themeId, theme);
+          return;
+        }
+
+        window.Modal.confirm({
+          title: 'تعيين الثيم الافتراضي',
+          message: msg,
+          confirmText: 'تعيين',
+          cancelText: 'إلغاء',
+          icon: 'success'
+        }).then(function (confirmed) {
+          if (confirmed) performSetDefault(themeId, theme);
+        });
+      }
+
+      function performSetDefault(themeId, theme) {
+        // 1. اقرأ الـ settings.theme الحالي
+        window.sb.from('settings').select('value').eq('key', 'theme').maybeSingle()
+          .then(function (res) {
+            var current = (res.data && res.data.value) || {};
+            current.default_theme = themeId;
+            return window.sb.from('settings').upsert({ key: 'theme', value: current }, { onConflict: 'key' });
+          })
+          .then(function (res) {
+            if (res.error) throw new Error(res.error.message);
+
+            state.defaultThemeId = themeId;
+            toast('تم تعيين "' + theme.name + '" كثيم افتراضي', 'success');
+
+            logActivity('set_default_theme', 'تعيين الثيم الافتراضي: ' + theme.name, { theme_id: themeId });
+
+            updateStats();
+            render();
+          })
+          .catch(function (err) {
+            toast('فشل التعيين: ' + err.message, 'error');
+          });
+      }
+
+      // ============ Toggle Active ============
+      function toggleActive(themeId) {
+        var theme = state.allThemes.find(function (t) { return t.id === themeId; });
+        if (!theme) return;
+
+        var isActive = theme.is_active !== false;
+        var newState = !isActive;
+        var msg = newState ? 'تفعيل "' + theme.name + '"?' : 'تعطيل "' + theme.name + '"? لن يظهر للمستخدمين.';
+
+        if (!window.Modal || !window.Modal.confirm) {
+          if (!confirm(msg)) return;
+          performToggle(themeId, newState);
+          return;
+        }
+
+        window.Modal.confirm({
+          title: newState ? 'تفعيل ثيم' : 'تعطيل ثيم',
+          message: msg,
+          confirmText: newState ? 'تفعيل' : 'تعطيل',
+          cancelText: 'إلغاء',
+          icon: newState ? 'success' : 'warning',
+          danger: !newState
+        }).then(function (confirmed) {
+          if (confirmed) performToggle(themeId, newState);
+        });
+      }
+
+      function performToggle(themeId, isActive) {
+        window.sb.from('themes').update({ is_active: isActive }).eq('id', themeId)
+          .then(function (res) {
+            if (res.error) { toast('فشل التحديث: ' + res.error.message, 'error'); return; }
+            var t = state.allThemes.find(function (x) { return x.id === themeId; });
+            if (t) t.is_active = isActive;
+            toast('تم ' + (isActive ? 'تفعيل' : 'تعطيل') + ' الثيم', 'success');
+            updateStats();
+            render();
+          })
+          .catch(function (err) {
+            toast('حدث خطأ: ' + err.message, 'error');
+          });
+      }
+
+      // ============ Delete ============
+      function deleteTheme(themeId) {
+        var theme = state.allThemes.find(function (t) { return t.id === themeId; });
+        if (!theme) return;
+
+        if (themeId === state.defaultThemeId) {
+          toast('لا يمكن حذف الثيم الافتراضي — عيّن ثيم آخر أولاً', 'error');
+          return;
+        }
+
+        var msg = 'حذف الثيم "' + theme.name + '"? لا يمكن التراجع.';
+
+        if (!window.Modal || !window.Modal.confirm) {
+          if (!confirm(msg)) return;
+          performDelete(themeId, theme);
+          return;
+        }
+
+        window.Modal.confirm({
+          title: 'حذف ثيم',
+          message: msg,
+          confirmText: 'حذف نهائي',
+          cancelText: 'إلغاء',
+          icon: 'error',
+          danger: true
+        }).then(function (confirmed) {
+          if (confirmed) performDelete(themeId, theme);
+        });
+      }
+
+      function performDelete(themeId, theme) {
+        window.sb.from('themes').delete().eq('id', themeId)
+          .then(function (res) {
+            if (res.error) { toast('فشل الحذف: ' + res.error.message, 'error'); return; }
+            state.allThemes = state.allThemes.filter(function (t) { return t.id !== themeId; });
+            toast('تم حذف الثيم', 'success');
+            updateStats();
+            render();
+            logActivity('delete_theme', 'حذف ثيم: ' + theme.name, { theme_id: themeId });
+          })
+          .catch(function (err) {
+            toast('حدث خطأ: ' + err.message, 'error');
+          });
+      }
+
+      // ============ Helpers ============
+      function disableSaveBtn(disable) {
+        var btn = $('saveThemeBtn');
+        if (!btn) return;
+        btn.disabled = disable;
+        if (disable) {
+          btn.innerHTML = '<span>جاري الحفظ...</span>';
+        } else {
+          btn.innerHTML = '' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">' +
+              '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>' +
+              '<polyline points="17 21 17 13 7 13 7 21"></polyline>' +
+              '<polyline points="7 3 7 8 15 8"></polyline>' +
+            '</svg>' +
+            '<span>' + (state.editingThemeId ? 'حفظ التغييرات' : 'إضافة الثيم') + '</span>';
+        }
+      }
+
+      function logActivity(type, description, details) {
+        if (!window.sb || !state.currentUser) return;
+        window.sb.from('activities').insert({
+          user_id: state.currentUser.id,
+          user_name: state.currentUser.full_name,
+          user_role: state.currentUser.role,
+          action_type: type,
+          description: description,
+          details: details || {}
+        }).catch(function () {});
+      }
+
+      // ============ Bind Events ============
+      function bindEvents() {
+        // Add
+        var addBtn = $('addThemeBtn');
+        if (addBtn) addBtn.addEventListener('click', openAddModal);
+
+        var emptyAddBtn = $('emptyAddBtn');
+        if (emptyAddBtn) emptyAddBtn.addEventListener('click', openAddModal);
+
+        // Close
+        var closeBtn = $('modalCloseBtn');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+        var cancelBtn = $('cancelBtn');
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+        // Backdrop
+        var modal = $('themeModal');
+        if (modal) {
+          modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+          });
+        }
+
+        // Esc
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && modal && modal.classList.contains('show')) closeModal();
+        });
+
+        // Form submit
+        var form = $('themeForm');
+        if (form) form.addEventListener('submit', handleSubmit);
+
+        // Toggle active label
+        var activeCheckbox = $('themeActive');
+        if (activeCheckbox) {
+          activeCheckbox.addEventListener('change', function () {
+            setText('activeLabel', this.checked ? 'نشط' : 'معطل');
+          });
+        }
+      }
+
+      // ============ Load All ============
+      function loadAll() {
+        var loader = $('adminLoader');
+        if (loader) loader.classList.add('show');
+
+        return Promise.all([loadThemes(), loadDefaultTheme()])
+          .then(function (results) {
+            state.allThemes = results[0] || [];
+            state.defaultThemeId = results[1];
+
+            if (loader) loader.classList.remove('show');
+
+            updateStats();
+            render();
+
+            logDebug('Loaded:', { themes: state.allThemes.length, default: state.defaultThemeId });
+          })
+          .catch(function (err) {
+            if (loader) loader.classList.remove('show');
+            toast('حدث خطأ في تحميل الثيمات', 'error');
+            logDebug('Load error:', err.message);
+          });
+      }
+
+      // ============ Init ============
+      function init() {
+        if (state.initialized) return;
+        state.initialized = true;
+
+        if (window.AuthGuard && window.AuthGuard.getUser) {
+          state.currentUser = window.AuthGuard.getUser();
+        }
+
+        bindEvents();
+
+        waitForSupabase(function () {
+          loadAll();
+        });
+
+        logDebug('Admin themes initialized');
+      }
+
+      function waitForSupabase(cb) {
+        if (window.sb) { cb(); return; }
+        var w = 0;
+        var i = setInterval(function () {
+          w += 100;
+          if (window.sb || w >= 3000) {
+            clearInterval(i);
+            if (window.sb) cb();
+          }
+        }, 100);
+      }
+
+      window.AdminThemes = {
+        initialized: true,
+        init: init,
+        refresh: loadAll,
+        getState: function () { return state; }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
