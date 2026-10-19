@@ -2,9 +2,9 @@
 // [22/50] ITWS Platform - Verify Page Logic
 // Path: assets/js/pages/verify.js
 // ============================================
-// إصلاح: بدون إيموجي
-// إصلاح: مسارات نسبية
-// إصلاح: يتحقق من is_active وأيضاً status
+// يدعم فصل النقابة عن الأكاديميات (issuer_type)
+// بدون إيموجي
+// مسارات نسبية
 // ============================================
 
 (function () {
@@ -19,9 +19,6 @@
     initialized: false
   };
 
-  // ============================================
-  // 1. Helpers
-  // ============================================
   function $(id) { return document.getElementById(id); }
 
   function setText(id, t) {
@@ -45,13 +42,9 @@
       var d = date instanceof Date ? date : new Date(date);
       if (isNaN(d.getTime())) return '—';
       return d.toLocaleDateString('ar-EG', opts || {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric'
       });
-    } catch (e) {
-      return '—';
-    }
+    } catch (e) { return '—'; }
   }
 
   function getSetting(p, f) {
@@ -75,30 +68,15 @@
     }
   }
 
-  function resolve(path) {
-    if (!path) return '#';
-    if (window.resolveUrl) return window.resolveUrl(path);
-    var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
-    return base + String(path).replace(/^\.?\//, '');
-  }
-
-  // ============================================
-  // 2. Dynamic content
-  // ============================================
   function applyDynamicContent() {
-    setText('footerCopyright', getSetting('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات والبرمجيات'));
+    setText('footerCopyright', getSetting('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات'));
     setText('footerPresidentLabel', getSetting('app_identity.president_label', 'النقيب العام:'));
     setText('footerPresidentName', getSetting('app_identity.president_name', 'المحاسب / محمود جميل'));
   }
 
-  // ============================================
-  // 3. Load certificate
-  // ============================================
   function loadCertificate(code) {
     if (!window.sb) return Promise.reject(new Error('Supabase not ready'));
-
-    return window.sb
-      .from('certificates')
+    return window.sb.from('certificates')
       .select('*')
       .eq('certificate_code', code)
       .maybeSingle()
@@ -108,33 +86,26 @@
       });
   }
 
-  // ============================================
-  // 4. Load academy details
-  // ============================================
   function loadAcademyDetails(cert) {
-    if (!cert) return Promise.resolve({ academy: null, branch: null });
+    if (!cert || !cert.academy_id) {
+      return Promise.resolve({ academy: null, branch: null });
+    }
 
     var promises = [];
 
-    if (cert.academy_id) {
-      promises.push(
-        window.sb.from('academies')
-          .select('id, name, license_number, logo_url, status, is_deleted')
-          .eq('id', cert.academy_id)
-          .maybeSingle()
-          .then(function (r) { return r.data; })
-          .catch(function () { return null; })
-      );
-    } else {
-      promises.push(Promise.resolve(null));
-    }
+    promises.push(
+      window.sb.from('academies')
+        .select('id, name, license_number, logo_url, status, is_deleted, academy_type')
+        .eq('id', cert.academy_id).maybeSingle()
+        .then(function (r) { return r.data; })
+        .catch(function () { return null; })
+    );
 
     if (cert.branch_id) {
       promises.push(
         window.sb.from('academy_branches')
           .select('id, governorate, address')
-          .eq('id', cert.branch_id)
-          .maybeSingle()
+          .eq('id', cert.branch_id).maybeSingle()
           .then(function (r) { return r.data; })
           .catch(function () { return null; })
       );
@@ -147,12 +118,8 @@
     });
   }
 
-  // ============================================
-  // 5. Log search
-  // ============================================
   function logSearch(code, count) {
     if (!window.sb) return;
-
     window.sb.from('search_logs').insert({
       search_type: 'certificate',
       search_value: code,
@@ -161,9 +128,6 @@
     }).catch(function () {});
   }
 
-  // ============================================
-  // 6. Grade class
-  // ============================================
   function gradeClass(grade) {
     if (!grade) return '';
     var g = String(grade).toUpperCase().replace(/[+-]/g, '');
@@ -174,9 +138,6 @@
     return 'fail';
   }
 
-  // ============================================
-  // 7. Render certificate (بدون إيموجي)
-  // ============================================
   function renderCertificate(cert) {
     var result = $('verifyResult');
     if (!result) return;
@@ -185,8 +146,11 @@
     var academy = state.currentAcademy;
     var branch = state.currentBranch;
 
-    // التحقق من حالة الأكاديمية أيضاً
-    var academyOk = !academy || (academy.status === 'approved' && academy.is_deleted !== true);
+    // ✅ تحديد نوع الجهة
+    var isUnion = cert.issuer_type === 'union' || !cert.academy_id;
+
+    // ✅ التحقق من الأكاديمية (لو الشهادة من أكاديمية)
+    var academyOk = isUnion || !academy || (academy.status === 'approved' && academy.is_deleted !== true);
     var isFullyValid = isActive && academyOk;
 
     var statusIcon = isFullyValid ? '&#10003;' : '&#10005;';
@@ -194,7 +158,6 @@
     var statusClass = isFullyValid ? 'valid' : 'invalid';
     var headerClass = isFullyValid ? '' : 'invalid';
 
-    // بيانات
     var studentName = escapeHtml(cert.student_name || '—');
     var nationalId = cert.student_national_id
       ? '&#8226;&#8226;&#8226;&#8226; &#8226;&#8226;&#8226;&#8226; &#8226;&#8226;&#8226;&#8226; ' + escapeHtml(String(cert.student_national_id).slice(-4))
@@ -205,19 +168,29 @@
     var gradeCls = gradeClass(cert.grade);
     var issuedDate = formatDate(cert.issued_at);
     var completionDate = cert.completion_date ? formatDate(cert.completion_date) : null;
-    var academyName = academy ? escapeHtml(academy.name) : escapeHtml(cert.academy_name || '—');
-    var licenseNumber = academy
-      ? escapeHtml(academy.license_number || '—')
-      : escapeHtml(cert.academy_license_number || '—');
-    var branchName = branch
-      ? escapeHtml(branch.governorate || '—')
-      : escapeHtml(cert.branch_name || '—');
-    var branchAddress = branch && branch.address ? escapeHtml(branch.address) : '';
+
+    var issuerLabel, issuerName, issuerLicense, branchLabel, branchName, branchAddress;
+
+    if (isUnion) {
+      issuerLabel = 'الجهة المُصدرة';
+      issuerName = escapeHtml(getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات'));
+      issuerLicense = escapeHtml(getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب'));
+      branchLabel = null;
+      branchName = null;
+      branchAddress = null;
+    } else {
+      issuerLabel = 'الأكاديمية';
+      issuerName = academy ? escapeHtml(academy.name) : escapeHtml(cert.academy_name || '—');
+      issuerLicense = academy
+        ? escapeHtml(academy.license_number || '—')
+        : escapeHtml(cert.academy_license_number || '—');
+      branchLabel = 'الفرع';
+      branchName = branch ? escapeHtml(branch.governorate || '—') : escapeHtml(cert.branch_name || '—');
+      branchAddress = branch && branch.address ? escapeHtml(branch.address) : '';
+    }
 
     var html = '' +
       '<div class="cert-card' + (isFullyValid ? '' : ' invalid') + '">' +
-
-        // Header
         '<div class="cert-header' + (headerClass ? ' ' + headerClass : '') + '">' +
           '<div class="cert-header-left">' +
             '<div class="cert-seal">' + statusIcon + '</div>' +
@@ -229,10 +202,7 @@
           '<span class="cert-status ' + statusClass + '">' + statusText + '</span>' +
         '</div>' +
 
-        // Body
         '<div class="cert-body">' +
-
-          // بيانات المتدرب
           '<div class="cert-section">' +
             '<div class="cert-section-title">بيانات المتدرب</div>' +
             '<div class="cert-grid">' +
@@ -247,7 +217,6 @@
             '</div>' +
           '</div>' +
 
-          // بيانات الدورة
           '<div class="cert-section">' +
             '<div class="cert-section-title">بيانات الدورة</div>' +
             '<div class="cert-grid">' +
@@ -274,22 +243,23 @@
             '</div>' +
           '</div>' +
 
-          // بيانات الأكاديمية
           '<div class="cert-section">' +
-            '<div class="cert-section-title">بيانات الأكاديمية</div>' +
+            '<div class="cert-section-title">' + (isUnion ? 'الجهة المُصدرة' : 'بيانات الأكاديمية') + '</div>' +
             '<div class="cert-grid">' +
               '<div class="cert-item">' +
-                '<div class="cert-item-label">الأكاديمية</div>' +
-                '<div class="cert-item-value">' + academyName + '</div>' +
+                '<div class="cert-item-label">' + issuerLabel + '</div>' +
+                '<div class="cert-item-value">' + issuerName + '</div>' +
               '</div>' +
               '<div class="cert-item">' +
-                '<div class="cert-item-label">رقم الاعتماد</div>' +
-                '<div class="cert-item-value mono">' + licenseNumber + '</div>' +
+                '<div class="cert-item-label">' + (isUnion ? 'اللجنة المُنظمة' : 'رقم الاعتماد') + '</div>' +
+                '<div class="cert-item-value' + (isUnion ? '' : ' mono') + '">' + issuerLicense + '</div>' +
               '</div>' +
-              '<div class="cert-item">' +
-                '<div class="cert-item-label">الفرع</div>' +
-                '<div class="cert-item-value">' + branchName + '</div>' +
-              '</div>' +
+              (branchName
+                ? '<div class="cert-item">' +
+                    '<div class="cert-item-label">' + branchLabel + '</div>' +
+                    '<div class="cert-item-value">' + branchName + '</div>' +
+                  '</div>'
+                : '') +
               (branchAddress
                 ? '<div class="cert-item">' +
                     '<div class="cert-item-label">عنوان الفرع</div>' +
@@ -299,7 +269,6 @@
             '</div>' +
           '</div>' +
 
-          // تاريخ الإصدار
           '<div class="cert-section">' +
             '<div class="cert-section-title">تاريخ الإصدار</div>' +
             '<div class="cert-grid">' +
@@ -309,10 +278,8 @@
               '</div>' +
             '</div>' +
           '</div>' +
-
         '</div>' +
 
-        // Actions
         (isFullyValid
           ? '<div class="cert-actions">' +
               '<button class="cert-action-btn success" onclick="VerifyPage.print()" type="button">طباعة</button>' +
@@ -322,29 +289,21 @@
             '</div>'
           : '') +
 
-        // Footer
         '<div class="cert-footer">' +
           'تم التحقق بواسطة <strong>' + escapeHtml(getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات')) + '</strong>' +
           '<br>' +
           escapeHtml(getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب')) +
         '</div>' +
-
       '</div>';
 
     result.innerHTML = html;
     result.classList.add('show');
   }
 
-  // ============================================
-  // 8. Print
-  // ============================================
   function printCertificate() {
     window.print();
   }
 
-  // ============================================
-  // 9. PDF
-  // ============================================
   function downloadPDF() {
     if (!state.currentCertificate) return;
     toast('جاري تجهيز PDF...', 'info');
@@ -365,9 +324,6 @@
     }
   }
 
-  // ============================================
-  // 10. Share
-  // ============================================
   function share() {
     if (!state.currentCertificate) return;
     var code = state.currentCertificate.certificate_code;
@@ -400,9 +356,6 @@
     }
   }
 
-  // ============================================
-  // 11. Main search
-  // ============================================
   function performSearch(code) {
     if (!code) {
       toast('أدخل كود الشهادة', 'error');
@@ -424,10 +377,8 @@
         if (!cert) {
           if (loader) loader.classList.remove('show');
           if (error) {
-            var titleEl = $('errorTitle');
-            var textEl = $('errorText');
-            if (titleEl) titleEl.textContent = 'لم يتم العثور على الشهادة';
-            if (textEl) textEl.textContent = 'تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الأكاديمية المسؤولة';
+            $('errorTitle').textContent = 'لم يتم العثور على الشهادة';
+            $('errorText').textContent = 'تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الجهة المُصدرة';
             error.classList.add('show');
           }
           if (btn) { btn.disabled = false; btn.textContent = 'تحقق'; }
@@ -455,10 +406,8 @@
       .catch(function (err) {
         if (loader) loader.classList.remove('show');
         if (error) {
-          var titleEl = $('errorTitle');
-          var textEl = $('errorText');
-          if (titleEl) titleEl.textContent = 'حدث خطأ';
-          if (textEl) textEl.textContent = err.message || 'يرجى المحاولة مرة أخرى';
+          $('errorTitle').textContent = 'حدث خطأ';
+          $('errorText').textContent = err.message || 'يرجى المحاولة مرة أخرى';
           error.classList.add('show');
         }
         if (btn) { btn.disabled = false; btn.textContent = 'تحقق'; }
@@ -466,9 +415,6 @@
       });
   }
 
-  // ============================================
-  // 12. Submit
-  // ============================================
   function handleSubmit(e) {
     if (e) e.preventDefault();
     var input = $('certCodeInput');
@@ -482,9 +428,6 @@
     return false;
   }
 
-  // ============================================
-  // 13. Init
-  // ============================================
   function init() {
     if (state.initialized) return;
     state.initialized = true;
@@ -500,7 +443,6 @@
       });
     }
 
-    // Auto-verify من URL
     var params = new URLSearchParams(window.location.search);
     var code = params.get('code');
     if (code) {
@@ -508,13 +450,8 @@
       if (input) input.value = code;
       setTimeout(function () { performSearch(code); }, 400);
     }
-
-    logDebug('Verify page initialized');
   }
 
-  // ============================================
-  // 14. Public API
-  // ============================================
   window.VerifyPage = {
     initialized: true,
     init: init,
