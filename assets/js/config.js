@@ -9,7 +9,7 @@
   'use strict';
 
   // ⚠️ غيّر السطر ده قبل التشغيل
-  const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
+  const SUPABASE_URL = 'https://hfupkxbajpnaillsqayc.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable__9lVaIyTxYzyykQ_AY_u9w_On795zBK';
 
   // ✅ المسار الأساسي للمشروع على GitHub Pages
