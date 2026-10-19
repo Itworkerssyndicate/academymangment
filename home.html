@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>الرئيسية | نقابة تكنولوجيا المعلومات</title>
+  <meta name="description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية - نقابة تكنولوجيا المعلومات والبرمجيات">
+  <meta name="theme-color" content="#0A0E14">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="نقابة تكنولوجيا المعلومات والبرمجيات">
+  <meta property="og:description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ar_EG">
+  
+  <!-- Fonts - Cairo ONLY -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Settings Defaults -->
+  <script src="assets/js/settings-defaults.js"></script>
+  
+  <!-- Theme Bootstrap (BEFORE CSS) -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/themes-data.js"></script>
+  <script src="assets/js/theme.js"></script>
+  
+  <!-- App Settings (sync from localStorage) -->
+  <script src="assets/js/app-settings.js"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/loader.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  
+  <!-- Home Custom Styles -->
+  <style>
+    /* ============================================
+       HOME PAGE — Official Patriotic Design
+       ============================================ */
+    
+    /* ============ HERO SECTION ============ */
+    .home-hero {
+      position: relative;
+      padding: 64px 20px 80px;
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .home-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 30%, var(--primary-soft) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, var(--accent-soft) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .home-hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--primary-soft);
+      border: 1px solid var(--primary);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 20px;
+      animation: fadeInUp 0.6s ease;
+    }
+    
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    
+    .hero-title {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      line-height: 1.25;
+      color: var(--text);
+      margin: 0 0 12px 0;
+      letter-spacing: -0.5px;
+      animation: fadeInUp 0.7s ease 0.1s both;
+    }
+    
+    .hero-title-accent {
+      color: var(--primary);
+      display: inline-block;
+    }
+    
+    .hero-subtitle {
+      font-size: clamp(14px, 2vw, 17px);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 640px;
+      margin: 0 auto 36px;
+      animation: fadeInUp 0.7s ease 0.2s both;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ============ SEARCH BOX ============ */
+    .search-card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px;
+      box-shadow: var(--shadow-lg);
+      animation: fadeInUp 0.7s ease 0.3s both;
+    }
+    
+    /* Tabs */
+    .search-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 4px;
+    }
+    
+    .search-tab {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    
+    .search-tab:hover {
+      color: var(--text);
+      background: var(--surface-hover);
+    }
+    
+    .search-tab.active {
+      background: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    /* Search Input Area */
+    .search-form {
+      display: flex;
+      gap: 8px;
+      padding: 4px;
+    }
+    
+    .search-input {
+      flex: 1;
+      padding: 14px 18px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .search-btn {
+      padding: 14px 28px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .search-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    
+    .search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .search-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 12px;
+      padding: 0 8px;
+    }
+    
+    /* ============ STATS SECTION ============ */
+    .home-stats {
+      padding: 48px 20px;
+      background: var(--bg);
+    }
+    
+    .home-stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    
+    .stat-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-block::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .stat-block:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+    
+    .stat-block:hover::before {
+      opacity: 1;
+    }
+    
+    .stat-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      opacity: 0.85;
+    }
+    
+    .stat-value {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .stat-value.loading {
+      color: var(--text-muted);
+      font-size: 24px;
+    }
+    
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .stat-label-online {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease-in-out infinite;
+      box-shadow: 0 0 8px var(--success);
+    }
+    
+    /* ============ RECENT ACADEMIES ============ */
+    .home-academies {
+      padding: 64px 20px;
+      background: var(--bg-alt);
+    }
+    
+    .home-academies-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .section-title {
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 8px;
+    }
+    
+    .section-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .academies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .academy-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .academy-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+    
+    .academy-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    
+    .academy-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--primary-text);
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    
+    .academy-badge {
+      padding: 4px 10px;
+      background: var(--success-soft);
+      color: var(--success);
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    
+    .academy-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .academy-category {
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .academy-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .academy-footer-stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* ============ CTA SECTION ============ */
+    .home-cta {
+      padding: 64px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .home-cta::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 100% at 50% 50%, var(--primary-soft) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .home-cta-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    
+    .cta-title {
+      font-size: clamp(22px, 3.5vw, 30px);
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 12px;
+    }
+    
+    .cta-text {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0 0 24px;
+    }
+    
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 32px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    
+    .cta-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--primary-soft);
+    }
+    
+    /* ============ THEME FAB ============ */
+    .theme-fab {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      color: var(--primary);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      transition: all 0.3s;
+    }
+    
+    .theme-fab:hover {
+      border-color: var(--primary);
+      transform: scale(1.1) rotate(15deg);
+    }
+    
+    /* Theme Panel */
+    .theme-panel {
+      position: fixed;
+      bottom: 88px;
+      left: 24px;
+      width: 280px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .theme-panel.open {
+      display: block;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .theme-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .theme-panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .theme-panel-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    
+    .theme-list {
+      display: grid;
+      gap: 6px;
+    }
+    
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      text-align: right;
+    }
+    
+    .theme-option:hover {
+      border-color: var(--primary);
+      background: var(--surface-hover);
+    }
+    
+    .theme-option.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .theme-swatches {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    
+    .theme-swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    
+    .theme-name {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .theme-reset {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .theme-reset:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    /* ============ EMPTY STATE ============ */
+    .empty-section {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    /* ============ FOOTER ============ */
+    .home-footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 48px 20px 24px;
+    }
+    
+    .home-footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 32px;
+    }
+    
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .footer-brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .footer-brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--primary-text);
+      font-size: 18px;
+      overflow: hidden;
+    }
+    
+    .footer-brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 6px;
+    }
+    
+    .footer-brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .footer-brand-tagline {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .footer-brand-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    
+    .footer-col-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 12px;
+    }
+    
+    .footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+    
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .footer-president {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+      .home-hero { padding: 48px 16px 60px; }
+      .home-stats-inner { grid-template-columns: 1fr; gap: 12px; }
+      .search-form { flex-direction: column; }
+      .search-btn { width: 100%; justify-content: center; }
+      .academies-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+      .home-stats, .home-academies, .home-cta { padding: 40px 16px; }
+      .home-footer { padding: 32px 16px 20px; }
+      .theme-panel { left: 16px; right: 16px; width: auto; }
+      .theme-fab { bottom: 16px; left: 16px; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Boot Loader -->
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">ن.ت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <!-- Page Wrapper -->
+  <div class="page-wrapper">
+
+    <!-- Header Container (auto-mounted) -->
+    <div id="headerContainer"></div>
+
+    <!-- ============ HERO ============ -->
+    <section class="home-hero">
+      <div class="home-hero-inner">
+        
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          <span>النظام الرسمي المعتمد</span>
+        </div>
+        
+        <h1 class="hero-title" id="heroTitle">
+          تحقق من <span class="hero-title-accent">شهاداتك</span> بثقة
+        </h1>
+        
+        <p class="hero-subtitle" id="heroSubtitle">
+          النظام الرسمي للتحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة من النقابة
+        </p>
+        
+        <!-- Search Box -->
+        <div class="search-card">
+          <div class="search-tabs">
+            <button class="search-tab active" data-tab="certificate" type="button">
+              🔍 شهادة
+            </button>
+            <button class="search-tab" data-tab="student" type="button">
+              👤 متدرب
+            </button>
+            <button class="search-tab" data-tab="academy" type="button">
+              🏛️ أكاديمية
+            </button>
+          </div>
+          
+          <form class="search-form" id="searchForm" onsubmit="return handleSearch(event)">
+            <input
+              type="text"
+              class="search-input"
+              id="searchInput"
+              placeholder="أدخل كود الشهادة..."
+              autocomplete="off"
+              required
+            >
+            <button type="submit" class="search-btn" id="searchBtn">
+              <span>بحث</span>
+              <span>→</span>
+            </button>
+          </form>
+          
+          <p class="search-hint" id="searchHint">
+            أدخل كود الشهادة المطبوع عليها
+          </p>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- ============ STATS ============ -->
+    <section class="home-stats" id="statsSection">
+      <div class="home-stats-inner">
+        
+        <div class="stat-block">
+          <div class="stat-icon">🏛️</div>
+          <div class="stat-value loading" id="statAcademies">—</div>
+          <div class="stat-label">أكاديمية معتمدة</div>
+        </div>
+        
+        <div class="stat-block">
+          <div class="stat-icon">📜</div>
+          <div class="stat-value loading" id="statCertificates">—</div>
+          <div class="stat-label">شهادة موثقة</div>
+        </div>
+        
+        <div class="stat-block">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value loading" id="statOnline">—</div>
+          <div class="stat-label">
+            <span class="stat-label-online">
+              <span class="online-dot"></span>
+              زائر حالياً
+            </span>
+          </div>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- ============ RECENT ACADEMIES ============ -->
+    <section class="home-academies" id="academiesSection">
+      <div class="home-academies-inner">
+        
+        <div class="section-header">
+          <h2 class="section-title">أحدث الأكاديميات المعتمدة</h2>
+          <p class="section-subtitle">أكاديميات حصلت على اعتماد رسمي من النقابة</p>
+        </div>
+        
+        <div class="academies-grid" id="academiesGrid">
+          <div class="empty-section">جاري التحميل...</div>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="home-cta">
+      <div class="home-cta-inner">
+        <h2 class="cta-title">هل تمتلك أكاديمية تدريبية؟</h2>
+        <p class="cta-text">
+          احصل على اعتماد رسمي من النقابة وكن جزءاً من المنظومة المعتمدة
+        </p>
+        <a href="/academy-apply.html" class="cta-btn">
+          <span>قدم طلب اعتماد</span>
+          <span>→</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="home-footer">
+      <div class="home-footer-inner">
+        
+        <div class="footer-grid">
+          
+          <div class="footer-brand">
+            <div class="footer-brand-logo">
+              <div class="footer-brand-mark" id="footerLogo">ن.ت</div>
+              <div>
+                <div class="footer-brand-name" id="footerUnionName">نقابة تكنولوجيا المعلومات</div>
+                <div class="footer-brand-tagline" id="footerCommitteeName">لجنة التحول الرقمي والتدريب</div>
+              </div>
+            </div>
+            <p class="footer-brand-text" id="footerBrandText">
+              النظام الرسمي للتحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="footer-col-title">روابط سريعة</h3>
+            <ul class="footer-links">
+              <li><a href="/home.html">الرئيسية</a></li>
+              <li><a href="/verify.html">التحقق من شهادة</a></li>
+              <li><a href="/academies.html">الأكاديميات</a></li>
+              <li><a href="/track.html">متابعة طلب</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="footer-col-title">تواصل معنا</h3>
+            <ul class="footer-links">
+              <li><a href="#" id="footerEmail">info@itws.eg</a></li>
+              <li><a href="#" id="footerPhone">01234567890</a></li>
+              <li><a href="#" id="footerWebsite">itws.eg</a></li>
+            </ul>
+          </div>
+          
+        </div>
+        
+        <div class="footer-bottom">
+          <span id="footerCopyright">© 2026 نقابة تكنولوجيا المعلومات والبرمجيات</span>
+          <span>
+            <span id="footerPresidentLabel">النقيب العام:</span>
+            <span class="footer-president" id="footerPresidentName">المحاسب / محمود جميل</span>
+          </span>
+        </div>
+        
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ============ THEME FAB ============ -->
+  <button class="theme-fab" id="themeFab" title="تغيير الثيم" aria-label="تغيير الثيم">🎨</button>
+  
+  <div class="theme-panel" id="themePanel">
+    <div class="theme-panel-header">
+      <span class="theme-panel-title">اختر الثيم</span>
+      <button class="theme-panel-close" id="themePanelClose" aria-label="إغلاق">×</button>
+    </div>
+    <div class="theme-list" id="themeList"></div>
+    <button class="theme-reset" id="themeReset">استعادة الافتراضي</button>
+  </div>
+
+  <!-- ============ Scripts ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth-guard.js"></script>
+  <script src="assets/js/app-title.js"></script>
+  <script src="assets/js/ui/header.js"></script>
+  <script src="assets/js/ui/modal.js"></script>
+  
+  <!-- Home Page Logic -->
+  <script>
+    (function () {
+      'use strict';
+      
+      var S = window.AppSettings || { get: function (p, f) { return f; } };
+      
+      // ============================================
+      // 1. تطبيق المحتوى الديناميكي من الإعدادات
+      // ============================================
+      function applyDynamicContent() {
+        var unionName = S.get('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+        var committeeName = S.get('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
+        var presidentName = S.get('app_identity.president_name', 'المحاسب / محمود جميل');
+        var presidentLabel = S.get('app_identity.president_label', 'النقيب العام:');
+        var footerText = S.get('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات والبرمجيات');
+        var contactEmail = S.get('app_identity.contact_email', 'info@itws.eg');
+        var contactPhone = S.get('app_identity.contact_phone', '01234567890');
+        var websiteUrl = S.get('app_identity.website_url', 'https://itws.eg');
+        var logoUrl = S.get('app_identity.logo_url', null);
+        
+        // Footer
+        setText('footerUnionName', unionName);
+        setText('footerCommitteeName', committeeName);
+        setText('footerCopyright', footerText);
+        setText('footerPresidentLabel', presidentLabel);
+        setText('footerPresidentName', presidentName);
+        
+        // Contact
+        var emailEl = document.getElementById('footerEmail');
+        if (emailEl) {
+          emailEl.textContent = contactEmail;
+          emailEl.href = 'mailto:' + contactEmail;
+        }
+        var phoneEl = document.getElementById('footerPhone');
+        if (phoneEl) {
+          phoneEl.textContent = contactPhone;
+          phoneEl.href = 'tel:' + contactPhone;
+        }
+        var websiteEl = document.getElementById('footerWebsite');
+        if (websiteEl) {
+          websiteEl.textContent = websiteUrl.replace(/^https?:\/\//, '');
+          websiteEl.href = websiteUrl;
+          websiteEl.target = '_blank';
+        }
+        
+        // Logo
+        if (logoUrl) {
+          var logoEl = document.getElementById('footerLogo');
+          if (logoEl) {
+            logoEl.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="' + escapeHtml(unionName) + '">';
+          }
+        }
+        
+        // Hero title (لو الإعدادات فيها نص مخصص)
+        var heroTitleSetting = S.get('app_identity.hero_title', null);
+        if (heroTitleSetting) {
+          var heroTitleEl = document.getElementById('heroTitle');
+          if (heroTitleEl) heroTitleEl.innerHTML = heroTitleSetting;
+        }
+        var heroSubtitleSetting = S.get('app_identity.hero_subtitle', null);
+        if (heroSubtitleSetting) {
+          setText('heroSubtitle', heroSubtitleSetting);
+        }
+      }
+      
+      function setText(id, text) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+      
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      
+      // ============================================
+      // 2. البحث (3 أنواع)
+      // ============================================
+      var searchConfig = {
+        certificate: {
+          placeholder: 'أدخل كود الشهادة...',
+          hint: 'أدخل كود الشهادة المطبوع عليها',
+          url: '/verify.html?code=',
+          validate: function (v) { return v.length >= 4; },
+          errorMsg: 'أدخل كود شهادة صحيح (4 أحرف على الأقل)'
+        },
+        student: {
+          placeholder: 'أدخل الرقم القومي (14 رقم)...',
+          hint: 'ابحث بالرقم القومي لعرض كل الشهادات',
+          url: '/student.html?id=',
+          validate: function (v) { return /^\d{14}$/.test(v); },
+          errorMsg: 'الرقم القومي يجب أن يكون 14 رقم'
+        },
+        academy: {
+          placeholder: 'اسم الأكاديمية أو الرقم الاعتمادي...',
+          hint: 'ابحث باسم الأكاديمية أو رقم اعتمادها',
+          url: '/academies.html?search=',
+          validate: function (v) { return v.length >= 2; },
+          errorMsg: 'أدخل اسم أكاديمية أو رقم اعتماد'
+        }
+      };
+      
+      var currentTab = 'certificate';
+      
+      function switchTab(tab) {
+        currentTab = tab;
+        
+        document.querySelectorAll('.search-tab').forEach(function (el) {
+          el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+        });
+        
+        var cfg = searchConfig[tab];
+        var input = document.getElementById('searchInput');
+        var hint = document.getElementById('searchHint');
+        
+        if (input) {
+          input.placeholder = cfg.placeholder;
+          input.value = '';
+          // لو متدرب → type=number
+          if (tab === 'student') {
+            input.setAttribute('inputmode', 'numeric');
+            input.setAttribute('maxlength', '14');
+            input.setAttribute('pattern', '[0-9]{14}');
+          } else {
+            input.removeAttribute('inputmode');
+            input.removeAttribute('maxlength');
+            input.removeAttribute('pattern');
+          }
+        }
+        if (hint) hint.textContent = cfg.hint;
+        
+        input && input.focus();
+      }
+      
+      function handleSearch(e) {
+        e.preventDefault();
+        
+        var input = document.getElementById('searchInput');
+        var value = input ? input.value.trim() : '';
+        var cfg = searchConfig[currentTab];
+        
+        if (!cfg.validate(value)) {
+          if (window.Utils && window.Utils.showToast) {
+            window.Utils.showToast(cfg.errorMsg, 'error');
+          } else {
+            alert(cfg.errorMsg);
+          }
+          input && input.focus();
+          return false;
+        }
+        
+        // redirect
+        window.location.href = cfg.url + encodeURIComponent(value);
+        return false;
+      }
+      
+      window.handleSearch = handleSearch;
+      
+      // ربط الـ tabs
+      document.querySelectorAll('.search-tab').forEach(function (el) {
+        el.addEventListener('click', function () {
+          switchTab(el.getAttribute('data-tab'));
+        });
+      });
+      
+      // ============================================
+      // 3. Stats من Supabase (real-time)
+      // ============================================
+      function loadStats() {
+        if (!window.sb) return;
+        
+        // (أ) عدد الأكاديميات المعتمدة
+        window.sb
+          .from('academies')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved')
+          .eq('is_deleted', false)
+          .then(function (res) {
+            var el = document.getElementById('statAcademies');
+            if (el && !res.error) {
+              el.textContent = formatNumber(res.count || 0);
+              el.classList.remove('loading');
+            }
+          });
+        
+        // (ب) عدد الشهادات النشطة
+        window.sb
+          .from('certificates')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .then(function (res) {
+            var el = document.getElementById('statCertificates');
+            if (el && !res.error) {
+              el.textContent = formatNumber(res.count || 0);
+              el.classList.remove('loading');
+            }
+          });
+        
+        // (ج) الزوار الحاليون
+        updateOnlineCount();
+        setInterval(updateOnlineCount, 30000); // كل 30 ثانية
+      }
+      
+      function updateOnlineCount() {
+        if (window.SessionManager && window.SessionManager.getOnlineCount) {
+          window.SessionManager.getOnlineCount().then(function (count) {
+            var el = document.getElementById('statOnline');
+            if (el) {
+              el.textContent = formatNumber(count);
+              el.classList.remove('loading');
+            }
+          });
+        }
+      }
+      
+      function formatNumber(n) {
+        if (n == null) return '—';
+        if (n < 1000) return n.toString();
+        if (n < 1000000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      }
+      
+      // ============================================
+      // 4. آخر الأكاديميات
+      // ============================================
+      function loadRecentAcademies() {
+        if (!window.sb) return;
+        if (!S.get('behavior.home_show_recent_academies', true)) {
+          var sec = document.getElementById('academiesSection');
+          if (sec) sec.style.display = 'none';
+          return;
+        }
+        
+        var limit = S.get('behavior.home_stats_academies_count', 6);
+        
+        window.sb
+          .from('academies')
+          .select('id, name, license_number, category_id, logo_url, created_at')
+          .eq('status', 'approved')
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false })
+          .limit(limit)
+          .then(function (res) {
+            if (res.error || !res.data || res.data.length === 0) {
+              var grid = document.getElementById('academiesGrid');
+              if (grid) {
+                grid.innerHTML = '<div class="empty-section">لا توجد أكاديميات معتمدة بعد</div>';
+              }
+              return;
+            }
+            
+            renderAcademies(res.data);
+          });
+      }
+      
+      function renderAcademies(academies) {
+        var grid = document.getElementById('academiesGrid');
+        if (!grid) return;
+        
+        // نجيب التصنيفات
+        window.sb
+          .from('academy_categories')
+          .select('id, name, color')
+          .then(function (catRes) {
+            var categories = {};
+            if (catRes.data) {
+              catRes.data.forEach(function (c) { categories[c.id] = c; });
+            }
+            
+            var html = academies.map(function (a) {
+              var initial = (a.name || '؟').charAt(0);
+              var cat = categories[a.category_id];
+              var logoHtml = a.logo_url
+                ? '<img src="' + escapeHtml(a.logo_url) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">'
+                : initial;
+              
+              return '' +
+                '<div class="academy-card" onclick="window.location.href=\'/academy-details.html?id=' + encodeURIComponent(a.id) + '\'">' +
+                  '<div class="academy-card-header">' +
+                    '<div class="academy-logo">' + logoHtml + '</div>' +
+                    '<span class="academy-badge">✓ معتمدة</span>' +
+                  '</div>' +
+                  '<div>' +
+                    '<div class="academy-name">' + escapeHtml(a.name) + '</div>' +
+                    (cat ? '<div class="academy-category">' + escapeHtml(cat.name) + '</div>' : '') +
+                  '</div>' +
+                  '<div class="academy-footer">' +
+                    '<span class="academy-footer-stat">🔑 ' + escapeHtml(a.license_number || '—') + '</span>' +
+                    '<span>→</span>' +
+                  '</div>' +
+                '</div>';
+            }).join('');
+            
+            grid.innerHTML = html;
+          });
+      }
+      
+      // ============================================
+      // 5. Theme Picker
+      // ============================================
+      function initThemePicker() {
+        // لو الإعدادات مش بتسمح للزوار بتغيير الثيم
+        if (!S.get('behavior.enable_theme_picker_for_visitors', true)) {
+          var fab = document.getElementById('themeFab');
+          if (fab) fab.style.display = 'none';
+          return;
+        }
+        
+        var fab = document.getElementById('themeFab');
+        var panel = document.getElementById('themePanel');
+        var closeBtn = document.getElementById('themePanelClose');
+        var resetBtn = document.getElementById('themeReset');
+        var listEl = document.getElementById('themeList');
+        
+        if (!fab || !panel || !listEl) return;
+        
+        // بناء قائمة الثيمات
+        var themes = window.getThemesList ? window.getThemesList() : [];
+        listEl.innerHTML = themes.map(function (t) {
+          var swatches = (t.preview || []).map(function (c) {
+            return '<span class="theme-swatch" style="background:' + c + '"></span>';
+          }).join('');
+          return '' +
+            '<button class="theme-option" data-theme-option="' + t.id + '">' +
+              '<div class="theme-swatches">' + swatches + '</div>' +
+              '<span class="theme-name">' + escapeHtml(t.name) + '</span>' +
+            '</button>';
+        }).join('');
+        
+        // تحديث الحالة
+        if (window.ThemeManager) window.ThemeManager.refreshPicker();
+        
+        // Toggle panel
+        fab.addEventListener('click', function (e) {
+          e.stopPropagation();
+          panel.classList.toggle('open');
+        });
+        
+        // Close panel
+        closeBtn && closeBtn.addEventListener('click', function () {
+          panel.classList.remove('open');
+        });
+        
+        // Reset
+        resetBtn && resetBtn.addEventListener('click', function () {
+          if (window.ThemeManager) {
+            window.ThemeManager.reset().then(function () {
+              if (window.Utils) window.Utils.showToast('تم استعادة الثيم الافتراضي', 'success');
+            });
+          }
+        });
+        
+        // Click outside
+        document.addEventListener('click', function (e) {
+          if (panel.classList.contains('open') && !panel.contains(e.target) && !fab.contains(e.target)) {
+            panel.classList.remove('open');
+          }
+        });
+      }
+      
+      // ============================================
+      // 6. Init
+      // ============================================
+      function init() {
+        // تطبيق المحتوى الديناميكي
+        applyDynamicContent();
+        
+        // استمع لتغييرات الإعدادات
+        if (window.AppSettings && window.AppSettings.onChange) {
+          window.AppSettings.onChange(function () {
+            applyDynamicContent();
+          });
+        }
+        
+        // تحميل الإحصائيات والأكاديميات
+        // نستنى Supabase يكون جاهز
+        var waited = 0;
+        var waitInterval = setInterval(function () {
+          waited += 100;
+          if (window.sb || waited >= 2000) {
+            clearInterval(waitInterval);
+            if (window.sb) {
+              loadStats();
+              loadRecentAcademies();
+            }
+          }
+        }, 100);
+        
+        // Theme picker
+        initThemePicker();
+      }
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+      
+    })();
+  </script>
+
+</body>
+</html>
