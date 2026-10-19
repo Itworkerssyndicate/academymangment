@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>عرض الشهادة | لوحة التحكم</title>
+  <meta name="description" content="عرض تفاصيل الشهادة">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <!-- QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <!-- html2pdf for PDF download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <style>
+    /* ============ CERTIFICATE VIEW ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    
+    .back-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .back-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .page-header-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+    }
+    
+    .page-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ LAYOUT ============ */
+    .view-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+    
+    @media (max-width: 1100px) {
+      .view-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* ============ STATUS BANNER ============ */
+    .status-banner {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid;
+    }
+    
+    .status-banner.valid {
+      background: var(--success-soft);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    
+    .status-banner.invalid {
+      background: var(--error-soft);
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    .status-banner-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: currentColor;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .status-banner-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .status-banner-content {
+      flex: 1;
+    }
+    
+    .status-banner-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 2px;
+    }
+    
+    .status-banner-text {
+      font-size: 12px;
+      opacity: 0.85;
+      margin: 0;
+    }
+    
+    /* ============ CERTIFICATE PREVIEW ============ */
+    .cert-preview-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .cert-preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .cert-preview-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .cert-preview-title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+    
+    .cert-preview-note {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    /* ============ CERTIFICATE (REAL LAYOUT) ============ */
+    .cert-real {
+      background: #ffffff;
+      color: #1a1a2e;
+      border: 4px solid var(--primary);
+      border-radius: 16px;
+      padding: 32px 28px;
+      position: relative;
+      direction: rtl;
+      font-family: 'Cairo', sans-serif;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    
+    .cert-real::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 2px dashed rgba(201, 168, 76, 0.15);
+      border-radius: 10px;
+      pointer-events: none;
+    }
+    
+    /* Header */
+    .cert-real-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 3px solid var(--primary);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cert-real-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .cert-real-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    
+    .cert-real-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+    
+    .cert-real-union {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.3;
+      margin: 0;
+    }
+    
+    .cert-real-committee {
+      font-size: 11px;
+      color: #666;
+      margin: 2px 0 0;
+    }
+    
+    .cert-real-seal {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+    
+    /* Title */
+    .cert-real-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 8px 0 4px;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cert-real-subtitle {
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cert-real-code {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    
+    .cert-real-status-badge {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    
+    .cert-real-status-badge.valid {
+      background: #10B981;
+      color: #fff;
+    }
+    
+    .cert-real-status-badge.invalid {
+      background: #EF4444;
+      color: #fff;
+    }
+    
+    /* Fields */
+    .cert-real-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+      background: #f8faff;
+      border: 1px solid rgba(201, 168, 76, 0.06);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    @media (max-width: 640px) {
+      .cert-real-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .cert-real-field {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .cert-real-field-label {
+      font-size: 9px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .cert-real-field-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a2e;
+      word-break: break-word;
+    }
+    
+    .cert-real-field-value.mono {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+      font-size: 12px;
+    }
+    
+    .cert-real-field-value.grade-A { color: #10B981; }
+    .cert-real-field-value.grade-B { color: #3B82F6; }
+    .cert-real-field-value.grade-C { color: #EAB308; }
+    .cert-real-field-value.grade-D { color: #F97316; }
+    .cert-real-field-value.grade-F { color: #EF4444; }
+    
+    /* Footer */
+    .cert-real-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-top: 16px;
+      border-top: 2px solid #eee;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cert-real-sig {
+      text-align: center;
+      flex: 1;
+      min-width: 100px;
+    }
+    
+    .cert-real-sig-label {
+      font-size: 9px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    
+    .cert-real-sig-line {
+      width: 100px;
+      border-bottom: 2px solid #1a1a2e;
+      margin: 4px auto;
+    }
+    
+    .cert-real-sig-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 4px;
+    }
+    
+    .cert-real-sig-seal {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(201, 168, 76, 0.15);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin: 0 auto;
+    }
+    
+    /* Bottom */
+    .cert-real-bottom {
+      text-align: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+      font-size: 9px;
+      color: #ccc;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* ============ DATA PANELS ============ */
+    .data-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .data-panels {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .data-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    
+    .data-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .data-panel-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .data-panel-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .data-panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    
+    .data-panel-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .data-panel-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .data-panel-item-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .data-panel-item-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-word;
+    }
+    
+    .data-panel-item-value.mono {
+      font-family: 'Courier New', monospace;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+    }
+    
+    .data-panel-item-value.empty {
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 400;
+    }
+    
+    /* ============ SIDEBAR ============ */
+    .sidebar-sticky {
+      position: sticky;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .sidebar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    
+    .sidebar-card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .sidebar-card-header svg {
+      width: 14px;
+      height: 14px;
+      color: var(--primary);
+    }
+    
+    .sidebar-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .sidebar-card-body {
+      padding: 18px;
+    }
+    
+    /* ============ QR CODE ============ */
+    .qr-wrapper {
+      text-align: center;
+    }
+    
+    .qr-container {
+      display: inline-block;
+      padding: 12px;
+      background: #fff;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .qr-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+    
+    /* ============ ACTIONS ============ */
+    .sidebar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .sidebar-btn {
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    
+    .sidebar-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .sidebar-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .sidebar-btn.primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: var(--primary-text);
+    }
+    
+    .sidebar-btn.danger {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+    
+    .sidebar-btn.danger:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .sidebar-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+    
+    /* ============ META INFO ============ */
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .meta-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+    
+    .meta-item-label {
+      color: var(--text-muted);
+    }
+    
+    .meta-item-value {
+      color: var(--text);
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+    }
+    
+    /* ============ LOADING ============ */
+    .view-loader {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    
+    .view-loader.show { display: block; }
+    
+    .view-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .view-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ ERROR ============ */
+    .view-error {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .view-error.show { display: block; }
+    
+    .view-error-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--error-soft);
+      color: var(--error);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .view-error-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .view-error-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--error);
+      margin: 0 0 6px;
+    }
+    
+    .view-error-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    
+    .view-error-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    
+    .view-error-btn:hover {
+      background: var(--primary-hover);
+    }
+    
+    /* ============ PRINT ============ */
+    @media print {
+      body {
+        background: #fff !important;
+      }
+      
+      .app-sidebar,
+      .app-topbar,
+      .page-header-admin,
+      .sidebar-sticky,
+      .cert-preview-header,
+      .data-panels,
+      .status-banner {
+        display: none !important;
+      }
+      
+      .app-layout {
+        display: block !important;
+      }
+      
+      .app-main {
+        padding: 0 !important;
+      }
+      
+      .app-content {
+        padding: 0 !important;
+      }
+      
+      .view-layout {
+        display: block !important;
+      }
+      
+      .cert-preview-wrapper {
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+      }
+      
+      .cert-real {
+        border-width: 3px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1100px) {
+      .sidebar-sticky {
+        position: static;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .page-header-admin {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .page-header-actions {
+        justify-content: flex-start;
+      }
+      
+      .cert-real {
+        padding: 20px 16px;
+      }
+      
+      .cert-real-title {
+        font-size: 18px;
+      }
+      
+      .cert-real-logo,
+      .cert-real-seal {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+      }
+      
+      .cert-real-union {
+        font-size: 13px;
+      }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<!-- ✅ حماية الصفحة -->
+<body data-requires-auth data-required-roles="super_admin,admin,committee_manager">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">عرض الشهادة</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="../home.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span>الموقع</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Loader -->
+          <div class="view-loader" id="viewLoader">
+            <div class="view-loader-spinner"></div>
+            <div class="view-loader-text">جاري تحميل الشهادة...</div>
+          </div>
+
+          <!-- Error -->
+          <div class="view-error" id="viewError">
+            <div class="view-error-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <h3 class="view-error-title" id="errorTitle">الشهادة غير موجودة</h3>
+            <p class="view-error-text" id="errorText">لم يتم العثور على شهادة بهذا المعرف.</p>
+            <a href="certificates.html" class="view-error-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>العودة للشهادات</span>
+            </a>
+          </div>
+
+          <!-- Content -->
+          <div id="viewContent" style="display:none;">
+
+            <!-- Page Header -->
+            <div class="page-header-admin">
+              <div class="page-header-left">
+                <a href="certificates.html" class="back-btn" title="رجوع">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                  </svg>
+                </a>
+                <div class="page-header-info">
+                  <h2>تفاصيل الشهادة</h2>
+                  <p id="headerCode">—</p>
+                </div>
+              </div>
+              <div class="page-header-actions">
+                <button class="btn btn-outline btn-sm" id="printBtn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                  </svg>
+                  <span>طباعة</span>
+                </button>
+                <button class="btn btn-primary btn-sm" id="pdfBtn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>تحميل PDF</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Status Banner -->
+            <div class="status-banner valid" id="statusBanner">
+              <div class="status-banner-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div class="status-banner-content">
+                <h3 class="status-banner-title" id="statusTitle">الشهادة نشطة</h3>
+                <p class="status-banner-text" id="statusText">هذه الشهادة صالحة ويمكن التحقق منها عبر الموقع العام.</p>
+              </div>
+            </div>
+
+            <div class="view-layout">
+
+              <!-- Left: Main Content -->
+              <div>
+
+                <!-- Certificate Preview -->
+                <div class="cert-preview-wrapper">
+                  <div class="cert-preview-header">
+                    <div class="cert-preview-title">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="7"></circle>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                      </svg>
+                      <span>معاينة الشهادة</span>
+                    </div>
+                    <span class="cert-preview-note">كما ستظهر للجمهور</span>
+                  </div>
+
+                  <!-- Real Certificate -->
+                  <div class="cert-real" id="certReal">
+                    
+                    <!-- Header -->
+                    <div class="cert-real-header">
+                      <div class="cert-real-brand">
+                        <div class="cert-real-logo" id="certLogo">نت</div>
+                        <div>
+                          <h1 class="cert-real-union" id="certUnionName">نقابة تكنولوجيا المعلومات والبرمجيات</h1>
+                          <p class="cert-real-committee" id="certCommitteeName">لجنة التحول الرقمي والتدريب</p>
+                        </div>
+                      </div>
+                      <div class="cert-real-seal">نت</div>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="cert-real-title">شهادة اجتياز دورة تدريبية</div>
+                    <div class="cert-real-subtitle">
+                      <span class="cert-real-code" id="certCode">—</span>
+                      <span class="cert-real-status-badge valid" id="certStatusBadge">صالحة</span>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="cert-real-grid" id="certFields"></div>
+
+                    <!-- Footer -->
+                    <div class="cert-real-footer">
+                      <div class="cert-real-sig">
+                        <div class="cert-real-sig-label">توقيع رئيس اللجنة</div>
+                        <div class="cert-real-sig-line"></div>
+                        <div class="cert-real-sig-name" id="certCommitteeHead">—</div>
+                      </div>
+                      <div class="cert-real-sig">
+                        <div class="cert-real-sig-seal">ختم</div>
+                        <div class="cert-real-sig-label" style="margin-top:6px;">ختم النقابة</div>
+                      </div>
+                      <div class="cert-real-sig">
+                        <div class="cert-real-sig-label">النقيب العام</div>
+                        <div class="cert-real-sig-line"></div>
+                        <div class="cert-real-sig-name" id="certPresident">—</div>
+                      </div>
+                    </div>
+
+                    <!-- Bottom -->
+                    <div class="cert-real-bottom" id="certBottom">
+                      تم التحقق بواسطة نقابة تكنولوجيا المعلومات
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Data Panels -->
+                <div class="data-panels">
+
+                  <!-- Student -->
+                  <div class="data-panel">
+                    <div class="data-panel-header">
+                      <div class="data-panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                      <h3 class="data-panel-title">بيانات المتدرب</h3>
+                    </div>
+                    <div class="data-panel-list">
+                      <div class="data-panel-item">
+                        <div class="data-panel-item-label">الاسم الكامل</div>
+                        <div class="data-panel-item-value" id="dataStudentName">—</div>
+                      </div>
+                      <div class="data-panel-item">
+                        <div class="data-panel-item-label">الرقم القومي</div>
+                        <div class="data-panel-item-value mono" id="dataNationalId">—</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Course -->
+                  <div class="data-panel">
+                    <div class="data-panel-header">
+                      <div class="data-panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                      </div>
+                      <h3 class="data-panel-title">بيانات الدورة</h3>
+                    </div>
+                    <div class="data-panel-list">
+                      <div class="data-panel-item">
+                        <div class="data-panel-item-label">اسم الدورة</div>
+                        <div class="data-panel-item-value" id="dataCourseName">—</div>
+                      </div>
+                      <div class="data-panel-item">
+                        <div class="data-panel-item-label">عدد الساعات</div>
+                        <div class="data-panel-item-value" id="dataHours">—</div>
+                      </div>
+                      <div class="data-panel-item">
+                        <div class="data-panel-item-label">التقدير</div>
+                        <div class="data-panel-item-value" id="dataGrade">—</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Issuer -->
+                  <div class="data-panel" style="grid-column:1/-1;">
+                    <div class="data-panel-header">
+                      <div class="data-panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                      </div>
+                      <h3 class="data-panel-title">الجهة المُصدرة</h3>
+                    </div>
+                    <div class="data-panel-list">
+                      <div class="data-panel-item">
+                        <div class="data-panel-item-label">النوع</div>
+                        <div class="data-panel-item-value" id="dataIssuerType">—</div>
+                      </div>
+                      <div class="data-panel-item" id="dataAcademyWrap" style="display:none;">
+                        <div class="data-panel-item-label">الأكاديمية</div>
+                        <div class="data-panel-item-value" id="dataAcademy">—</div>
+                      </div>
+                      <div class="data-panel-item" id="dataLicenseWrap" style="display:none;">
+                        <div class="data-panel-item-label">رقم الاعتماد</div>
+                        <div class="data-panel-item-value mono" id="dataLicense">—</div>
+                      </div>
+                      <div class="data-panel-item" id="dataBranchWrap" style="display:none;">
+                        <div class="data-panel-item-label">الفرع</div>
+                        <div class="data-panel-item-value" id="dataBranch">—</div>
+                      </div>
+                      <div class="data-panel-item">
+                        <div class="data-panel-item-label">تاريخ الإصدار</div>
+                        <div class="data-panel-item-value" id="dataIssuedAt">—</div>
+                      </div>
+                      <div class="data-panel-item" id="dataCompletionWrap" style="display:none;">
+                        <div class="data-panel-item-label">تاريخ إتمام الدورة</div>
+                        <div class="data-panel-item-value" id="dataCompletion">—</div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+              <!-- Right: Sidebar -->
+              <div class="sidebar-sticky">
+
+                <!-- QR Code -->
+                <div class="sidebar-card">
+                  <div class="sidebar-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span class="sidebar-card-title">QR Code</span>
+                  </div>
+                  <div class="sidebar-card-body">
+                    <div class="qr-wrapper">
+                      <div class="qr-container" id="qrContainer"></div>
+                      <p class="qr-text">امسح الكود للتحقق من الشهادة</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="sidebar-card">
+                  <div class="sidebar-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <span class="sidebar-card-title">إجراءات</span>
+                  </div>
+                  <div class="sidebar-card-body">
+                    <div class="sidebar-actions">
+                      <a href="#" class="sidebar-btn" id="viewPublicBtn" target="_blank" style="text-decoration:none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span>عرض للجمهور</span>
+                      </a>
+                      <button class="sidebar-btn" id="shareBtn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="18" cy="5" r="3"></circle>
+                          <circle cx="6" cy="12" r="3"></circle>
+                          <circle cx="18" cy="19" r="3"></circle>
+                          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        <span>مشاركة</span>
+                      </button>
+                      <button class="sidebar-btn" id="copyLinkBtn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        <span>نسخ الرابط</span>
+                      </button>
+
+                      <div id="adminActions" style="display:none;border-top:1px solid var(--border);padding-top:8px;margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+                        <a href="#" class="sidebar-btn primary" id="editBtn" style="text-decoration:none;">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                          <span>تعديل الشهادة</span>
+                        </a>
+                        <button class="sidebar-btn danger" id="deleteBtn" type="button">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          </svg>
+                          <span>حذف الشهادة</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Meta Info -->
+                <div class="sidebar-card">
+                  <div class="sidebar-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span class="sidebar-card-title">معلومات</span>
+                  </div>
+                  <div class="sidebar-card-body">
+                    <div class="meta-list">
+                      <div class="meta-item">
+                        <span class="meta-item-label">معرف الشهادة</span>
+                        <span class="meta-item-value" id="metaId">—</span>
+                      </div>
+                      <div class="meta-item">
+                        <span class="meta-item-label">الحالة</span>
+                        <span class="meta-item-value" id="metaStatus">—</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+  <script src="../assets/js/pages/admin/certificate-view.js"></script>
+
+</body>
+</html>
