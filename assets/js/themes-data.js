@@ -2,9 +2,9 @@
 // [5/50] ITWS Platform - Themes Data
 // Path: assets/js/themes-data.js
 // ============================================
-// 💡 6 ثيمات كاملة جاهزة، كل واحد له معنى وهوية بصرية
-// 💡 الألوان مطابقة لمعايير WCAG AA (تباين كافٍ للقراءة)
-// 💡 كل ثيم فيه 20+ متغير CSS عشان يغطي كل عناصر الواجهة
+// 💡 الثيم الافتراضي = "وطني داكن" (أحمر مصر + أسود + أبيض)
+// 💡 يليق بلوجو النقابة (فيه علم مصر)
+// 💡 6 ثيمات كاملة
 // ============================================
 
 (function () {
@@ -13,39 +13,39 @@
   window.ITWS_THEMES = {
 
     // ============================================
-    // 1. formal_dark - الافتراضي الرسمي (ذهبي + أزرق)
+    // 1. watanii_dark - وطني داكن (الافتراضي) 🇪🇬
     // ============================================
-    formal_dark: {
-      id: 'formal_dark',
-      name: 'الافتراضي الرسمي',
-      name_en: 'Formal Dark',
-      description: 'الثيم الرسمي الافتراضي للنقابة — ذهبي وأزرق داكن',
-      preview: ['#0A1628', '#C9A84C', '#1E40AF'],
+    watanii_dark: {
+      id: 'watanii_dark',
+      name: 'وطني داكن',
+      name_en: 'Patriotic Dark',
+      description: 'الثيم الرسمي — أحمر مصر مع أسود وأبيض',
+      preview: ['#0A0E14', '#CE1126', '#FFFFFF'],
       is_light: false,
       colors: {
-        'primary': '#C9A84C',
-        'primary-hover': '#B8953E',
-        'primary-soft': 'rgba(201, 168, 76, 0.12)',
-        'primary-text': '#0A1628',
+        'primary': '#CE1126',
+        'primary-hover': '#E63946',
+        'primary-soft': 'rgba(206, 17, 38, 0.14)',
+        'primary-text': '#FFFFFF',
 
-        'accent': '#1E40AF',
-        'accent-hover': '#1E3A8A',
-        'accent-soft': 'rgba(30, 64, 175, 0.15)',
+        'accent': '#FFFFFF',
+        'accent-hover': '#E5E7EB',
+        'accent-soft': 'rgba(255, 255, 255, 0.08)',
 
-        'bg': '#0A1628',
-        'bg-alt': '#060F1E',
-        'surface': '#0F1E35',
-        'surface-elevated': '#152641',
-        'surface-hover': '#1C3050',
+        'bg': '#0A0E14',
+        'bg-alt': '#05080D',
+        'surface': '#131820',
+        'surface-elevated': '#1C2430',
+        'surface-hover': '#252F3D',
 
         'text': '#F8FAFC',
         'text-secondary': '#94A3B8',
         'text-muted': '#64748B',
-        'text-inverse': '#0A1628',
+        'text-inverse': '#0A0E14',
 
         'border': 'rgba(255, 255, 255, 0.08)',
-        'border-strong': 'rgba(255, 255, 255, 0.15)',
-        'border-focus': '#C9A84C',
+        'border-strong': 'rgba(255, 255, 255, 0.16)',
+        'border-focus': '#CE1126',
 
         'success': '#10B981',
         'success-soft': 'rgba(16, 185, 129, 0.12)',
@@ -56,19 +56,19 @@
         'info': '#3B82F6',
         'info-soft': 'rgba(59, 130, 246, 0.12)',
 
-        'shadow': '0 8px 32px rgba(0, 0, 0, 0.4)',
-        'shadow-lg': '0 20px 60px rgba(0, 0, 0, 0.5)'
+        'shadow': '0 8px 32px rgba(0, 0, 0, 0.5)',
+        'shadow-lg': '0 20px 60px rgba(0, 0, 0, 0.6)'
       }
     },
 
     // ============================================
-    // 2. watanii - وطني (أحمر + أسود + أبيض)
+    // 2. watanii_light - وطني فاتح
     // ============================================
-    watanii: {
-      id: 'watanii',
-      name: 'وطني',
-      name_en: 'Patriotic',
-      description: 'ثيم وطني بألوان علم مصر — أحمر وأسود وأبيض',
+    watanii_light: {
+      id: 'watanii_light',
+      name: 'وطني فاتح',
+      name_en: 'Patriotic Light',
+      description: 'وطني بخلفية فاتحة — مريح للقراءة الطويلة',
       preview: ['#FAFAFA', '#CE1126', '#000000'],
       is_light: true,
       colors: {
@@ -77,9 +77,9 @@
         'primary-soft': 'rgba(206, 17, 38, 0.08)',
         'primary-text': '#FFFFFF',
 
-        'accent': '#000000',
-        'accent-hover': '#1F2937',
-        'accent-soft': 'rgba(0, 0, 0, 0.05)',
+        'accent': '#0F172A',
+        'accent-hover': '#1E293B',
+        'accent-soft': 'rgba(15, 23, 42, 0.05)',
 
         'bg': '#FAFAFA',
         'bg-alt': '#F0F0F0',
@@ -117,7 +117,7 @@
       id: 'tech_blue',
       name: 'تكنولوجي',
       name_en: 'Tech Blue',
-      description: 'ثيم تكنولوجي حديث بألوان الأزرق والسماوي',
+      description: 'ثيم تكنولوجي حديث بألوان الأزرق',
       preview: ['#0F172A', '#3B82F6', '#06B6D4'],
       is_light: false,
       colors: {
@@ -166,7 +166,7 @@
       id: 'light_formal',
       name: 'رسمي فاتح',
       name_en: 'Light Formal',
-      description: 'ثيم رسمي فاتح — أزرق ملكي مع ذهبي',
+      description: 'أزرق ملكي مع ذهبي — فخم ومريح',
       preview: ['#F8FAFC', '#1E40AF', '#C9A84C'],
       is_light: true,
       colors: {
@@ -215,7 +215,7 @@
       id: 'emerald',
       name: 'زمردي',
       name_en: 'Emerald',
-      description: 'ثيم زمردي هادئ بألوان الأخضر الطبيعي',
+      description: 'أخضر زمردي هادئ',
       preview: ['#0A1F1A', '#10B981', '#0D9488'],
       is_light: false,
       colors: {
@@ -258,13 +258,13 @@
     },
 
     // ============================================
-    // 6. midnight_gold - ليلي ذهبي (أسود + ذهبي)
+    // 6. midnight_gold - ليلي ذهبي
     // ============================================
     midnight_gold: {
       id: 'midnight_gold',
       name: 'ليلي ذهبي',
       name_en: 'Midnight Gold',
-      description: 'ثيم فاخر — أسود عميق مع ذهبي ملكي',
+      description: 'أسود عميق مع ذهبي ملكي',
       preview: ['#000000', '#C9A84C', '#FFFFFF'],
       is_light: false,
       colors: {
@@ -307,9 +307,8 @@
     }
   };
 
-  // ============ الثيم الافتراضي (Fallback) ============
-  // لو Supabase مش متاح لأي سبب، ده اللي بيتطبق
-  window.ITWS_DEFAULT_THEME = 'formal_dark';
+  // ============ ⚠️ الثيم الافتراضي = وطني داكن ============
+  window.ITWS_DEFAULT_THEME = 'watanii_dark';
 
   // ============ Helper: قائمة الثيمات ============
   window.getThemesList = function () {
@@ -326,16 +325,14 @@
     });
   };
 
-  // ============ Helper: جلب ثيم بالـ ID ============
+  // ============ Helper: جلب ثيم ============
   window.getTheme = function (id) {
     return window.ITWS_THEMES[id] || null;
   };
 
-  // ============ Debug ============
   if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
     console.log('%c✅ [ITWS] Themes loaded:', 'color: #10B981; font-weight: bold;', Object.keys(window.ITWS_THEMES).length, 'themes');
     console.log('   Default:', window.ITWS_DEFAULT_THEME);
-    console.log('   Available:', Object.keys(window.ITWS_THEMES).join(', '));
   }
 
 })();
