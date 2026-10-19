@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>صفحة المتدرب | نقابة تكنولوجيا المعلومات</title>
+  <meta name="description" content="اعرض جميع شهادات المتدرب وتحميل السيرة الذاتية الاحترافية">
+  <meta name="theme-color" content="#0A0E14">
+  
+  <meta property="og:title" content="صفحة المتدرب">
+  <meta property="og:description" content="جميع شهادات المتدرب في مكان واحد">
+  <meta property="og:type" content="profile">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="assets/js/settings-defaults.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/themes-data.js"></script>
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/loader.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  
+  <style>
+    /* ============ HERO ============ */
+    .student-hero {
+      padding: 56px 20px 40px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .student-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 30%, var(--primary-soft) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
+    .student-hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .student-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--primary-soft);
+      border: 1px solid var(--primary);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    
+    .student-title {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.3;
+      margin: 0 0 12px;
+      letter-spacing: -0.5px;
+    }
+    
+    .student-title-accent { color: var(--primary); }
+    
+    .student-subtitle {
+      font-size: clamp(14px, 2vw, 16px);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* ============ MAIN ============ */
+    .student-main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+    
+    /* ============ SEARCH ============ */
+    .student-search-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 32px;
+    }
+    
+    .student-search-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .student-search-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    
+    .student-search-input {
+      flex: 1;
+      padding: 16px 20px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      min-width: 0;
+      direction: ltr;
+      text-align: center;
+    }
+    
+    .student-search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    
+    .student-search-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 0;
+      direction: rtl;
+      text-align: right;
+    }
+    
+    .student-search-btn {
+      padding: 16px 32px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    
+    .student-search-btn:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px var(--primary-soft);
+    }
+    
+    .student-search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .student-search-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    /* ============ LOADER ============ */
+    .student-loader {
+      display: none;
+      text-align: center;
+      padding: 48px 20px;
+    }
+    
+    .student-loader.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .student-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .student-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* ============ ERROR ============ */
+    .student-message {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    
+    .student-message.show {
+      display: block;
+      animation: slideUp 0.4s ease;
+    }
+    
+    .student-message.error {
+      border-color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .student-message-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+      font-weight: 700;
+      color: var(--error);
+    }
+    
+    .student-message-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--error);
+      margin: 0 0 8px;
+    }
+    
+    .student-message-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ============ RESULT ============ */
+    .student-result {
+      display: none;
+    }
+    
+    .student-result.show {
+      display: block;
+      animation: slideUp 0.5s ease;
+    }
+    
+    /* ===== PROFILE CARD ===== */
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    
+    .profile-header {
+      padding: 32px 28px;
+      background: linear-gradient(135deg, var(--primary-soft), transparent);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 6px var(--primary-soft), 0 8px 24px var(--primary-soft);
+      overflow: hidden;
+    }
+    
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-info {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .profile-name {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 6px;
+      line-height: 1.3;
+    }
+    
+    .profile-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    .profile-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .profile-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+    }
+    
+    .profile-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .profile-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .profile-btn.primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: var(--primary-text);
+    }
+    
+    .profile-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    /* ===== STATS BAR ===== */
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--border);
+    }
+    
+    .profile-stat {
+      padding: 20px;
+      text-align: center;
+      border-left: 1px solid var(--border);
+    }
+    
+    .profile-stat:last-child {
+      border-left: none;
+    }
+    
+    .profile-stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    
+    .profile-stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    /* ===== CERTIFICATES SECTION ===== */
+    .certificates-section {
+      margin-top: 32px;
+    }
+    
+    .certificates-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .certificates-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .certificates-count {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 999px;
+    }
+    
+    .certificates-list {
+      display: grid;
+      gap: 16px;
+    }
+    
+    .cert-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      transition: all 0.2s;
+    }
+    
+    .cert-item:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    
+    .cert-item-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .cert-item-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .cert-item-main {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .cert-item-course {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 4px;
+      line-height: 1.4;
+    }
+    
+    .cert-item-code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+    
+    .cert-item-details {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .cert-item-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .cert-item-detail-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .cert-item-detail-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .cert-grade {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .cert-grade.excellent { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+    .cert-grade.very-good { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
+    .cert-grade.good { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+    .cert-grade.pass { background: rgba(249, 115, 22, 0.15); color: #F97316; }
+    .cert-grade.fail { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+    
+    .cert-item-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .cert-action-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    
+    .cert-action-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .cert-action-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ INFO CARDS ============ */
+    .student-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    
+    .student-info-card {
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .student-info-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .student-info-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .student-info-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 640px) {
+      .student-search-form {
+        flex-direction: column;
+      }
+      
+      .student-search-btn {
+        width: 100%;
+      }
+      
+      .student-search-card,
+      .student-main {
+        padding: 20px 16px;
+      }
+      
+      .profile-header {
+        padding: 24px 20px;
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .profile-info {
+        text-align: center;
+      }
+      
+      .profile-meta {
+        justify-content: center;
+      }
+      
+      .profile-actions {
+        justify-content: center;
+        width: 100%;
+      }
+      
+      .profile-btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 100px;
+      }
+      
+      .profile-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .profile-stat {
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+      
+      .profile-stat:first-child {
+        border-top: none;
+      }
+      
+      .cert-item {
+        padding: 16px 18px;
+      }
+      
+      .cert-item-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
+    @media print {
+      .student-hero,
+      .student-search-card,
+      .student-info,
+      .cert-item-actions,
+      .profile-actions,
+      #headerContainer,
+      .theme-fab,
+      .theme-panel {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="page-wrapper">
+
+    <div id="headerContainer"></div>
+
+    <!-- ============ HERO ============ -->
+    <section class="student-hero">
+      <div class="student-hero-inner">
+        <div class="student-badge">صفحة المتدرب الرسمية</div>
+        <h1 class="student-title">
+          اعرض <span class="student-title-accent">شهاداتك</span> في مكان واحد
+        </h1>
+        <p class="student-subtitle">
+          أدخل رقمك القومي لعرض جميع شهاداتك التدريبية المعتمدة وتحميل سيرتك الذاتية
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ MAIN ============ -->
+    <main class="student-main">
+
+      <!-- SEARCH -->
+      <div class="student-search-card">
+        <div class="student-search-label">الرقم القومي</div>
+        
+        <form class="student-search-form" id="studentForm" onsubmit="return false;">
+          <input
+            type="text"
+            class="student-search-input"
+            id="nationalIdInput"
+            placeholder="أدخل الرقم القومي (14 رقم)"
+            inputmode="numeric"
+            maxlength="14"
+            autocomplete="off"
+            required
+          >
+          <button type="submit" class="student-search-btn" id="studentBtn">بحث</button>
+        </form>
+        
+        <div class="student-search-hint">
+          أدخل الرقم القومي المكون من 14 رقماً لعرض الشهادات
+        </div>
+      </div>
+
+      <!-- LOADER -->
+      <div class="student-loader" id="studentLoader">
+        <div class="student-loader-spinner"></div>
+        <div class="student-loader-text">جاري البحث عن الشهادات...</div>
+      </div>
+
+      <!-- ERROR -->
+      <div class="student-message" id="studentError">
+        <div class="student-message-icon">&#10005;</div>
+        <h2 class="student-message-title" id="errorTitle">لم يتم العثور على شهادات</h2>
+        <p class="student-message-text" id="errorText">
+          تأكد من الرقم القومي، أو تواصل مع الأكاديمية المسؤولة
+        </p>
+      </div>
+
+      <!-- RESULT -->
+      <div class="student-result" id="studentResult"></div>
+
+      <!-- INFO -->
+      <div class="student-info">
+        <div class="student-info-card">
+          <h3 class="student-info-title">جميع شهاداتك</h3>
+          <p class="student-info-text">كل الشهادات الصادرة من الأكاديميات المعتمدة في مكان واحد</p>
+        </div>
+        <div class="student-info-card">
+          <h3 class="student-info-title">سيرة ذاتية احترافية</h3>
+          <p class="student-info-text">حمّل سيرتك الذاتية بصيغة PDF جاهزة للطباعة</p>
+        </div>
+        <div class="student-info-card">
+          <h3 class="student-info-title">مشاركة آمنة</h3>
+          <p class="student-info-text">شارك رابط صفحتك مع جهات التوظيف</p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="home-footer">
+      <div class="home-footer-inner">
+        <div class="footer-bottom">
+          <span id="footerCopyright">© 2026 نقابة تكنولوجيا المعلومات والبرمجيات</span>
+          <span>
+            <span id="footerPresidentLabel">النقيب العام:</span>
+            <span class="footer-president" id="footerPresidentName">المحاسب / محمود جميل</span>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth-guard.js"></script>
+  <script src="assets/js/app-title.js"></script>
+  <script src="assets/js/ui/header.js"></script>
+  <script src="assets/js/ui/modal.js"></script>
+  <script src="assets/js/pages/student.js"></script>
+
+</body>
+</html>
