@@ -2,56 +2,69 @@
 // [9/50] ITWS Platform - Auth Guard
 // Path: assets/js/auth-guard.js
 // ============================================
-// 💡 يحمي الصفحات المحمية
-// 💡 يتحقق من تسجيل الدخول + الدور قبل أي محتوى
-// 💡 يمنع flash of content غير مصرح به
-// 💡 يوفر بيانات المستخدم لكل الصفحات
+// إصلاح: استخدام resolveUrl() للتوافق مع GitHub Pages
+// بدون إيموجي
 // ============================================
 
 (function () {
   'use strict';
 
-  // ============ حماية من التهيئة المكررة ============
   if (window.AuthGuard && window.AuthGuard.initialized) return;
 
   var cfg = window.ITWS_CONFIG;
-  var ROUTES = (cfg && cfg.ROUTES) || {};
-  var LOGIN_PAGE = ROUTES.LOGIN || '/login.html';
 
-  // ============ حالة داخلية ============
+  // ============ مساعدات المسار ============
+  function resolve(path) {
+    if (!path) return '#';
+    if (window.resolveUrl) return window.resolveUrl(path);
+    var base = (cfg && cfg.BASE_PATH) || '';
+    return base + String(path).replace(/^\.?\//, '');
+  }
+
+  function getLoginPage() {
+    var routes = (cfg && cfg.ROUTES) || {};
+    return resolve(routes.LOGIN || 'login.html');
+  }
+
+  function getAdminPage() {
+    var routes = (cfg && cfg.ROUTES) || {};
+    return resolve(routes.ADMIN || 'admin/index.html');
+  }
+
+  function getHomePage() {
+    var routes = (cfg && cfg.ROUTES) || {};
+    return resolve(routes.HOME || 'home.html');
+  }
+
+  // ============ حالة ============
   var state = {
-    currentUser: null,        // { id, email, role, full_name, is_active }
-    authUser: null,           // raw Supabase user
+    currentUser: null,
+    authUser: null,
     initialized: false,
     listeners: [],
-    checking: false
+    checking: null,
+    authChannel: null
   };
 
-  // ============ 1. جلب المستخدم الحالي (كامل) ============
+  // ============ 1. جلب المستخدم الحالي ============
   function getCurrentUser() {
     if (!window.sb) return Promise.resolve(null);
 
     return window.sb.auth.getUser()
       .then(function (res) {
-        if (!res || !res.data || !res.data.user) {
-          return null;
-        }
+        if (!res || !res.data || !res.data.user) return null;
         var user = res.data.user;
         state.authUser = user;
 
-        // جلب بيانات الملف الشخصي من جدول profiles
         return window.sb
           .from('profiles')
           .select('id, email, full_name, phone, role, is_active, created_at')
           .eq('id', user.id)
           .maybeSingle()
           .then(function (r) {
-            if (r.error || !r.data) {
-              return null;
-            }
-            if (r.data.is_active === false) {
-              return null; // حساب معطل
-            }
+            if (r.error || !r.data) return null;
+            if (r.data.is_active === false) return null;
+
             var profile = {
               id: r.data.id,
               email: r.data.email || user.email,
@@ -71,14 +84,12 @@
       });
   }
 
-  // ============ 2. هل المستخدم مسجل دخول؟ ============
+  // ============ 2. هل مسجل دخول ============
   function isAuthenticated() {
-    return getCurrentUser().then(function (u) {
-      return !!u;
-    });
+    return getCurrentUser().then(function (u) { return !!u; });
   }
 
-  // ============ 3. هل المستخدم له دور محدد؟ ============
+  // ============ 3. هل عنده دور ============
   function hasRole(role) {
     return getCurrentUser().then(function (u) {
       if (!u) return false;
@@ -87,27 +98,27 @@
     });
   }
 
-  // ============ 4. هل المستخدم أدمن (أي نوع)؟ ============
   function isAdmin() {
     return hasRole(['super_admin', 'admin', 'committee_manager']);
   }
 
-  // ============ 5. هل المستخدم سوبر أدمن؟ ============
   function isSuperAdmin() {
     return hasRole('super_admin');
   }
 
-  // ============ 6. إعادة التوجيه للـ login ============
+  // ============ 4. Redirect to Login ============
   function redirectToLogin() {
     var currentPath = window.location.pathname + window.location.search;
-    // متحولش لو أصلاً في login
+
     if (currentPath.indexOf('login.html') !== -1) return;
 
+    var loginUrl = getLoginPage();
     var next = encodeURIComponent(currentPath);
-    window.location.href = LOGIN_PAGE + '?next=' + next;
+    var sep = loginUrl.indexOf('?') !== -1 ? '&' : '?';
+    window.location.href = loginUrl + sep + 'next=' + next;
   }
 
-  // ============ 7. إعادة التوجيه لصفحة آمنة ============
+  // ============ 5. Redirect to Safe ============
   function redirectToSafe(user) {
     if (!user) {
       redirectToLogin();
@@ -115,49 +126,33 @@
     }
 
     var role = user.role;
-    var dest;
-
     if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-      dest = ROUTES.ADMIN || '/admin/index.html';
+      window.location.href = getAdminPage();
     } else {
-      dest = ROUTES.HOME || '/home.html';
+      window.location.href = getHomePage();
     }
-
-    window.location.href = dest;
   }
 
-  // ============ 8. حماية الصفحة (الوظيفة الأساسية) ============
-  // allowedRoles: مصفوفة الأدوار المسموحة (أو null = أي مسجل دخول)
-  // options: { redirect: 'login' | 'safe', showLoader: true }
+  // ============ 6. Guard ============
   function guard(allowedRoles, options) {
     options = options || {};
     var redirectMode = options.redirect || 'login';
 
-    if (state.checking) {
-      // لو فيه فحص جاري، ارجع Promise موجود
-      return state.checking;
-    }
+    if (state.checking) return state.checking;
 
-    // إخفاء المحتوى مؤقتاً لمنع flash
     hideBody();
 
     state.checking = getCurrentUser().then(function (user) {
       state.checking = null;
 
-      // (أ) مفيش مستخدم → اروح login
       if (!user) {
-        if (redirectMode === 'login') {
-          redirectToLogin();
-        } else {
-          redirectToSafe(null);
-        }
+        if (redirectMode === 'login') redirectToLogin();
+        else redirectToSafe(null);
         return null;
       }
 
-      // (ب) فيه مستخدم — اتحقق من الدور
       if (allowedRoles && allowedRoles.length > 0) {
         if (allowedRoles.indexOf(user.role) === -1) {
-          // مش مصرح — اروح لصفحة آمنة
           showUnauthorizedMessage(user);
           setTimeout(function () {
             redirectToSafe(user);
@@ -166,7 +161,6 @@
         }
       }
 
-      // (ج) كل حاجة تمام — اعرض المحتوى
       showBody();
       notifyAuthReady(user);
       logDebug('Access granted:', user.email, '(', user.role, ')');
@@ -175,35 +169,27 @@
     }).catch(function (err) {
       state.checking = null;
       logDebug('Guard error:', err.message);
-      if (redirectMode === 'login') {
-        redirectToLogin();
-      } else {
-        redirectToSafe(null);
-      }
+      if (redirectMode === 'login') redirectToLogin();
+      else redirectToSafe(null);
       return null;
     });
 
     return state.checking;
   }
 
-  // ============ 9. حماية خاصة للأدمن ============
+  // ============ 7. Guard presets ============
   function guardAdmin(options) {
     return guard(['super_admin', 'admin', 'committee_manager'], options);
   }
 
-  // ============ 10. حماية خاصة للسوبر أدمن ============
   function guardSuperAdmin(options) {
     return guard(['super_admin'], options);
   }
 
-  // ============ 11. حماية للأكاديميات (بوابة الأكاديمية) ============
   function guardAcademy(options) {
-    // في المرحلة الأولى، الأكاديميات مش بتسجل دخول
-    // لما نضيف الحسابات، هيتعدل هنا
     return guard(null, options);
   }
 
-  // ============ 12. حماية للصفحات العامة (بدون تحقق) ============
   function optional() {
     showBody();
     return getCurrentUser().then(function (user) {
@@ -212,14 +198,13 @@
     });
   }
 
-  // ============ 13. إخفاء/إظهار الـ body ============
+  // ============ 8. Body visibility ============
   function hideBody() {
     if (document.body) {
       document.body.style.visibility = 'hidden';
     } else {
-      // لو الـ body لسه ما اتحملش، نستنى
       document.addEventListener('DOMContentLoaded', function () {
-        document.body.style.visibility = 'hidden';
+        if (document.body) document.body.style.visibility = 'hidden';
       }, { once: true });
     }
   }
@@ -230,9 +215,8 @@
     }
   }
 
-  // ============ 14. عرض رسالة عدم التصريح ============
+  // ============ 9. Unauthorized message ============
   function showUnauthorizedMessage(user) {
-    // نعرض الرسالة فوق المحتوى المخفي
     var msg = document.createElement('div');
     msg.style.cssText = [
       'position:fixed',
@@ -251,38 +235,32 @@
     ].join(';');
 
     msg.innerHTML = '' +
-      '<div style="font-size:64px;margin-bottom:16px;">🔒</div>' +
-      '<h2 style="font-size:24px;margin-bottom:8px;font-weight:700;">غير مصرح لك بالوصول</h2>' +
-      '<p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;">' +
-      'هذه الصفحة مخصصة لـ ' + formatRolesDisplay() +
+      '<div style="width:80px;height:80px;border-radius:50%;background:var(--error-soft);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--error);margin-bottom:24px;font-weight:700;">&#10005;</div>' +
+      '<h2 style="font-size:24px;margin-bottom:12px;font-weight:700;">غير مصرح لك بالوصول</h2>' +
+      '<p style="color:var(--text-secondary);font-size:14px;margin-bottom:20px;">' +
+        'هذه الصفحة مخصصة للمستخدمين المصرح لهم فقط' +
       '</p>' +
       '<p style="color:var(--text-muted);font-size:13px;">' +
-      'دورك الحالي: <strong>' + escapeHtml(translateRole(user.role)) + '</strong>' +
+        'دورك الحالي: <strong style="color:var(--primary);">' + escapeHtml(translateRole(user.role)) + '</strong>' +
       '</p>' +
-      '<p style="color:var(--text-muted);font-size:13px;margin-top:16px;">' +
-      'جاري تحويلك للصفحة المناسبة...' +
+      '<p style="color:var(--text-muted);font-size:13px;margin-top:20px;">' +
+        'جاري تحويلك للصفحة المناسبة...' +
       '</p>';
 
     document.body.appendChild(msg);
   }
 
-  function formatRolesDisplay() {
-    return 'المستخدمين المصرح لهم';
-  }
-
-  // ============ 15. تسجيل الخروج ============
+  // ============ 10. Logout ============
   function logout() {
-    // نوقف الـ session heartbeat أولاً
     if (window.SessionManager && window.SessionManager.stop) {
       window.SessionManager.stop();
     }
 
     if (!window.sb) {
-      window.location.href = LOGIN_PAGE;
+      window.location.href = getLoginPage();
       return Promise.resolve();
     }
 
-    // تسجيل الحدث في activities
     if (state.currentUser) {
       logActivity('logout', 'تسجيل خروج', {});
     }
@@ -291,14 +269,14 @@
       .then(function () {
         state.currentUser = null;
         state.authUser = null;
-        window.location.href = LOGIN_PAGE;
+        window.location.href = getLoginPage();
       })
       .catch(function () {
-        window.location.href = LOGIN_PAGE;
+        window.location.href = getLoginPage();
       });
   }
 
-  // ============ 16. تسجيل نشاط ============
+  // ============ 11. Activity log ============
   function logActivity(type, description, details) {
     if (!window.sb || !state.currentUser) return Promise.resolve();
 
@@ -316,7 +294,7 @@
     });
   }
 
-  // ============ 17. الاستماع لتغيير حالة Auth ============
+  // ============ 12. Auth change listener ============
   function onAuthChange(callback) {
     if (!window.sb) return null;
     if (typeof callback !== 'function') return null;
@@ -331,7 +309,6 @@
           state.currentUser = null;
           state.authUser = null;
         } else if (event === 'SIGNED_IN' && session) {
-          // بنحدّث بعد شوية عشان ميتعارضش مع الـ callback
           setTimeout(function () {
             getCurrentUser().then(function (user) {
               if (user) notifyAuthReady(user);
@@ -339,17 +316,11 @@
           }, 100);
         }
 
-        // استدعاء المستمعين
         state.listeners.forEach(function (cb) {
-          try {
-            cb(event, session);
-          } catch (e) {
-            logDebug('Listener error:', e.message);
-          }
+          try { cb(event, session); } catch (e) {}
         });
       });
 
-      // تخزين الـ subscription
       if (result && result.data && result.data.subscription) {
         state.authChannel = result.data.subscription;
       }
@@ -361,7 +332,7 @@
     };
   }
 
-  // ============ 18. إشعار كل الصفحات ببيانات المستخدم ============
+  // ============ 13. Notify ============
   function notifyAuthReady(user) {
     try {
       window.dispatchEvent(new CustomEvent('itws:auth-ready', {
@@ -370,7 +341,7 @@
     } catch (e) {}
   }
 
-  // ============ 19. مساعدات ============
+  // ============ 14. Helpers ============
   function translateRole(role) {
     var map = {
       'super_admin': 'سوبر أدمن',
@@ -397,47 +368,34 @@
     }
   }
 
-  // ============ 20. الواجهة العامة ============
+  // ============ 15. Public API ============
   window.AuthGuard = {
     initialized: true,
 
-    // Core
     getCurrentUser: getCurrentUser,
     isAuthenticated: isAuthenticated,
     hasRole: hasRole,
     isAdmin: isAdmin,
     isSuperAdmin: isSuperAdmin,
 
-    // Guards
     guard: guard,
     guardAdmin: guardAdmin,
     guardSuperAdmin: guardSuperAdmin,
     guardAcademy: guardAcademy,
     optional: optional,
 
-    // Actions
     logout: logout,
     logActivity: logActivity,
     redirectToLogin: redirectToLogin,
     redirectToSafe: redirectToSafe,
 
-    // Listeners
     onAuthChange: onAuthChange,
-
-    // Helpers
     translateRole: translateRole,
 
-    // Utility
-    getUser: function () {
-      return state.currentUser;
-    }
+    getUser: function () { return state.currentUser; }
   };
 
-  // ============ 21. التهيئة التلقائية ============
-  // بندعم السيناريوهين:
-  // 1. لو الصفحة عايزة تتحكم يدوياً → بتنادي AuthGuard.guard()
-  // 2. لو الصفحة محددة data-requires-auth → بيشتغل تلقائي
-
+  // ============ 16. Auto-guard ============
   function autoGuard() {
     if (!document.body) return;
 
@@ -446,9 +404,7 @@
     var requiredRoles = body.getAttribute('data-required-roles');
 
     if (!requiresAuth) {
-      // الصفحة عامة — بس نتأكد إن الـ body ظاهر
       showBody();
-      // نجلب بيانات المستخدم لو مسجل (بس مش إلزامي)
       getCurrentUser().then(function (user) {
         if (user) notifyAuthReady(user);
       });
