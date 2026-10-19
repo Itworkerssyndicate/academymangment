@@ -5,28 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- ============ Meta ============ -->
-  <title>نقابة تكنولوجيا المعلومات والبرمجيات</title>
-  <meta name="description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية - نقابة تكنولوجيا المعلومات والبرمجيات">
+  <title>جاري التحميل...</title>
+  <meta name="description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية">
   <meta name="theme-color" content="#0A0E14">
   
-  <!-- ============ Fonts - Cairo ONLY ============ -->
+  <!-- ============ Fonts (تحميل مبدئي - الخط الديناميكي من AppSettings) ============ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- ============ Theme Bootstrap ============ -->
+  <!-- ============ Settings Defaults ============ -->
+  <script src="assets/js/settings-defaults.js"></script>
+  
+  <!-- ============ Theme Bootstrap (BEFORE CSS) ============ -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
+  
+  <!-- ============ App Settings (يقرأ من localStorage قبل CSS) ============ -->
+  <script src="assets/js/app-settings.js"></script>
   
   <!-- ============ CSS ============ -->
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
   
-  <!-- ============ Custom Splash Styles ============ -->
+  <!-- ============ Splash Styles (ديناميكية) ============ -->
   <style>
     /* ============================================
-       SPLASH SCREEN — Patriotic Dark (وطني داكن) 🇪🇬
+       SPLASH — Dynamic (يقرأ كل حاجة من AppSettings)
        ============================================ */
     
     *, *::before, *::after {
@@ -42,13 +48,12 @@
     }
     
     body {
-      font-family: 'Cairo', 'Segoe UI', sans-serif;
-      background: var(--bg, #0A0E14);
-      color: var(--text, #F8FAFC);
+      font-family: var(--font, 'Cairo', 'Segoe UI', sans-serif);
+      background: var(--bg);
+      color: var(--text);
       direction: rtl;
     }
     
-    /* ============ Splash Container ============ */
     .splash {
       position: fixed;
       inset: 0;
@@ -65,7 +70,7 @@
       pointer-events: none;
     }
     
-    /* ============ Background Layers ============ */
+    /* ============ Background ============ */
     .splash-bg {
       position: absolute;
       inset: 0;
@@ -78,9 +83,9 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 50% 40%, var(--primary-soft, rgba(206,17,38,0.15)) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 80% at 80% 80%, rgba(255,255,255,0.03) 0%, transparent 50%),
-        radial-gradient(ellipse 60% 80% at 20% 20%, var(--primary-soft, rgba(206,17,38,0.08)) 0%, transparent 50%);
+        radial-gradient(ellipse 80% 60% at 50% 40%, var(--primary-soft) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 80%, var(--accent-soft) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 80% at 20% 20%, var(--primary-soft) 0%, transparent 50%);
       animation: bgShift 12s ease-in-out infinite alternate;
     }
     
@@ -93,8 +98,8 @@
       position: absolute;
       inset: 0;
       background-image:
-        linear-gradient(var(--border, rgba(255,255,255,0.04)) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border, rgba(255,255,255,0.04)) 1px, transparent 1px);
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
       background-size: 60px 60px;
       mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 80%);
       -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 80%);
@@ -107,7 +112,6 @@
       50% { opacity: 0.7; }
     }
     
-    /* Particles */
     .splash-particles {
       position: absolute;
       inset: 0;
@@ -117,29 +121,21 @@
     
     .particle {
       position: absolute;
-      width: 3px;
-      height: 3px;
       border-radius: 50%;
-      background: var(--primary, #CE1126);
-      box-shadow: 0 0 6px var(--primary, #CE1126);
+      background: var(--primary);
+      box-shadow: 0 0 6px var(--primary);
       opacity: 0;
       animation: particleFloat 8s linear infinite;
     }
     
     @keyframes particleFloat {
-      0% {
-        opacity: 0;
-        transform: translateY(100vh) translateX(0) scale(0.4);
-      }
+      0% { opacity: 0; transform: translateY(100vh) translateX(0) scale(0.4); }
       10% { opacity: 0.6; }
       90% { opacity: 0.6; }
-      100% {
-        opacity: 0;
-        transform: translateY(-20vh) translateX(var(--drift, 0)) scale(1);
-      }
+      100% { opacity: 0; transform: translateY(-20vh) translateX(var(--drift, 0)) scale(1); }
     }
     
-    /* ============ Main Card ============ */
+    /* ============ Card ============ */
     .splash-card {
       position: relative;
       z-index: 2;
@@ -151,29 +147,20 @@
       max-width: 480px;
       width: calc(100% - 40px);
       background: rgba(19, 24, 32, 0.55);
-      border: 1px solid var(--border, rgba(255,255,255,0.08));
+      border: 1px solid var(--border);
       border-radius: 24px;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      box-shadow:
-        0 20px 60px rgba(0,0,0,0.5),
-        0 0 0 1px var(--border, rgba(255,255,255,0.05)),
-        inset 0 1px 0 rgba(255,255,255,0.05);
+      box-shadow: var(--shadow-lg), 0 0 0 1px var(--border), inset 0 1px 0 rgba(255,255,255,0.05);
       animation: cardIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
     
     @keyframes cardIn {
-      0% {
-        opacity: 0;
-        transform: translateY(30px) scale(0.96);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     
-    /* ============ Logo Section ============ */
+    /* ============ Logo ============ */
     .splash-logo-wrap {
       position: relative;
       width: 140px;
@@ -184,49 +171,36 @@
       margin-bottom: 32px;
     }
     
-    /* Rotating rings */
     .splash-ring {
       position: absolute;
       border-radius: 50%;
-      border: 1px solid var(--primary, #CE1126);
+      border: 1px solid var(--primary);
       opacity: 0;
     }
     
     .splash-ring.ring-1 {
-      width: 140px;
-      height: 140px;
+      width: 140px; height: 140px;
       border-style: dashed;
       animation: ringAppear 1.2s ease forwards 0.1s, ringRotate 20s linear infinite;
       --final-opacity: 0.15;
     }
     
     .splash-ring.ring-2 {
-      width: 120px;
-      height: 120px;
+      width: 120px; height: 120px;
       animation: ringAppear 1.2s ease forwards 0.2s, ringRotateReverse 15s linear infinite;
       --final-opacity: 0.25;
     }
     
     .splash-ring.ring-3 {
-      width: 100px;
-      height: 100px;
+      width: 100px; height: 100px;
       animation: ringAppear 1.2s ease forwards 0.3s;
       --final-opacity: 0.35;
     }
     
-    @keyframes ringAppear {
-      to { opacity: var(--final-opacity, 0.3); }
-    }
+    @keyframes ringAppear { to { opacity: var(--final-opacity, 0.3); } }
+    @keyframes ringRotate { to { transform: rotate(360deg); } }
+    @keyframes ringRotateReverse { to { transform: rotate(-360deg); } }
     
-    @keyframes ringRotate {
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes ringRotateReverse {
-      to { transform: rotate(-360deg); }
-    }
-    
-    /* Hexagon SVG */
     .splash-hexagon {
       position: absolute;
       inset: 0;
@@ -237,38 +211,33 @@
     
     .hex-path {
       fill: none;
-      stroke: var(--primary, #CE1126);
+      stroke: var(--primary);
       stroke-width: 1.5;
       stroke-linecap: round;
       stroke-linejoin: round;
       stroke-dasharray: 500;
       stroke-dashoffset: 500;
       animation: hexDraw 1.8s cubic-bezier(0.65, 0, 0.35, 1) forwards 0.4s;
-      filter: drop-shadow(0 0 8px var(--primary-soft, rgba(206,17,38,0.5)));
+      filter: drop-shadow(0 0 8px var(--primary-soft));
     }
     
-    @keyframes hexDraw {
-      to { stroke-dashoffset: 0; }
-    }
+    @keyframes hexDraw { to { stroke-dashoffset: 0; } }
     
-    /* Logo center */
     .splash-logo-inner {
       position: relative;
       z-index: 2;
       width: 72px;
       height: 72px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary, #CE1126), #8B0A18);
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Cairo', sans-serif;
+      font-family: var(--font, 'Cairo', sans-serif);
       font-size: 24px;
       font-weight: 800;
-      color: #FFFFFF;
-      box-shadow:
-        0 0 0 6px var(--primary-soft, rgba(206,17,38,0.15)),
-        0 8px 32px rgba(206,17,38,0.4);
+      color: var(--primary-text);
+      box-shadow: 0 0 0 6px var(--primary-soft), 0 8px 32px var(--primary-soft);
       overflow: hidden;
       opacity: 0;
       transform: scale(0.6);
@@ -290,14 +259,19 @@
     
     /* ============ Title ============ */
     .splash-title {
-      font-family: 'Cairo', sans-serif;
+      font-family: var(--font, 'Cairo', sans-serif);
       font-size: 22px;
       font-weight: 800;
       line-height: 1.35;
       margin: 0 0 6px 0;
       letter-spacing: -0.3px;
       opacity: 0;
-      background: linear-gradient(90deg, var(--text, #F8FAFC), #FF6B7A, var(--text, #F8FAFC));
+      color: var(--text);
+      animation: titleFade 0.6s ease forwards 1.8s;
+    }
+    
+    .splash-title.shimmer {
+      background: linear-gradient(90deg, var(--text), var(--primary-hover), var(--text));
       background-size: 200% auto;
       -webkit-background-clip: text;
       background-clip: text;
@@ -305,27 +279,23 @@
       animation: titleFade 0.6s ease forwards 1.8s, shimmer 4s linear infinite 2.4s;
     }
     
-    @keyframes titleFade {
-      to { opacity: 1; }
-    }
-    
+    @keyframes titleFade { to { opacity: 1; } }
     @keyframes shimmer {
       0% { background-position: 200% center; }
       100% { background-position: -200% center; }
     }
     
     .splash-subtitle {
-      font-family: 'Cairo', sans-serif;
+      font-family: var(--font, 'Cairo', sans-serif);
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-muted, #64748B);
+      color: var(--text-muted);
       margin: 0 0 24px 0;
       letter-spacing: 0.5px;
       opacity: 0;
       animation: titleFade 0.6s ease forwards 2s;
     }
     
-    /* Divider */
     .splash-divider {
       display: flex;
       align-items: center;
@@ -338,19 +308,19 @@
     .splash-divider-line {
       width: 40px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, var(--primary, #CE1126));
+      background: linear-gradient(90deg, transparent, var(--primary));
     }
     
     .splash-divider-line:last-child {
-      background: linear-gradient(90deg, var(--primary, #CE1126), transparent);
+      background: linear-gradient(90deg, var(--primary), transparent);
     }
     
     .splash-divider-diamond {
       width: 6px;
       height: 6px;
-      background: var(--primary, #CE1126);
+      background: var(--primary);
       transform: rotate(45deg);
-      box-shadow: 0 0 8px var(--primary, #CE1126);
+      box-shadow: 0 0 8px var(--primary);
     }
     
     /* ============ Progress ============ */
@@ -378,19 +348,19 @@
     
     .progress-bg {
       fill: none;
-      stroke: var(--border, rgba(255,255,255,0.08));
+      stroke: var(--border);
       stroke-width: 3;
     }
     
     .progress-fill {
       fill: none;
-      stroke: var(--primary, #CE1126);
+      stroke: var(--primary);
       stroke-width: 3;
       stroke-linecap: round;
       stroke-dasharray: 176;
       stroke-dashoffset: 176;
       transition: stroke-dashoffset 0.4s ease;
-      filter: drop-shadow(0 0 4px var(--primary, #CE1126));
+      filter: drop-shadow(0 0 4px var(--primary));
     }
     
     .progress-text {
@@ -399,16 +369,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Cairo', sans-serif;
+      font-family: var(--font, 'Cairo', sans-serif);
       font-size: 14px;
       font-weight: 700;
-      color: var(--primary, #CE1126);
+      color: var(--primary);
     }
     
     .splash-progress-bar {
       width: 100%;
       height: 2px;
-      background: var(--border, rgba(255,255,255,0.08));
+      background: var(--border);
       border-radius: 999px;
       overflow: hidden;
     }
@@ -416,16 +386,16 @@
     .splash-progress-bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #8B0A18, var(--primary, #CE1126));
+      background: linear-gradient(90deg, var(--primary-hover), var(--primary));
       border-radius: 999px;
       transition: width 0.4s ease;
-      box-shadow: 0 0 10px var(--primary, #CE1126);
+      box-shadow: 0 0 10px var(--primary);
     }
     
     .splash-status {
-      font-family: 'Cairo', sans-serif;
+      font-family: var(--font, 'Cairo', sans-serif);
       font-size: 12px;
-      color: var(--text-muted, #64748B);
+      color: var(--text-muted);
       letter-spacing: 0.5px;
       min-height: 18px;
       display: flex;
@@ -440,7 +410,7 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--primary, #CE1126);
+      background: var(--primary);
       animation: statusPulse 1.4s ease-in-out infinite;
     }
     
@@ -476,89 +446,88 @@
       content: "";
       width: 40px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, var(--primary, #CE1126), transparent);
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
     }
     
     .splash-footer-icon {
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background: var(--primary, #CE1126);
+      background: var(--primary);
     }
     
     .splash-footer-name {
-      font-family: 'Cairo', sans-serif;
+      font-family: var(--font, 'Cairo', sans-serif);
       font-size: 11px;
-      color: var(--text-muted, #64748B);
+      color: var(--text-muted);
       letter-spacing: 1.5px;
       margin-bottom: 4px;
     }
     
     .splash-footer-president {
-      font-family: 'Cairo', sans-serif;
+      font-family: var(--font, 'Cairo', sans-serif);
       font-size: 13px;
       font-weight: 600;
-      color: var(--text-secondary, #94A3B8);
+      color: var(--text-secondary);
     }
     
     .splash-footer-president span {
-      color: var(--primary, #CE1126);
+      color: var(--primary);
       font-weight: 700;
+    }
+    
+    /* ============ Animation Level Modifiers ============ */
+    body.anim-reduced *,
+    body.anim-reduced *::before,
+    body.anim-reduced *::after {
+      animation-duration: 0.4s !important;
+      animation-iteration-count: 1 !important;
+    }
+    
+    body.anim-none *,
+    body.anim-none *::before,
+    body.anim-none *::after {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    
+    body.anim-none .splash-particles,
+    body.anim-none .splash-grid {
+      display: none !important;
+    }
+    
+    /* ============ Hidden Components ============ */
+    .splash-hexagon.hidden-component,
+    .splash-ring.hidden-component,
+    .splash-particles.hidden-component,
+    .splash-progress-circular.hidden-component,
+    .splash-progress-bar.hidden-component,
+    .splash-status.hidden-component,
+    .splash-footer.hidden-component,
+    .splash-logo-wrap.hidden-component {
+      display: none !important;
     }
     
     /* ============ Responsive ============ */
     @media (max-width: 480px) {
-      .splash-card {
-        padding: 36px 24px;
-        border-radius: 20px;
-      }
-      
-      .splash-logo-wrap {
-        width: 120px;
-        height: 120px;
-        margin-bottom: 24px;
-      }
-      
+      .splash-card { padding: 36px 24px; border-radius: 20px; }
+      .splash-logo-wrap { width: 120px; height: 120px; margin-bottom: 24px; }
       .splash-ring.ring-1 { width: 120px; height: 120px; }
       .splash-ring.ring-2 { width: 100px; height: 100px; }
       .splash-ring.ring-3 { width: 84px; height: 84px; }
-      
-      .splash-logo-inner {
-        width: 60px;
-        height: 60px;
-        font-size: 20px;
-      }
-      
+      .splash-logo-inner { width: 60px; height: 60px; font-size: 20px; }
       .splash-title { font-size: 18px; }
       .splash-subtitle { font-size: 12px; }
-      
       .splash-footer { bottom: 16px; }
     }
     
-    @media (max-height: 600px) {
-      .splash-card { padding: 24px 20px; }
-      .splash-logo-wrap { width: 100px; height: 100px; margin-bottom: 16px; }
-      .splash-ring.ring-1 { width: 100px; height: 100px; }
-      .splash-ring.ring-2 { width: 80px; height: 80px; }
-      .splash-ring.ring-3 { width: 64px; height: 64px; }
-      .splash-logo-inner { width: 52px; height: 52px; font-size: 18px; }
-      .splash-title { font-size: 17px; }
-      .splash-divider { margin-bottom: 16px; }
-    }
-    
-    /* ============ Reduced Motion ============ */
     @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
+      *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
-      }
-      
-      .splash-title {
-        background: none;
-        -webkit-text-fill-color: var(--text, #F8FAFC);
       }
     }
     
@@ -569,8 +538,8 @@
 </head>
 <body>
 
-  <!-- ============ Splash Screen ============ -->
-  <div class="splash" id="splash" role="status" aria-live="polite" aria-label="جاري تحميل المنصة">
+  <!-- ============ Splash ============ -->
+  <div class="splash" id="splash" role="status" aria-live="polite">
     
     <div class="splash-bg"></div>
     <div class="splash-grid"></div>
@@ -578,36 +547,29 @@
     
     <div class="splash-card">
       
-      <!-- Logo -->
-      <div class="splash-logo-wrap">
-        <div class="splash-ring ring-1"></div>
-        <div class="splash-ring ring-2"></div>
-        <div class="splash-ring ring-3"></div>
+      <div class="splash-logo-wrap" id="splashLogoWrap">
+        <div class="splash-ring ring-1" id="splashRing1"></div>
+        <div class="splash-ring ring-2" id="splashRing2"></div>
+        <div class="splash-ring ring-3" id="splashRing3"></div>
         
-        <svg class="splash-hexagon" viewBox="0 0 100 100" aria-hidden="true">
-          <polygon 
-            class="hex-path"
-            points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5"
-          />
+        <svg class="splash-hexagon" id="splashHexagon" viewBox="0 0 100 100" aria-hidden="true">
+          <polygon class="hex-path" points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5"/>
         </svg>
         
         <div class="splash-logo-inner" id="splashLogo">ن.ت</div>
       </div>
       
-      <!-- Title -->
       <h1 class="splash-title" id="splashTitle">نقابة تكنولوجيا المعلومات والبرمجيات</h1>
       <p class="splash-subtitle" id="splashSubtitle">لجنة التحول الرقمي والتدريب</p>
       
-      <!-- Divider -->
       <div class="splash-divider">
         <span class="splash-divider-line"></span>
         <span class="splash-divider-diamond"></span>
         <span class="splash-divider-line"></span>
       </div>
       
-      <!-- Progress -->
       <div class="splash-progress-wrap">
-        <div class="splash-progress-circular">
+        <div class="splash-progress-circular" id="splashProgressCircular">
           <svg viewBox="0 0 64 64" aria-hidden="true">
             <circle class="progress-bg" cx="32" cy="32" r="28"/>
             <circle class="progress-fill" id="progressCircle" cx="32" cy="32" r="28"/>
@@ -615,7 +577,7 @@
           <div class="progress-text" id="progressText">0%</div>
         </div>
         
-        <div class="splash-progress-bar">
+        <div class="splash-progress-bar" id="splashProgressBar">
           <div class="splash-progress-bar-fill" id="progressBar"></div>
         </div>
         
@@ -624,21 +586,20 @@
       
     </div>
     
-    <!-- Footer -->
-    <div class="splash-footer">
+    <div class="splash-footer" id="splashFooter">
       <div class="splash-footer-divider">
         <span class="splash-footer-icon"></span>
       </div>
       <div class="splash-footer-name" id="splashFooterName">النقابة العامة</div>
       <div class="splash-footer-president">
-        النقيب العام: <span id="splashPresidentName">المحاسب / محمود جميل</span>
+        <span id="splashPresidentLabel">النقيب العام:</span>
+        <span id="splashPresidentName">المحاسب / محمود جميل</span>
       </div>
     </div>
     
   </div>
 
   <!-- ============ Scripts ============ -->
-  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/utils.js"></script>
@@ -646,50 +607,130 @@
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/app-title.js"></script>
   
-  <!-- ============ Splash Logic ============ -->
+  <!-- ============ Splash Logic (ديناميكي بالكامل) ============ -->
   <script>
     (function () {
       'use strict';
       
-      var MIN_SPLASH = 2200;
-      var MAX_SPLASH = 6000;
-      var startTime = Date.now();
-      var hasRedirected = false;
-      var currentProgress = 0;
-      var targetProgress = 0;
-      var progressRaf = null;
+      // ============ 1. قراءة الإعدادات من AppSettings ============
+      function readSplashConfig() {
+        var S = window.AppSettings || {
+          get: function (path, fallback) { return fallback; }
+        };
+        
+        return {
+          enabled: S.get('splash.enabled', true),
+          minDuration: S.get('splash.min_duration_ms', 2200),
+          maxDuration: S.get('splash.max_duration_ms', 6000),
+          loadingTexts: S.get('splash.loading_texts', [
+            'جاري التحميل...',
+            'جاري التحقق من الجلسة...',
+            'جاري تجهيز المنصة...',
+            'على وشك الدخول...'
+          ]),
+          showLogo: S.get('splash.show_logo', true),
+          showHexagon: S.get('splash.show_hexagon', true),
+          showRings: S.get('splash.show_rings', true),
+          showParticles: S.get('splash.show_particles', true),
+          showProgressCircular: S.get('splash.show_progress_circular', true),
+          showProgressBar: S.get('splash.show_progress_bar', true),
+          showStatusText: S.get('splash.show_status_text', true),
+          showPresidentFooter: S.get('splash.show_president_footer', true),
+          showShimmer: S.get('splash.show_shimmer', true),
+          particlesCount: S.get('splash.particles_count', 18),
+          animationLevel: S.get('splash.animation_level', 'full'),
+          statusLoading: S.get('splash.status_loading', 'جاري التحميل'),
+          statusRedirecting: S.get('splash.status_redirecting', 'على وشك الدخول...')
+        };
+      }
       
-      var ROUTES = (window.ITWS_CONFIG && window.ITWS_CONFIG.ROUTES) || {
-        HOME: '/home.html',
-        ADMIN: '/admin/index.html'
-      };
+      var cfg = readSplashConfig();
       
-      // ============ Particles ============
+      // ============ 2. تطبيق animation level ============
+      if (cfg.animationLevel === 'reduced') {
+        document.body.classList.add('anim-reduced');
+      } else if (cfg.animationLevel === 'none') {
+        document.body.classList.add('anim-none');
+      }
+      
+      // ============ 3. تطبيق إظهار/إخفاء المكونات ============
+      function applyComponentVisibility() {
+        if (!cfg.showLogo) {
+          var w = document.getElementById('splashLogoWrap');
+          if (w) w.classList.add('hidden-component');
+        }
+        if (!cfg.showHexagon) {
+          var h = document.getElementById('splashHexagon');
+          if (h) h.classList.add('hidden-component');
+        }
+        if (!cfg.showRings) {
+          ['splashRing1', 'splashRing2', 'splashRing3'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.add('hidden-component');
+          });
+        }
+        if (!cfg.showParticles) {
+          var p = document.getElementById('splashParticles');
+          if (p) p.classList.add('hidden-component');
+        }
+        if (!cfg.showProgressCircular) {
+          var pc = document.getElementById('splashProgressCircular');
+          if (pc) pc.classList.add('hidden-component');
+        }
+        if (!cfg.showProgressBar) {
+          var pb = document.getElementById('splashProgressBar');
+          if (pb) pb.classList.add('hidden-component');
+        }
+        if (!cfg.showStatusText) {
+          var st = document.getElementById('splashStatus');
+          if (st) st.classList.add('hidden-component');
+        }
+        if (!cfg.showPresidentFooter) {
+          var ft = document.getElementById('splashFooter');
+          if (ft) ft.classList.add('hidden-component');
+        }
+        if (cfg.showShimmer) {
+          var t = document.getElementById('splashTitle');
+          if (t) t.classList.add('shimmer');
+        }
+      }
+      
+      applyComponentVisibility();
+      
+      // ============ 4. Particles ============
       function spawnParticles() {
+        if (!cfg.showParticles) return;
         var container = document.getElementById('splashParticles');
         if (!container) return;
         
-        var count = 18;
+        var count = cfg.particlesCount;
+        if (cfg.animationLevel === 'none') count = 0;
+        if (cfg.animationLevel === 'reduced') count = Math.min(count, 6);
+        
         for (var i = 0; i < count; i++) {
           var p = document.createElement('div');
           p.className = 'particle';
           p.style.left = (Math.random() * 100) + '%';
           p.style.animationDelay = (Math.random() * 8) + 's';
           p.style.animationDuration = (6 + Math.random() * 6) + 's';
-          
           var size = 1.5 + Math.random() * 3;
           p.style.width = size + 'px';
           p.style.height = size + 'px';
-          
-          var drift = (Math.random() - 0.5) * 100;
-          p.style.setProperty('--drift', drift + 'px');
+          p.style.setProperty('--drift', ((Math.random() - 0.5) * 100) + 'px');
           p.style.opacity = 0.3 + Math.random() * 0.5;
-          
           container.appendChild(p);
         }
       }
       
-      // ============ Progress ============
+      spawnParticles();
+      
+      // ============ 5. Progress ============
+      var currentProgress = 0;
+      var targetProgress = 0;
+      var progressRaf = null;
+      var startTime = Date.now();
+      var hasRedirected = false;
+      
       function setTargetProgress(value) {
         targetProgress = Math.max(0, Math.min(100, value));
         animateProgress();
@@ -697,66 +738,79 @@
       
       function animateProgress() {
         if (progressRaf) return;
-        
         function step() {
           var diff = targetProgress - currentProgress;
-          
           if (Math.abs(diff) < 0.5) {
             currentProgress = targetProgress;
             renderProgress();
             progressRaf = null;
             return;
           }
-          
           currentProgress += diff * 0.15;
           renderProgress();
           progressRaf = requestAnimationFrame(step);
         }
-        
         progressRaf = requestAnimationFrame(step);
       }
       
       function renderProgress() {
-        var value = Math.round(currentProgress);
-        
         var circle = document.getElementById('progressCircle');
         if (circle) {
           var circumference = 2 * Math.PI * 28;
-          var offset = circumference * (1 - currentProgress / 100);
-          circle.style.strokeDashoffset = offset;
+          circle.style.strokeDashoffset = circumference * (1 - currentProgress / 100);
         }
-        
         var text = document.getElementById('progressText');
-        if (text) text.textContent = value + '%';
-        
+        if (text) text.textContent = Math.round(currentProgress) + '%';
         var bar = document.getElementById('progressBar');
         if (bar) bar.style.width = currentProgress + '%';
       }
       
-      // ============ Status ============
+      // ============ 6. Status ============
+      var statusIndex = 0;
+      var statusInterval = null;
+      
       function setStatus(text) {
         var el = document.getElementById('splashStatus');
         if (el) el.textContent = text;
       }
       
-      // ============ Content ============
-      function updateContent(settings) {
-        if (!settings) return;
+      function startStatusCycle() {
+        if (!cfg.showStatusText || !cfg.loadingTexts || cfg.loadingTexts.length === 0) return;
+        setStatus(cfg.loadingTexts[0]);
+        statusInterval = setInterval(function () {
+          statusIndex = (statusIndex + 1) % cfg.loadingTexts.length;
+          setStatus(cfg.loadingTexts[statusIndex]);
+        }, 900);
+      }
+      
+      function stopStatusCycle() {
+        if (statusInterval) {
+          clearInterval(statusInterval);
+          statusInterval = null;
+        }
+      }
+      
+      // ============ 7. Content (اسم النقابة، اللوجو، النقيب) ============
+      function applyIdentityContent() {
+        var S = window.AppSettings || { get: function (p, f) { return f; } };
         
-        var unionName = settings.union_name || 'نقابة تكنولوجيا المعلومات والبرمجيات';
-        var committeeName = settings.committee_name || 'لجنة التحول الرقمي والتدريب';
-        var presidentName = settings.president_name || 'المحاسب / محمود جميل';
-        var logoUrl = settings.logo_url || null;
+        var unionName = S.get('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+        var committeeName = S.get('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
+        var presidentName = S.get('app_identity.president_name', 'المحاسب / محمود جميل');
+        var presidentLabel = S.get('app_identity.president_label', 'النقيب العام:');
+        var logoUrl = S.get('app_identity.logo_url', null);
         
         var titleEl = document.getElementById('splashTitle');
         var subtitleEl = document.getElementById('splashSubtitle');
         var footerNameEl = document.getElementById('splashFooterName');
+        var presidentLabelEl = document.getElementById('splashPresidentLabel');
         var presidentEl = document.getElementById('splashPresidentName');
         var logoEl = document.getElementById('splashLogo');
         
         if (titleEl) titleEl.textContent = unionName;
         if (subtitleEl) subtitleEl.textContent = committeeName;
         if (footerNameEl) footerNameEl.textContent = unionName;
+        if (presidentLabelEl) presidentLabelEl.textContent = presidentLabel;
         if (presidentEl) presidentEl.textContent = presidentName;
         
         if (logoUrl && logoEl) {
@@ -764,27 +818,35 @@
         }
       }
       
-      // ============ Route ============
+      applyIdentityContent();
+      
+      // ============ 8. Route ============
+      var ROUTES = (window.ITWS_CONFIG && window.ITWS_CONFIG.ROUTES) || {};
+      var S = window.AppSettings || { get: function (p, f) { return f; } };
+      var redirectGuest = S.get('behavior.redirect_guest_to', ROUTES.HOME || '/home.html');
+      var redirectAdmin = S.get('behavior.redirect_admin_to', ROUTES.ADMIN || '/admin/index.html');
+      var redirectUser = S.get('behavior.redirect_user_to', ROUTES.HOME || '/home.html');
+      
       function determineRoute(user) {
-        if (!user) return ROUTES.HOME;
-        
+        if (!user) return redirectGuest;
         var role = user.role || 'user';
         if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-          return ROUTES.ADMIN;
+          return redirectAdmin;
         }
-        return ROUTES.HOME;
+        return redirectUser;
       }
       
-      // ============ Redirect ============
+      // ============ 9. Redirect ============
       function redirectTo(url) {
         if (hasRedirected) return;
         hasRedirected = true;
         
+        stopStatusCycle();
+        setStatus(cfg.statusRedirecting);
         setTargetProgress(100);
-        setStatus('على وشك الدخول...');
         
         var elapsed = Date.now() - startTime;
-        var remaining = Math.max(0, MIN_SPLASH - elapsed);
+        var remaining = Math.max(0, cfg.minDuration - elapsed);
         
         setTimeout(function () {
           var splash = document.getElementById('splash');
@@ -796,20 +858,7 @@
         }, remaining);
       }
       
-      // ============ Loaders ============
-      function loadSettings() {
-        if (!window.sb) return Promise.resolve(null);
-        return window.sb
-          .from('settings')
-          .select('value')
-          .eq('key', 'general')
-          .maybeSingle()
-          .then(function (r) {
-            return r.data && r.data.value ? r.data.value : null;
-          })
-          .catch(function () { return null; });
-      }
-      
+      // ============ 10. Loaders ============
       function loadUser() {
         if (window.AuthGuard && window.AuthGuard.getCurrentUser) {
           return window.AuthGuard.getCurrentUser().catch(function () { return null; });
@@ -817,62 +866,61 @@
         return Promise.resolve(null);
       }
       
-      // ============ Boot ============
+      // ============ 11. Boot ============
       function boot() {
-        spawnParticles();
+        // لو الـ splash معطل → نروح على طول
+        if (!cfg.enabled) {
+          redirectTo(redirectGuest);
+          return;
+        }
         
-        setTargetProgress(15);
-        setStatus('جاري تحميل الإعدادات...');
+        startStatusCycle();
+        setTargetProgress(20);
         
-        setTimeout(function () {
-          setTargetProgress(35);
-        }, 300);
+        setTimeout(function () { setTargetProgress(50); }, 400);
         
-        var settingsPromise = loadSettings().then(function (s) {
-          if (s) updateContent(s);
-          setTargetProgress(60);
-          setStatus('جاري التحقق من الجلسة...');
-          return s;
-        });
-        
-        var userPromise = loadUser().then(function (u) {
-          setTargetProgress(80);
-          return u;
-        });
-        
-        Promise.all([settingsPromise, userPromise])
-          .then(function (results) {
-            var user = results[1];
+        loadUser()
+          .then(function (user) {
+            setTargetProgress(85);
             var dest = determineRoute(user);
             
             if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
               console.log('[Splash] User:', user ? user.email + ' (' + user.role + ')' : 'guest');
-              console.log('[Splash] Destination:', dest);
+              console.log('[Splash] Dest:', dest);
             }
-            
-            setStatus('جاري تجهيز المنصة...');
-            setTargetProgress(95);
             
             redirectTo(dest);
           })
           .catch(function (err) {
             console.warn('[Splash] Boot error:', err);
-            redirectTo(ROUTES.HOME);
+            redirectTo(redirectGuest);
           });
         
+        // Safety timeout
         setTimeout(function () {
           if (!hasRedirected) {
             console.warn('[Splash] Max time reached');
-            redirectTo(ROUTES.HOME);
+            redirectTo(redirectGuest);
           }
-        }, MAX_SPLASH);
+        }, cfg.maxDuration);
       }
       
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-      } else {
-        boot();
-      }
+      // ============ 12. Start ============
+      // نستنى AppSettings يجيب البيانات (أو 800ms أقصى)
+      var waited = 0;
+      var waitInterval = setInterval(function () {
+        waited += 100;
+        var isLoaded = window.AppSettings && window.AppSettings.isLoaded && window.AppSettings.isLoaded();
+        
+        if (isLoaded || waited >= 800) {
+          clearInterval(waitInterval);
+          // نعيد قراءة الإعدادات بعد التحميل (لو اتحملت)
+          cfg = readSplashConfig();
+          applyComponentVisibility();
+          applyIdentityContent();
+          boot();
+        }
+      }, 100);
       
     })();
   </script>
