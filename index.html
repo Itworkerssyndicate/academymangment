@@ -4,37 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- ============ Meta ============ -->
-  <title>جاري التحميل...</title>
+  <title>نقابة تكنولوجيا المعلومات والبرمجيات</title>
   <meta name="description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية">
   <meta name="theme-color" content="#0A0E14">
   
-  <!-- ============ Fonts (تحميل مبدئي - الخط الديناميكي من AppSettings) ============ -->
+  <meta property="og:title" content="نقابة تكنولوجيا المعلومات والبرمجيات">
+  <meta property="og:description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ar_EG">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- ============ Settings Defaults ============ -->
   <script src="assets/js/settings-defaults.js"></script>
-  
-  <!-- ============ Theme Bootstrap (BEFORE CSS) ============ -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
-  
-  <!-- ============ App Settings (يقرأ من localStorage قبل CSS) ============ -->
   <script src="assets/js/app-settings.js"></script>
   
-  <!-- ============ CSS ============ -->
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
   
-  <!-- ============ Splash Styles (ديناميكية) ============ -->
   <style>
-    /* ============================================
-       SPLASH — Dynamic (يقرأ كل حاجة من AppSettings)
-       ============================================ */
-    
     *, *::before, *::after {
       box-sizing: border-box;
     }
@@ -48,7 +40,7 @@
     }
     
     body {
-      font-family: var(--font, 'Cairo', 'Segoe UI', sans-serif);
+      font-family: 'Cairo', 'Segoe UI', sans-serif;
       background: var(--bg);
       color: var(--text);
       direction: rtl;
@@ -70,7 +62,6 @@
       pointer-events: none;
     }
     
-    /* ============ Background ============ */
     .splash-bg {
       position: absolute;
       inset: 0;
@@ -135,7 +126,6 @@
       100% { opacity: 0; transform: translateY(-20vh) translateX(var(--drift, 0)) scale(1); }
     }
     
-    /* ============ Card ============ */
     .splash-card {
       position: relative;
       z-index: 2;
@@ -160,7 +150,6 @@
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     
-    /* ============ Logo ============ */
     .splash-logo-wrap {
       position: relative;
       width: 140px;
@@ -233,8 +222,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: var(--font, 'Cairo', sans-serif);
-      font-size: 24px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 20px;
       font-weight: 800;
       color: var(--primary-text);
       box-shadow: 0 0 0 6px var(--primary-soft), 0 8px 32px var(--primary-soft);
@@ -257,9 +246,8 @@
       padding: 8px;
     }
     
-    /* ============ Title ============ */
     .splash-title {
-      font-family: var(--font, 'Cairo', sans-serif);
+      font-family: 'Cairo', sans-serif;
       font-size: 22px;
       font-weight: 800;
       line-height: 1.35;
@@ -286,7 +274,7 @@
     }
     
     .splash-subtitle {
-      font-family: var(--font, 'Cairo', sans-serif);
+      font-family: 'Cairo', sans-serif;
       font-size: 13px;
       font-weight: 500;
       color: var(--text-muted);
@@ -323,7 +311,6 @@
       box-shadow: 0 0 8px var(--primary);
     }
     
-    /* ============ Progress ============ */
     .splash-progress-wrap {
       display: flex;
       flex-direction: column;
@@ -369,7 +356,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: var(--font, 'Cairo', sans-serif);
+      font-family: 'Cairo', sans-serif;
       font-size: 14px;
       font-weight: 700;
       color: var(--primary);
@@ -393,7 +380,7 @@
     }
     
     .splash-status {
-      font-family: var(--font, 'Cairo', sans-serif);
+      font-family: 'Cairo', sans-serif;
       font-size: 12px;
       color: var(--text-muted);
       letter-spacing: 0.5px;
@@ -419,7 +406,6 @@
       50% { opacity: 1; transform: scale(1.2); }
     }
     
-    /* ============ Footer ============ */
     .splash-footer {
       position: absolute;
       bottom: 24px;
@@ -457,7 +443,7 @@
     }
     
     .splash-footer-name {
-      font-family: var(--font, 'Cairo', sans-serif);
+      font-family: 'Cairo', sans-serif;
       font-size: 11px;
       color: var(--text-muted);
       letter-spacing: 1.5px;
@@ -465,7 +451,7 @@
     }
     
     .splash-footer-president {
-      font-family: var(--font, 'Cairo', sans-serif);
+      font-family: 'Cairo', sans-serif;
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -476,7 +462,6 @@
       font-weight: 700;
     }
     
-    /* ============ Animation Level Modifiers ============ */
     body.anim-reduced *,
     body.anim-reduced *::before,
     body.anim-reduced *::after {
@@ -498,26 +483,15 @@
       display: none !important;
     }
     
-    /* ============ Hidden Components ============ */
-    .splash-hexagon.hidden-component,
-    .splash-ring.hidden-component,
-    .splash-particles.hidden-component,
-    .splash-progress-circular.hidden-component,
-    .splash-progress-bar.hidden-component,
-    .splash-status.hidden-component,
-    .splash-footer.hidden-component,
-    .splash-logo-wrap.hidden-component {
-      display: none !important;
-    }
+    .hidden-component { display: none !important; }
     
-    /* ============ Responsive ============ */
     @media (max-width: 480px) {
       .splash-card { padding: 36px 24px; border-radius: 20px; }
       .splash-logo-wrap { width: 120px; height: 120px; margin-bottom: 24px; }
       .splash-ring.ring-1 { width: 120px; height: 120px; }
       .splash-ring.ring-2 { width: 100px; height: 100px; }
       .splash-ring.ring-3 { width: 84px; height: 84px; }
-      .splash-logo-inner { width: 60px; height: 60px; font-size: 20px; }
+      .splash-logo-inner { width: 60px; height: 60px; font-size: 18px; }
       .splash-title { font-size: 18px; }
       .splash-subtitle { font-size: 12px; }
       .splash-footer { bottom: 16px; }
@@ -538,7 +512,6 @@
 </head>
 <body>
 
-  <!-- ============ Splash ============ -->
   <div class="splash" id="splash" role="status" aria-live="polite">
     
     <div class="splash-bg"></div>
@@ -556,7 +529,7 @@
           <polygon class="hex-path" points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5"/>
         </svg>
         
-        <div class="splash-logo-inner" id="splashLogo">ن.ت</div>
+        <div class="splash-logo-inner" id="splashLogo">نت</div>
       </div>
       
       <h1 class="splash-title" id="splashTitle">نقابة تكنولوجيا المعلومات والبرمجيات</h1>
@@ -599,7 +572,6 @@
     
   </div>
 
-  <!-- ============ Scripts ============ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/utils.js"></script>
@@ -607,17 +579,12 @@
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/app-title.js"></script>
   
-  <!-- ============ Splash Logic (ديناميكي بالكامل) ============ -->
   <script>
     (function () {
       'use strict';
       
-      // ============ 1. قراءة الإعدادات من AppSettings ============
       function readSplashConfig() {
-        var S = window.AppSettings || {
-          get: function (path, fallback) { return fallback; }
-        };
-        
+        var S = window.AppSettings || { get: function (p, f) { return f; } };
         return {
           enabled: S.get('splash.enabled', true),
           minDuration: S.get('splash.min_duration_ms', 2200),
@@ -646,14 +613,12 @@
       
       var cfg = readSplashConfig();
       
-      // ============ 2. تطبيق animation level ============
       if (cfg.animationLevel === 'reduced') {
         document.body.classList.add('anim-reduced');
       } else if (cfg.animationLevel === 'none') {
         document.body.classList.add('anim-none');
       }
       
-      // ============ 3. تطبيق إظهار/إخفاء المكونات ============
       function applyComponentVisibility() {
         if (!cfg.showLogo) {
           var w = document.getElementById('splashLogoWrap');
@@ -697,7 +662,6 @@
       
       applyComponentVisibility();
       
-      // ============ 4. Particles ============
       function spawnParticles() {
         if (!cfg.showParticles) return;
         var container = document.getElementById('splashParticles');
@@ -724,7 +688,6 @@
       
       spawnParticles();
       
-      // ============ 5. Progress ============
       var currentProgress = 0;
       var targetProgress = 0;
       var progressRaf = null;
@@ -765,7 +728,6 @@
         if (bar) bar.style.width = currentProgress + '%';
       }
       
-      // ============ 6. Status ============
       var statusIndex = 0;
       var statusInterval = null;
       
@@ -790,7 +752,6 @@
         }
       }
       
-      // ============ 7. Content (اسم النقابة، اللوجو، النقيب) ============
       function applyIdentityContent() {
         var S = window.AppSettings || { get: function (p, f) { return f; } };
         
@@ -820,23 +781,26 @@
       
       applyIdentityContent();
       
-      // ============ 8. Route ============
       var ROUTES = (window.ITWS_CONFIG && window.ITWS_CONFIG.ROUTES) || {};
       var S = window.AppSettings || { get: function (p, f) { return f; } };
-      var redirectGuest = S.get('behavior.redirect_guest_to', ROUTES.HOME || 'academymangment/home.html');
-      var redirectAdmin = S.get('behavior.redirect_admin_to', ROUTES.ADMIN || 'academymangment/admin/index.html');
-      var redirectUser = S.get('behavior.redirect_user_to', ROUTES.HOME || 'academymangment/home.html');
+      var redirectGuest = S.get('behavior.redirect_guest_to', ROUTES.HOME || 'home.html');
+      var redirectAdmin = S.get('behavior.redirect_admin_to', ROUTES.ADMIN || 'admin/index.html');
+      var redirectUser = S.get('behavior.redirect_user_to', ROUTES.HOME || 'home.html');
       
-      function determineRoute(user) {
-        if (!user) return redirectGuest;
-        var role = user.role || 'user';
-        if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-          return redirectAdmin;
-        }
-        return redirectUser;
+      function resolveRoute(path) {
+        if (window.resolveUrl) return window.resolveUrl(path);
+        return path;
       }
       
-      // ============ 9. Redirect ============
+      function determineRoute(user) {
+        if (!user) return resolveRoute(redirectGuest);
+        var role = user.role || 'user';
+        if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
+          return resolveRoute(redirectAdmin);
+        }
+        return resolveRoute(redirectUser);
+      }
+      
       function redirectTo(url) {
         if (hasRedirected) return;
         hasRedirected = true;
@@ -851,14 +815,12 @@
         setTimeout(function () {
           var splash = document.getElementById('splash');
           if (splash) splash.classList.add('fade-out');
-          
           setTimeout(function () {
             window.location.href = url;
           }, 500);
         }, remaining);
       }
       
-      // ============ 10. Loaders ============
       function loadUser() {
         if (window.AuthGuard && window.AuthGuard.getCurrentUser) {
           return window.AuthGuard.getCurrentUser().catch(function () { return null; });
@@ -866,11 +828,9 @@
         return Promise.resolve(null);
       }
       
-      // ============ 11. Boot ============
       function boot() {
-        // لو الـ splash معطل → نروح على طول
         if (!cfg.enabled) {
-          redirectTo(redirectGuest);
+          redirectTo(resolveRoute(redirectGuest));
           return;
         }
         
@@ -883,30 +843,19 @@
           .then(function (user) {
             setTargetProgress(85);
             var dest = determineRoute(user);
-            
-            if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-              console.log('[Splash] User:', user ? user.email + ' (' + user.role + ')' : 'guest');
-              console.log('[Splash] Dest:', dest);
-            }
-            
             redirectTo(dest);
           })
-          .catch(function (err) {
-            console.warn('[Splash] Boot error:', err);
-            redirectTo(redirectGuest);
+          .catch(function () {
+            redirectTo(resolveRoute(redirectGuest));
           });
         
-        // Safety timeout
         setTimeout(function () {
           if (!hasRedirected) {
-            console.warn('[Splash] Max time reached');
-            redirectTo(redirectGuest);
+            redirectTo(resolveRoute(redirectGuest));
           }
         }, cfg.maxDuration);
       }
       
-      // ============ 12. Start ============
-      // نستنى AppSettings يجيب البيانات (أو 800ms أقصى)
       var waited = 0;
       var waitInterval = setInterval(function () {
         waited += 100;
@@ -914,7 +863,6 @@
         
         if (isLoaded || waited >= 800) {
           clearInterval(waitInterval);
-          // نعيد قراءة الإعدادات بعد التحميل (لو اتحملت)
           cfg = readSplashConfig();
           applyComponentVisibility();
           applyIdentityContent();
