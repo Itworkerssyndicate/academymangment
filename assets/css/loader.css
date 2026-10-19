@@ -1,0 +1,116 @@
+/* ============================================
+   [13/50] ITWS Platform - Boot Loader
+   Path: assets/css/loader.css
+   ============================================ */
+/* 💡 شاشة تحميل تظهر عند فتح الصفحة */
+/* 💡 تختفي تلقائياً بعد تطبيق الثيم */
+/* 💡 تمنع ظهور الصفحة بألوان خاطئة (FOUC) */
+/* ============================================ */
+
+/* ===== حاوية الـ Loader ===== */
+.theme-boot-loader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loader, 99999);
+  background: var(--bg, #0A1628);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: auto;
+}
+
+.theme-boot-loader.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ===== الشعار ===== */
+.theme-boot-loader .loader-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary, #C9A84C), var(--accent, #1E40AF));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font, 'Cairo', sans-serif);
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 0 40px var(--primary-soft, rgba(201,168,76,0.3));
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+/* ===== Spinner ===== */
+.theme-boot-loader .loader-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border, rgba(255,255,255,0.1));
+  border-top-color: var(--primary, #C9A84C);
+  border-radius: 50%;
+  animation: loaderSpin 0.8s linear infinite;
+}
+
+/* ===== النص ===== */
+.theme-boot-loader .loader-text {
+  font-family: var(--font, 'Cairo', sans-serif);
+  font-size: 13px;
+  color: var(--text-muted, #64748B);
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+/* ===== الأنيميشن ===== */
+@keyframes loaderSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 30px var(--primary-soft, rgba(201,168,76,0.2));
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px var(--primary-soft, rgba(201,168,76,0.4));
+  }
+}
+
+/* ===== للشاشات الصغيرة ===== */
+@media (max-width: 480px) {
+  .theme-boot-loader .loader-logo {
+    width: 64px;
+    height: 64px;
+    font-size: 26px;
+  }
+
+  .theme-boot-loader .loader-spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 2px;
+  }
+
+  .theme-boot-loader .loader-text {
+    font-size: 12px;
+  }
+}
+
+/* ===== Reduce Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .theme-boot-loader .loader-logo,
+  .theme-boot-loader .loader-spinner {
+    animation: none;
+  }
+}
+
+/* ===== Print (مش هيظهر أبداً) ===== */
+@media print {
+  .theme-boot-loader {
+    display: none !important;
+  }
+}
