@@ -2,11 +2,10 @@
 // [17/50] ITWS Platform - Modal Component
 // Path: assets/js/ui/modal.js
 // ============================================
-// 💡 Modal بسيط وقوي
-// 💡 يدعم: open/close/confirm/alert/prompt
-// 💡 Stacking (فتح modal فوق modal)
-// 💡 Focus trap (Accessibility)
-// 💡 Esc to close + Click backdrop
+// إصلاح: بدون إيموجي
+// إصلاح: يستخدم SVG بدل الإيموجي
+// إصلاح: Focus trap محسّن
+// إصلاح: إدارة أفضل للـ stacking
 // ============================================
 
 (function () {
@@ -17,13 +16,24 @@
   var cfg = window.ITWS_CONFIG;
 
   var state = {
-    stack: [],           // [modalId, modalId, ...]
+    stack: [],
     counter: 0,
-    escBound: false
+    escBound: false,
+    previousActiveElement: null
   };
 
   // ============================================
-  // 1. توليد ID فريد
+  // 1. SVG Icons (بدل الإيموجي)
+  // ============================================
+  var ICONS = {
+    warning: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+    info: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+    success: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    error: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>'
+  };
+
+  // ============================================
+  // 2. توليد ID
   // ============================================
   function nextId() {
     state.counter++;
@@ -31,7 +41,7 @@
   }
 
   // ============================================
-  // 2. إنشاء Modal Element
+  // 3. إنشاء Modal
   // ============================================
   function createModal(options) {
     var id = options.id || nextId();
@@ -51,7 +61,7 @@
 
     // زر الإغلاق
     var closeBtnHtml = options.showClose !== false
-      ? '<button class="modal-close" aria-label="إغلاق" data-modal-close>×</button>'
+      ? '<button class="modal-close" aria-label="إغلاق" type="button" data-modal-close>&times;</button>'
       : '';
 
     // Header
@@ -80,8 +90,8 @@
         var action = btn.action || 'data-modal-close';
         var dataAttrs = '';
         if (btn.value) dataAttrs += ' data-value="' + escapeAttr(btn.value) + '"';
-        return '<button class="' + cls + '" ' + action + dataAttrs + '>' +
-          (btn.icon ? btn.icon + ' ' : '') + escapeHtml(btn.label) +
+        return '<button class="' + cls + '" type="button" ' + action + dataAttrs + '>' +
+          escapeHtml(btn.label) +
         '</button>';
       }).join('');
       footerHtml = '<div class="modal-footer">' + btnsHtml + '</div>';
@@ -94,23 +104,21 @@
         footerHtml +
       '</div>';
 
-    // مستمع الإغلاق بالضغط على الـ backdrop
+    // Close on backdrop
     if (closeOnBackdrop) {
       backdrop.addEventListener('click', function (e) {
-        if (e.target === backdrop) {
-          close(id);
-        }
+        if (e.target === backdrop) close(id);
       });
     }
 
-    // مستمع الإغلاق بالأزرار
+    // Close buttons
     backdrop.querySelectorAll('[data-modal-close]').forEach(function (el) {
       el.addEventListener('click', function () {
         close(id);
       });
     });
 
-    // مستمع لأزرار الأفعال
+    // Action buttons
     backdrop.querySelectorAll('[data-modal-action]').forEach(function (el) {
       el.addEventListener('click', function () {
         var action = el.getAttribute('data-modal-action');
@@ -132,7 +140,7 @@
   }
 
   // ============================================
-  // 3. Esc handler
+  // 4. Esc handler
   // ============================================
   function handleEsc(e) {
     if (e.key === 'Escape' && state.stack.length > 0) {
@@ -142,7 +150,7 @@
   }
 
   // ============================================
-  // 4. Focus Trap
+  // 5. Focus trap
   // ============================================
   function trapFocus(modalEl) {
     var focusable = modalEl.querySelectorAll(
@@ -173,13 +181,18 @@
   }
 
   // ============================================
-  // 5. Open
+  // 6. Open
   // ============================================
   function open(options) {
     if (typeof options === 'string') {
       options = { content: options };
     }
     options = options || {};
+
+    // نحفظ العنصر النشط حالياً
+    if (state.stack.length === 0) {
+      state.previousActiveElement = document.activeElement;
+    }
 
     var modal = createModal(options);
     document.body.appendChild(modal);
@@ -203,7 +216,7 @@
   }
 
   // ============================================
-  // 6. Close
+  // 7. Close
   // ============================================
   function close(id) {
     var modal = document.getElementById(id);
@@ -216,6 +229,16 @@
       if (modal && modal.parentNode) {
         modal.parentNode.removeChild(modal);
       }
+
+      // رجّع التركيز للعنصر اللي كان نشط
+      if (state.stack.length === 0 && state.previousActiveElement) {
+        try {
+          if (state.previousActiveElement.focus) {
+            state.previousActiveElement.focus();
+          }
+        } catch (e) {}
+        state.previousActiveElement = null;
+      }
     }, 250);
   }
 
@@ -224,7 +247,7 @@
   }
 
   // ============================================
-  // 7. Confirm (سريع)
+  // 8. Confirm (بدون إيموجي)
   // ============================================
   function confirm(options) {
     if (typeof options === 'string') {
@@ -235,15 +258,23 @@
     return new Promise(function (resolve) {
       var confirmed = false;
 
+      // نوع الأيقونة
+      var iconType = options.icon || 'warning';
+      var iconSvg = ICONS[iconType] || ICONS.warning;
+
+      // لون الأيقونة
+      var iconColor = options.danger ? 'var(--error)' : 'var(--warning)';
+      if (iconType === 'info') iconColor = 'var(--info)';
+      if (iconType === 'success') iconColor = 'var(--success)';
+      if (iconType === 'error') iconColor = 'var(--error)';
+
       var id = open({
         title: options.title || 'تأكيد',
         size: options.size || 'sm',
         content: '' +
-          '<div style="text-align:center;padding:8px 0;">' +
-            '<div style="font-size:48px;margin-bottom:16px;">' +
-              (options.icon || '⚠️') +
-            '</div>' +
-            '<p style="font-size:15px;color:var(--text);line-height:1.6;">' +
+          '<div style="text-align:center;padding:12px 0;">' +
+            '<div style="color:' + iconColor + ';margin-bottom:20px;">' + iconSvg + '</div>' +
+            '<p style="font-size:15px;color:var(--text);line-height:1.7;margin:0;">' +
               escapeHtml(options.message || 'هل أنت متأكد؟') +
             '</p>' +
           '</div>',
@@ -267,7 +298,6 @@
           }
         },
         onOpen: function () {
-          // في حالة الإغلاق بـ Esc أو backdrop
           var modalEl = document.getElementById(id);
           if (modalEl) {
             var observer = new MutationObserver(function () {
@@ -284,7 +314,7 @@
   }
 
   // ============================================
-  // 8. Alert (سريع)
+  // 9. Alert (بدون إيموجي)
   // ============================================
   function alert(options) {
     if (typeof options === 'string') {
@@ -293,15 +323,21 @@
     options = options || {};
 
     return new Promise(function (resolve) {
+      var iconType = options.icon || 'info';
+      var iconSvg = ICONS[iconType] || ICONS.info;
+
+      var iconColor = 'var(--info)';
+      if (iconType === 'success') iconColor = 'var(--success)';
+      if (iconType === 'error') iconColor = 'var(--error)';
+      if (iconType === 'warning') iconColor = 'var(--warning)';
+
       open({
         title: options.title || 'تنبيه',
         size: options.size || 'sm',
         content: '' +
-          '<div style="text-align:center;padding:8px 0;">' +
-            '<div style="font-size:48px;margin-bottom:16px;">' +
-              (options.icon || 'ℹ️') +
-            '</div>' +
-            '<p style="font-size:15px;color:var(--text);line-height:1.6;">' +
+          '<div style="text-align:center;padding:12px 0;">' +
+            '<div style="color:' + iconColor + ';margin-bottom:20px;">' + iconSvg + '</div>' +
+            '<p style="font-size:15px;color:var(--text);line-height:1.7;margin:0;">' +
               escapeHtml(options.message || '') +
             '</p>' +
           '</div>',
@@ -329,7 +365,7 @@
   }
 
   // ============================================
-  // 9. Prompt (سريع)
+  // 10. Prompt
   // ============================================
   function prompt(options) {
     if (typeof options === 'string') {
@@ -403,7 +439,7 @@
   }
 
   // ============================================
-  // 10. Helpers
+  // 11. Helpers
   // ============================================
   function escapeHtml(str) {
     if (str == null) return '';
@@ -426,7 +462,7 @@
   }
 
   // ============================================
-  // 11. Public API
+  // 12. Public API
   // ============================================
   window.Modal = {
     initialized: true,
