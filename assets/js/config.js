@@ -1,21 +1,32 @@
 // ============================================
-// [3/50] ITWS Platform - Configuration
+// ITWS Platform - Configuration
 // Path: assets/js/config.js
+// ============================================
+// ✅ إصلاح: تثبيت BASE_PATH على /academymangment/
 // ============================================
 
 (function () {
   'use strict';
 
+  // ⚠️ غيّر السطر ده قبل التشغيل
   const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable__9lVaIyTxYzyykQ_AY_u9w_On795zBK';
 
-  // ============ اكتشاف المسار الجذري ============
-  function detectBasePath() {
-    var path = window.location.pathname;
-    if (/\/admin\//.test(path) || /\/portal\//.test(path)) {
-      return '../';
+  // ✅ المسار الأساسي للمشروع على GitHub Pages
+  // غيّره لو اسم المستودع مختلف
+  const DEFAULT_BASE_PATH = '/academymangment/';
+
+  // السماح بتجاوز المسار (للتطوير المحلي)
+  function getBasePath() {
+    if (window.ITWS_BASE_PATH !== undefined) {
+      return window.ITWS_BASE_PATH;
     }
-    return '';
+    // على GitHub Pages نستخدم المسار الثابت
+    if (window.location.hostname.includes('github.io')) {
+      return DEFAULT_BASE_PATH;
+    }
+    // محليًا: نرجع سلسلة فارغة
+    return '/';
   }
 
   window.ITWS_CONFIG = {
@@ -26,7 +37,7 @@
     APP_NAME_EN: 'ITWS',
     APP_VERSION: '1.0.0',
 
-    BASE_PATH: detectBasePath(),
+    BASE_PATH: getBasePath(),
 
     STORAGE_KEYS: {
       THEME: 'itws_theme',
@@ -65,13 +76,15 @@
     DEBUG: false
   };
 
-  // ============ Helper: بناء رابط ============
+  // ✅ دالة resolveUrl المحسّنة
   window.resolveUrl = function (path) {
     if (!path) return '';
     if (/^https?:\/\//.test(path) || path.startsWith('mailto:') || path.startsWith('tel:')) {
       return path;
     }
-    return (window.ITWS_CONFIG.BASE_PATH || '') + path.replace(/^\.?\//, '');
+    var base = window.ITWS_CONFIG.BASE_PATH;
+    if (base && !base.endsWith('/')) base += '/';
+    return base + String(path).replace(/^\.?\//, '');
   };
 
   if (SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) {
