@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>تعديل شهادة | لوحة التحكم</title>
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ CERTIFICATE EDIT ============ */
+    
+    .page-header-admin {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .page-header-left { display: flex; align-items: center; gap: 12px; }
+    .back-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-secondary); display: flex; align-items: center;
+      justify-content: center; text-decoration: none; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .back-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+    .back-btn svg { width: 16px; height: 16px; }
+    .page-header-info h2 { font-size: 22px; font-weight: 800; color: var(--text); margin: 0 0 4px; }
+    .page-header-info p { font-size: 13px; color: var(--text-muted); margin: 0; font-family: 'Courier New', monospace; letter-spacing: 0.5px; }
+    .page-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    
+    /* ============ LOADER / ERROR ============ */
+    .form-loader { display: none; text-align: center; padding: 80px 20px; }
+    .form-loader.show { display: block; }
+    .form-loader-spinner {
+      width: 48px; height: 48px; border: 3px solid var(--border);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .form-error-page {
+      display: none; text-align: center; padding: 72px 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .form-error-page.show { display: block; }
+    .form-error-page-icon {
+      width: 64px; height: 64px; margin: 0 auto 16px;
+      border-radius: 50%; background: var(--error-soft); color: var(--error);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .form-error-page-icon svg { width: 32px; height: 32px; }
+    .form-error-page-title { font-size: 18px; font-weight: 700; color: var(--error); margin: 0 0 6px; }
+    .form-error-page-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
+    
+    /* ============ LAYOUT ============ */
+    .edit-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) { .edit-layout { grid-template-columns: 1fr; } }
+    
+    /* ============ FORM ============ */
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px;
+    }
+    
+    .form-section { margin-bottom: 32px; }
+    .form-section:last-child { margin-bottom: 0; }
+    
+    .form-section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-section-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--primary-soft); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .form-section-icon svg { width: 18px; height: 18px; }
+    .form-section-title { font-size: 15px; font-weight: 700; color: var(--text); margin: 0; }
+    .form-section-desc { font-size: 12px; color: var(--text-muted); margin: 2px 0 0; }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-field { margin-bottom: 16px; }
+    .form-field:last-child { margin-bottom: 0; }
+    
+    .form-field label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text-secondary); margin-bottom: 8px;
+    }
+    .form-field label.required::after { content: " *"; color: var(--error); }
+    
+    .form-field input, .form-field select, .form-field textarea {
+      width: 100%; padding: 11px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-family: inherit;
+      font-size: 14px; outline: none; transition: all 0.2s;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    .form-field input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--surface-hover); }
+    .form-field input::placeholder, .form-field textarea::placeholder { color: var(--text-muted); }
+    .form-field textarea { resize: vertical; min-height: 80px; }
+    .form-field input.mono { font-family: 'Courier New', monospace; letter-spacing: 1px; }
+    
+    .form-field select {
+      appearance: none; cursor: pointer; padding-left: 36px;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: left 12px center;
+    }
+    .form-field select option { background: var(--surface-elevated); color: var(--text); }
+    .form-field select:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+    .form-error { font-size: 11px; color: var(--error); margin-top: 6px; display: none; }
+    .form-error.show { display: block; }
+    
+    /* ============ ISSUER RADIO ============ */
+    .issuer-radio-group {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+    }
+    .issuer-radio-card {
+      padding: 18px 16px; background: var(--bg);
+      border: 2px solid var(--border); border-radius: 12px;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 12px;
+      position: relative;
+    }
+    .issuer-radio-card:hover { border-color: var(--border-strong); }
+    .issuer-radio-card.active { border-color: var(--primary); background: var(--primary-soft); }
+    .issuer-radio-card input[type="radio"] {
+      position: absolute; opacity: 0; pointer-events: none;
+    }
+    .issuer-radio-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--surface); color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.2s;
+    }
+    .issuer-radio-card.active .issuer-radio-icon {
+      background: var(--primary); color: var(--primary-text);
+    }
+    .issuer-radio-icon svg { width: 20px; height: 20px; }
+    .issuer-radio-content { flex: 1; }
+    .issuer-radio-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .issuer-radio-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+    
+    /* Academy selector */
+    .academy-selector {
+      display: none; padding: 16px;
+      background: var(--bg); border: 1px dashed var(--border-strong);
+      border-radius: 12px; margin-top: 12px;
+    }
+    .academy-selector.show { display: block; }
+    
+    /* ============ CODE DISPLAY ============ */
+    .code-display {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 10px;
+      cursor: not-allowed;
+    }
+    .code-value {
+      font-family: 'Courier New', monospace; font-size: 15px;
+      font-weight: 700; color: var(--primary); letter-spacing: 1px;
+      flex: 1;
+    }
+    .code-lock-icon {
+      width: 20px; height: 20px; color: var(--text-muted); flex-shrink: 0;
+    }
+    
+    /* ============ ACTIONS ============ */
+    .form-actions {
+      display: flex; gap: 12px; padding-top: 24px;
+      border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap;
+    }
+    .form-actions .btn { flex: 1; justify-content: center; min-width: 140px; padding: 13px 24px; font-size: 14px; }
+    
+    /* ============ PREVIEW SIDEBAR ============ */
+    .sidebar-sticky { position: sticky; top: 20px; }
+    
+    .preview-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; margin-bottom: 16px;
+    }
+    .preview-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .preview-title {
+      font-size: 14px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .preview-title svg { width: 16px; height: 16px; color: var(--primary); }
+    .preview-badge {
+      font-size: 10px; padding: 2px 8px;
+      background: var(--primary-soft); color: var(--primary);
+      border-radius: 999px; font-weight: 700;
+    }
+    
+    .preview-body { padding: 20px; }
+    
+    /* Certificate Mini Preview */
+    .cert-mini {
+      background: #ffffff; color: #1a1a2e;
+      border: 3px solid var(--primary); border-radius: 12px;
+      padding: 18px; position: relative; overflow: hidden;
+      font-family: 'Cairo', sans-serif; direction: rtl;
+    }
+    .cert-mini::before {
+      content: ""; position: absolute; top: -30px; left: -30px;
+      width: 100px; height: 100px; border-radius: 50%;
+      background: rgba(206, 17, 38, 0.08);
+    }
+    .cert-mini-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 10px; border-bottom: 2px solid var(--primary);
+      margin-bottom: 12px; position: relative; z-index: 1;
+    }
+    .cert-mini-brand {
+      font-size: 11px; font-weight: 800; color: var(--primary);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .cert-mini-brand svg { width: 14px; height: 14px; }
+    .cert-mini-code {
+      font-family: 'Courier New', monospace; font-size: 9px;
+      color: #666; letter-spacing: 0.3px;
+    }
+    .cert-mini-title {
+      text-align: center; font-size: 12px; font-weight: 800;
+      color: var(--primary); margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+    .cert-mini-field {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 10px; margin-bottom: 7px; position: relative; z-index: 1;
+    }
+    .cert-mini-label { font-size: 9px; color: #888; flex-shrink: 0; }
+    .cert-mini-value {
+      font-size: 10px; font-weight: 600; color: #1a1a2e;
+      text-align: left; direction: ltr; word-break: break-word;
+    }
+    .cert-mini-value.empty { color: #bbb; font-style: italic; font-weight: 400; }
+    .cert-mini-value.grade-A { color: #10B981; }
+    .cert-mini-value.grade-B { color: #3B82F6; }
+    .cert-mini-value.grade-C { color: #EAB308; }
+    .cert-mini-value.grade-D { color: #F97316; }
+    .cert-mini-value.grade-F { color: #EF4444; }
+    
+    /* Info Panel */
+    .info-panel {
+      background: var(--warning-soft); border: 1px solid var(--warning);
+      border-radius: 12px; padding: 16px;
+    }
+    .info-panel-header {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; color: var(--warning); margin-bottom: 8px;
+    }
+    .info-panel-header svg { width: 14px; height: 14px; }
+    .info-panel-list {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .info-panel-list li {
+      font-size: 11px; color: var(--text-secondary);
+      line-height: 1.5; padding-right: 14px; position: relative;
+    }
+    .info-panel-list li::before {
+      content: ""; position: absolute; right: 0; top: 6px;
+      width: 4px; height: 4px; border-radius: 50%; background: var(--warning);
+    }
+    
+    /* ============ SUBMIT OVERLAY ============ */
+    .submit-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+      z-index: 9999; align-items: center; justify-content: center;
+    }
+    .submit-overlay.show { display: flex; }
+    .submit-overlay-content {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 40px 48px;
+      text-align: center; max-width: 360px; box-shadow: var(--shadow-lg);
+    }
+    .submit-overlay-spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    .submit-overlay-text { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+      .form-card { padding: 20px; }
+      .issuer-radio-group { grid-template-columns: 1fr; }
+      .form-actions { flex-direction: column-reverse; }
+      .form-actions .btn { width: 100%; }
+      .page-header-admin { flex-direction: column; align-items: stretch; }
+      .page-header-actions { justify-content: flex-start; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body data-requires-auth data-required-roles="super_admin,admin">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">تعديل الشهادة</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="../home.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span>الموقع</span>
+          </a>
+        </div>
+      </div>
+
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-left">
+              <a href="certificates.html" class="back-btn" title="رجوع">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+              </a>
+              <div class="page-header-info">
+                <h2>تعديل الشهادة</h2>
+                <p id="headerCode">—</p>
+              </div>
+            </div>
+            <div class="page-header-actions">
+              <a href="#" class="btn btn-outline btn-sm" id="viewBtn" style="text-decoration:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span>عرض</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="form-loader" id="formLoader">
+            <div class="form-loader-spinner"></div>
+          </div>
+
+          <!-- Error -->
+          <div class="form-error-page" id="formErrorPage">
+            <div class="form-error-page-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <h3 class="form-error-page-title" id="errTitle">الشهادة غير موجودة</h3>
+            <p class="form-error-page-text" id="errText">لم يتم العثور على الشهادة المطلوبة.</p>
+            <a href="certificates.html" class="btn btn-primary">
+              <span>العودة للشهادات</span>
+            </a>
+          </div>
+
+          <!-- Content -->
+          <div class="edit-layout" id="mainContent" style="display:none;">
+            <div>
+              <form id="editForm" novalidate>
+                <div class="form-card">
+
+                  <!-- Section 1: Code (locked) -->
+                  <div class="form-section">
+                    <div class="form-section-header">
+                      <div class="form-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="form-section-title">كود الشهادة</h3>
+                        <p class="form-section-desc">لا يمكن تعديله بعد الإنشاء</p>
+                      </div>
+                    </div>
+
+                    <div class="code-display">
+                      <span class="code-value" id="codeDisplay">—</span>
+                      <svg class="code-lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <!-- Section 2: Issuer -->
+                  <div class="form-section">
+                    <div class="form-section-header">
+                      <div class="form-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="form-section-title">الجهة المُصدرة</h3>
+                        <p class="form-section-desc">حدد من أصدر الشهادة</p>
+                      </div>
+                    </div>
+
+                    <div class="issuer-radio-group">
+                      <label class="issuer-radio-card" data-issuer="union">
+                        <input type="radio" name="issuerType" value="union">
+                        <div class="issuer-radio-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                          </svg>
+                        </div>
+                        <div class="issuer-radio-content">
+                          <div class="issuer-radio-title">النقابة مباشرة</div>
+                          <div class="issuer-radio-desc">شهادة صادرة من النقابة نفسها</div>
+                        </div>
+                      </label>
+
+                      <label class="issuer-radio-card" data-issuer="academy">
+                        <input type="radio" name="issuerType" value="academy">
+                        <div class="issuer-radio-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                          </svg>
+                        </div>
+                        <div class="issuer-radio-content">
+                          <div class="issuer-radio-title">أكاديمية معتمدة</div>
+                          <div class="issuer-radio-desc">شهادة صادرة من أكاديمية</div>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div class="academy-selector" id="academySelector">
+                      <div class="form-row">
+                        <div class="form-field">
+                          <label class="required">الأكاديمية</label>
+                          <select id="academySelect">
+                            <option value="">اختر الأكاديمية</option>
+                          </select>
+                          <div class="form-error" id="academySelectError"></div>
+                        </div>
+                        <div class="form-field">
+                          <label>الفرع</label>
+                          <select id="branchSelect">
+                            <option value="">اختر الفرع (اختياري)</option>
+                          </select>
+                          <div class="form-hint">يمكن تركه فارغاً</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Section 3: Student -->
+                  <div class="form-section">
+                    <div class="form-section-header">
+                      <div class="form-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="form-section-title">بيانات المتدرب</h3>
+                        <p class="form-section-desc">الاسم والرقم القومي</p>
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-field">
+                        <label class="required">اسم المتدرب</label>
+                        <input type="text" id="studentName" required maxlength="100" autocomplete="off">
+                        <div class="form-error" id="studentNameError"></div>
+                      </div>
+                      <div class="form-field">
+                        <label class="required">الرقم القومي</label>
+                        <input type="text" id="studentNationalId" class="mono" required maxlength="14" inputmode="numeric" autocomplete="off">
+                        <div class="form-error" id="studentNationalIdError"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Section 4: Course -->
+                  <div class="form-section">
+                    <div class="form-section-header">
+                      <div class="form-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="form-section-title">بيانات الدورة</h3>
+                        <p class="form-section-desc">الدورة والساعات والتقدير</p>
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="required">اسم الدورة</label>
+                      <input type="text" id="courseName" required maxlength="200" autocomplete="off">
+                      <div class="form-error" id="courseNameError"></div>
+                    </div>
+
+                    <div class="form-row-3">
+                      <div class="form-field">
+                        <label class="required">الساعات</label>
+                        <input type="number" id="courseHours" required min="1" max="500" inputmode="numeric">
+                        <div class="form-error" id="courseHoursError"></div>
+                      </div>
+                      <div class="form-field">
+                        <label class="required">التقدير</label>
+                        <select id="grade" required>
+                          <option value="">اختر</option>
+                          <option value="A+">A+</option>
+                          <option value="A">A</option>
+                          <option value="B+">B+</option>
+                          <option value="B">B</option>
+                          <option value="C+">C+</option>
+                          <option value="C">C</option>
+                          <option value="D">D</option>
+                          <option value="F">F</option>
+                        </select>
+                        <div class="form-error" id="gradeError"></div>
+                      </div>
+                      <div class="form-field">
+                        <label>تاريخ الإتمام</label>
+                        <input type="date" id="completionDate">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Section 5: Status -->
+                  <div class="form-section">
+                    <div class="form-section-header">
+                      <div class="form-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="form-section-title">حالة الشهادة</h3>
+                        <p class="form-section-desc">تفعيل أو تعطيل الظهور</p>
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label>الحالة</label>
+                      <select id="activeStatus">
+                        <option value="true">نشطة (تظهر للعامة)</option>
+                        <option value="false">غير نشطة (مخفية)</option>
+                      </select>
+                      <div class="form-hint">الشهادات غير النشطة لن تظهر في صفحة التحقق</div>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="form-actions">
+                    <a href="certificates.html" class="btn btn-outline" style="text-decoration:none;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                      <span>إلغاء</span>
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                      </svg>
+                      <span>حفظ التغييرات</span>
+                    </button>
+                  </div>
+
+                </div>
+              </form>
+            </div>
+
+            <!-- Preview Sidebar -->
+            <div class="sidebar-sticky">
+              <div class="preview-card">
+                <div class="preview-header">
+                  <div class="preview-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>معاينة مباشرة</span>
+                  </div>
+                  <span class="preview-badge">مباشر</span>
+                </div>
+                <div class="preview-body">
+                  <div class="cert-mini">
+                    <div class="cert-mini-header">
+                      <div class="cert-mini-brand">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span id="miniIssuer">النقابة</span>
+                      </div>
+                      <div class="cert-mini-code" id="miniCode">—</div>
+                    </div>
+                    <div class="cert-mini-title">شهادة اجتياز دورة تدريبية</div>
+                    <div class="cert-mini-field">
+                      <span class="cert-mini-label">المتدرب</span>
+                      <span class="cert-mini-value empty" id="miniStudent">—</span>
+                    </div>
+                    <div class="cert-mini-field">
+                      <span class="cert-mini-label">الرقم القومي</span>
+                      <span class="cert-mini-value empty" id="miniNationalId">—</span>
+                    </div>
+                    <div class="cert-mini-field">
+                      <span class="cert-mini-label">الدورة</span>
+                      <span class="cert-mini-value empty" id="miniCourse">—</span>
+                    </div>
+                    <div class="cert-mini-field">
+                      <span class="cert-mini-label">الساعات</span>
+                      <span class="cert-mini-value empty" id="miniHours">—</span>
+                    </div>
+                    <div class="cert-mini-field">
+                      <span class="cert-mini-label">التقدير</span>
+                      <span class="cert-mini-value empty" id="miniGrade">—</span>
+                    </div>
+                    <div class="cert-mini-field">
+                      <span class="cert-mini-label">الجهة</span>
+                      <span class="cert-mini-value empty" id="miniAcademy">—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-panel">
+                <div class="info-panel-header">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                  <span>ملاحظات مهمة</span>
+                </div>
+                <ul class="info-panel-list">
+                  <li>لا يمكن تعديل كود الشهادة بعد الإنشاء</li>
+                  <li>تغيير الجهة المُصدرة يؤثر على الظهور</li>
+                  <li>الشهادات غير النشطة مخفية من التحقق</li>
+                  <li>كل التغييرات تُسجَّل في سجل النشاطات</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Submit Overlay -->
+  <div class="submit-overlay" id="submitOverlay">
+    <div class="submit-overlay-content">
+      <div class="submit-overlay-spinner"></div>
+      <p class="submit-overlay-text">جاري حفظ التغييرات...</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+  <script src="../assets/js/pages/admin/certificate-edit.js"></script>
+
+</body>
+</html>
