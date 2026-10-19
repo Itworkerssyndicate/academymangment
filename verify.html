@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>التحقق من شهادة | نقابة تكنولوجيا المعلومات</title>
+  <meta name="description" content="تحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة - نقابة تكنولوجيا المعلومات والبرمجيات">
+  <meta name="theme-color" content="#0A0E14">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="التحقق من شهادة - نقابة تكنولوجيا المعلومات">
+  <meta property="og:description" content="تحقق من صحة الشهادات التدريبية المعتمدة">
+  <meta property="og:type" content="website">
+  
+  <!-- Fonts - Cairo ONLY -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Settings Defaults -->
+  <script src="assets/js/settings-defaults.js"></script>
+  
+  <!-- Theme Bootstrap -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/themes-data.js"></script>
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/app-settings.js"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/loader.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  
+  <!-- Verify Custom Styles -->
+  <style>
+    /* ============================================
+       VERIFY PAGE — Official Certificate Verification
+       ============================================ */
+    
+    /* ============ HERO ============ */
+    .verify-hero {
+      padding: 56px 20px 40px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .verify-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 30%, var(--primary-soft) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
+    .verify-hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .verify-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--primary-soft);
+      border: 1px solid var(--primary);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    
+    .verify-badge-icon {
+      font-size: 14px;
+    }
+    
+    .verify-title {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.3;
+      margin: 0 0 12px;
+      letter-spacing: -0.5px;
+    }
+    
+    .verify-title-accent {
+      color: var(--primary);
+    }
+    
+    .verify-subtitle {
+      font-size: clamp(14px, 2vw, 16px);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* ============ SEARCH SECTION ============ */
+    .verify-main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+    
+    .verify-search-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 32px;
+    }
+    
+    .verify-search-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .verify-search-label-icon {
+      font-size: 18px;
+    }
+    
+    .verify-search-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    
+    .verify-search-input {
+      flex: 1;
+      padding: 16px 20px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      min-width: 0;
+    }
+    
+    .verify-search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    
+    .verify-search-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+    
+    .verify-search-btn {
+      padding: 16px 32px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    
+    .verify-search-btn:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px var(--primary-soft);
+    }
+    
+    .verify-search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .verify-search-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 4px;
+    }
+    
+    .verify-search-hint-icon {
+      color: var(--primary);
+    }
+    
+    /* ============ LOADING ============ */
+    .verify-loader {
+      display: none;
+      text-align: center;
+      padding: 48px 20px;
+    }
+    
+    .verify-loader.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .verify-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .verify-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ RESULT ============ */
+    .verify-result {
+      display: none;
+    }
+    
+    .verify-result.show {
+      display: block;
+      animation: slideUp 0.5s ease;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* ============ NOT FOUND / ERROR ============ */
+    .verify-message {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    
+    .verify-message.show {
+      display: block;
+      animation: slideUp 0.4s ease;
+    }
+    
+    .verify-message.error {
+      border-color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .verify-message-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+    
+    .verify-message-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--error);
+      margin: 0 0 8px;
+    }
+    
+    .verify-message-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0;
+    }
+    
+    /* ============ CERTIFICATE CARD ============ */
+    .cert-card {
+      background: var(--surface);
+      border: 2px solid var(--success);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(16, 185, 129, 0.15);
+    }
+    
+    .cert-card.invalid {
+      border-color: var(--error);
+      box-shadow: 0 20px 60px rgba(239, 68, 68, 0.15);
+    }
+    
+    /* ===== Header ===== */
+    .cert-header {
+      padding: 24px 28px;
+      background: linear-gradient(135deg, var(--success-soft), transparent);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .cert-header.invalid {
+      background: linear-gradient(135deg, var(--error-soft), transparent);
+    }
+    
+    .cert-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .cert-seal {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--success);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 6px var(--success-soft), 0 8px 24px rgba(16, 185, 129, 0.3);
+      animation: sealPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .cert-header.invalid .cert-seal {
+      background: var(--error);
+      box-shadow: 0 0 0 6px var(--error-soft), 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+    
+    @keyframes sealPop {
+      0% { opacity: 0; transform: scale(0.5) rotate(-180deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    
+    .cert-header-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+      line-height: 1.3;
+    }
+    
+    .cert-header-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+    
+    /* Status Badge */
+    .cert-status {
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    
+    .cert-status.valid {
+      background: var(--success);
+      color: #fff;
+    }
+    
+    .cert-status.invalid {
+      background: var(--error);
+      color: #fff;
+    }
+    
+    /* ===== Body ===== */
+    .cert-body {
+      padding: 28px;
+    }
+    
+    .cert-section {
+      margin-bottom: 24px;
+    }
+    
+    .cert-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .cert-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .cert-section-title-icon {
+      font-size: 14px;
+    }
+    
+    /* Data Grid */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    
+    .cert-item {
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .cert-item:hover {
+      border-color: var(--border-strong);
+    }
+    
+    .cert-item-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .cert-item-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    
+    .cert-item-value.mono {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+      font-size: 13px;
+    }
+    
+    /* Grade Colors */
+    .cert-grade {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    
+    .cert-grade.excellent { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+    .cert-grade.very-good { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
+    .cert-grade.good { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+    .cert-grade.pass { background: rgba(249, 115, 22, 0.15); color: #F97316; }
+    .cert-grade.fail { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+    
+    /* ===== Actions ===== */
+    .cert-actions {
+      padding: 20px 28px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .cert-action-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 12px 20px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    
+    .cert-action-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .cert-action-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .cert-action-btn.primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: var(--primary-text);
+    }
+    
+    .cert-action-btn.success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+    
+    .cert-action-btn.success:hover {
+      background: #059669;
+      border-color: #059669;
+      color: #fff;
+    }
+    
+    /* ===== Footer ===== */
+    .cert-footer {
+      padding: 16px 28px;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    
+    .cert-footer strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    /* ============ INFO SECTION ============ */
+    .verify-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    
+    .verify-info-card {
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .verify-info-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .verify-info-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .verify-info-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .verify-info-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 640px) {
+      .verify-search-form {
+        flex-direction: column;
+      }
+      
+      .verify-search-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .verify-search-card,
+      .verify-main {
+        padding: 20px 16px;
+      }
+      
+      .cert-header {
+        padding: 20px;
+      }
+      
+      .cert-body {
+        padding: 20px;
+      }
+      
+      .cert-actions {
+        padding: 16px 20px 20px;
+        flex-direction: column;
+      }
+      
+      .cert-action-btn {
+        width: 100%;
+      }
+      
+      .cert-seal {
+        width: 52px;
+        height: 52px;
+        font-size: 26px;
+      }
+      
+      .cert-header-title {
+        font-size: 17px;
+      }
+      
+      .cert-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
+    @media print {
+      .verify-hero,
+      .verify-search-card,
+      .verify-info,
+      .cert-actions,
+      #headerContainer,
+      .theme-fab,
+      .theme-panel {
+        display: none !important;
+      }
+      
+      .cert-card {
+        border-width: 2px;
+        box-shadow: none;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Boot Loader -->
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">ن.ت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <!-- Page Wrapper -->
+  <div class="page-wrapper">
+
+    <!-- Header -->
+    <div id="headerContainer"></div>
+
+    <!-- ============ HERO ============ -->
+    <section class="verify-hero">
+      <div class="verify-hero-inner">
+        <div class="verify-badge">
+          <span class="verify-badge-icon">🔍</span>
+          <span>التحقق الرسمي من الشهادات</span>
+        </div>
+        <h1 class="verify-title">
+          تحقق من <span class="verify-title-accent">صحة الشهادة</span>
+        </h1>
+        <p class="verify-subtitle">
+          أدخل كود الشهادة المطبوع عليها للتحقق من صحتها بشكل فوري
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ MAIN ============ -->
+    <main class="verify-main">
+
+      <!-- ============ SEARCH ============ -->
+      <div class="verify-search-card">
+        <div class="verify-search-label">
+          <span class="verify-search-label-icon">📜</span>
+          <span>كود الشهادة</span>
+        </div>
+        
+        <form class="verify-search-form" id="verifyForm" onsubmit="return false;">
+          <input
+            type="text"
+            class="verify-search-input"
+            id="certCodeInput"
+            placeholder="NTI-2026-XXXXXX"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            maxlength="30"
+            required
+          >
+          <button type="submit" class="verify-search-btn" id="verifyBtn">
+            <span>🔍</span>
+            <span>تحقق</span>
+          </button>
+        </form>
+        
+        <div class="verify-search-hint">
+          <span class="verify-search-hint-icon">💡</span>
+          <span>أدخل الكود المطبوع على الشهادة (مثال: NTI-2026-A7B3C9)</span>
+        </div>
+      </div>
+
+      <!-- ============ LOADING ============ -->
+      <div class="verify-loader" id="verifyLoader">
+        <div class="verify-loader-spinner"></div>
+        <div class="verify-loader-text">جاري التحقق من الشهادة...</div>
+      </div>
+
+      <!-- ============ ERROR MESSAGE ============ -->
+      <div class="verify-message" id="verifyError">
+        <div class="verify-message-icon">❌</div>
+        <h2 class="verify-message-title" id="errorTitle">لم يتم العثور على الشهادة</h2>
+        <p class="verify-message-text" id="errorText">
+          تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الأكاديمية المسؤولة
+        </p>
+      </div>
+
+      <!-- ============ RESULT ============ -->
+      <div class="verify-result" id="verifyResult"></div>
+
+      <!-- ============ INFO CARDS ============ -->
+      <div class="verify-info" id="verifyInfo">
+        <div class="verify-info-card">
+          <div class="verify-info-icon">✅</div>
+          <h3 class="verify-info-title">تحقق فوري</h3>
+          <p class="verify-info-text">النتيجة تظهر مباشرة من قاعدة البيانات الرسمية</p>
+        </div>
+        <div class="verify-info-card">
+          <div class="verify-info-icon">🔒</div>
+          <h3 class="verify-info-title">موثوق 100%</h3>
+          <p class="verify-info-text">الشهادات صادرة عن أكاديميات معتمدة من النقابة</p>
+        </div>
+        <div class="verify-info-card">
+          <div class="verify-info-icon">📱</div>
+          <h3 class="verify-info-title">QR Code</h3>
+          <p class="verify-info-text">امسح الكود على الشهادة للتحقق السريع</p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="home-footer">
+      <div class="home-footer-inner">
+        <div class="footer-bottom">
+          <span id="footerCopyright">© 2026 نقابة تكنولوجيا المعلومات والبرمجيات</span>
+          <span>
+            <span id="footerPresidentLabel">النقيب العام:</span>
+            <span class="footer-president" id="footerPresidentName">المحاسب / محمود جميل</span>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ============ Scripts ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth-guard.js"></script>
+  <script src="assets/js/app-title.js"></script>
+  <script src="assets/js/ui/header.js"></script>
+  <script src="assets/js/ui/modal.js"></script>
+  <script src="assets/js/pages/verify.js"></script>
+
+</body>
+</html>
