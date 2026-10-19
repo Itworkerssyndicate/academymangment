@@ -1,0 +1,66 @@
+# ============================================
+# [1/50] ITWS Platform - Git Ignore
+# ============================================
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js (إذا استُخدم لاحقاً)
+.next/
+out/
+build/
+
+# Environment (⚠️ مهم جداً - لا ترفعها أبداً)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Supabase
+.supabase/
+supabase/.temp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Cache
+.cache/
+.parcel-cache/
+.turbo/
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# OS
+.DS_Store
+desktop.ini
+
+# Optional - لا ترفع مكتبات محلية ضخمة
+assets/vendor/
