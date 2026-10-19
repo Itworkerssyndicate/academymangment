@@ -2,41 +2,41 @@
    [10/50] ITWS Platform - Theme Variables
    Path: assets/css/theme.css
    ============================================ */
-/* 💡 كل المتغيرات دي بتتطبق ديناميكياً من theme.js */
-/* 💡 القيم الافتراضية هنا = formal_dark (fallback) */
-/* 💡 المستخدم مش بيتفاعل مع الملف ده مباشرة */
+/* 💡 القيم الافتراضية = "وطني داكن" 🇪🇬 */
+/* 💡 تُستبدل ديناميكياً من theme.js */
+/* 💡 الخط = Cairo فقط */
 /* ============================================ */
 
 :root {
 
-  /* ===== Primary Colors ===== */
-  --primary: #C9A84C;
-  --primary-hover: #B8953E;
-  --primary-soft: rgba(201, 168, 76, 0.12);
-  --primary-text: #0A1628;
+  /* ===== Primary Colors - أحمر مصر ===== */
+  --primary: #CE1126;
+  --primary-hover: #E63946;
+  --primary-soft: rgba(206, 17, 38, 0.14);
+  --primary-text: #FFFFFF;
 
-  /* ===== Accent Colors ===== */
-  --accent: #1E40AF;
-  --accent-hover: #1E3A8A;
-  --accent-soft: rgba(30, 64, 175, 0.15);
+  /* ===== Accent Colors - أبيض ===== */
+  --accent: #FFFFFF;
+  --accent-hover: #E5E7EB;
+  --accent-soft: rgba(255, 255, 255, 0.08);
 
-  /* ===== Backgrounds ===== */
-  --bg: #0A1628;
-  --bg-alt: #060F1E;
-  --surface: #0F1E35;
-  --surface-elevated: #152641;
-  --surface-hover: #1C3050;
+  /* ===== Backgrounds - أسود عميق ===== */
+  --bg: #0A0E14;
+  --bg-alt: #05080D;
+  --surface: #131820;
+  --surface-elevated: #1C2430;
+  --surface-hover: #252F3D;
 
   /* ===== Text Colors ===== */
   --text: #F8FAFC;
   --text-secondary: #94A3B8;
   --text-muted: #64748B;
-  --text-inverse: #0A1628;
+  --text-inverse: #0A0E14;
 
   /* ===== Borders ===== */
   --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.15);
-  --border-focus: #C9A84C;
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-focus: #CE1126;
 
   /* ===== Status Colors ===== */
   --success: #10B981;
@@ -49,17 +49,17 @@
   --info-soft: rgba(59, 130, 246, 0.12);
 
   /* ===== Shadows ===== */
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
 
-  /* ===== Radii (غير مرتبطة بالثيم) ===== */
+  /* ===== Radii ===== */
   --radius: 10px;
   --radius-sm: 6px;
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  /* ===== Typography ===== */
-  --font: 'IBM Plex Sans Arabic', 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
+  /* ===== Typography - Cairo فقط ===== */
+  --font: 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
   --font-mono: 'Courier New', 'Monaco', monospace;
 
   --text-xs: 12px;
@@ -110,21 +110,19 @@
 }
 
 /* ============================================
-   حالات خاصة بناءً على نوع الثيم
+   حالات خاصة
    ============================================ */
 
-/* الثيمات الداكنة */
 .theme-dark {
   color-scheme: dark;
 }
 
-/* الثيمات الفاتحة */
 .theme-light {
   color-scheme: light;
 }
 
 /* ============================================
-   تحسينات طباعة
+   Print Override
    ============================================ */
 
 @media print {
@@ -144,7 +142,7 @@
 }
 
 /* ============================================
-   Reduce Motion (Accessibility)
+   Reduce Motion
    ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
