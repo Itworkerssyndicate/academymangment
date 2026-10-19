@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>إدارة المستخدمين | لوحة التحكم</title>
+  <meta name="description" content="إدارة المستخدمين والصلاحيات">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ ADMIN USERS ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .page-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ MINI STATS ============ */
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .mini-stat {
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .mini-stat:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .mini-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .mini-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .mini-stat-value.primary { color: var(--primary); }
+    .mini-stat-value.success { color: var(--success); }
+    .mini-stat-value.info { color: var(--info); }
+    .mini-stat-value.warning { color: var(--warning); }
+    
+    /* ============ FILTERS ============ */
+    .filters-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filters-search-wrap {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .filters-search-wrap svg {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    .filters-search-input {
+      width: 100%;
+      padding: 11px 42px 11px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    
+    .filters-search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .filters-search-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .filter-select {
+      padding: 11px 14px;
+      padding-left: 34px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .filter-select option {
+      background: var(--surface-elevated);
+      color: var(--text);
+    }
+    
+    .filter-reset-btn {
+      padding: 11px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    .filter-reset-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .filter-reset-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ USERS GRID ============ */
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .user-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    
+    .user-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    
+    .user-card.inactive {
+      opacity: 0.65;
+    }
+    
+    .user-card.current-user {
+      border-color: var(--info);
+      background: linear-gradient(135deg, var(--info-soft), transparent);
+    }
+    
+    .user-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+      position: relative;
+    }
+    
+    .user-avatar.online::after {
+      content: "";
+      position: absolute;
+      bottom: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--success);
+      border: 2px solid var(--surface);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      margin: 0 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    
+    .user-you-badge {
+      font-size: 9px;
+      padding: 1px 7px;
+      background: var(--info-soft);
+      color: var(--info);
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    
+    .user-email {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .user-role-badge.super_admin {
+      background: rgba(139, 92, 246, 0.15);
+      color: #8B5CF6;
+    }
+    
+    .user-role-badge.admin {
+      background: var(--info-soft);
+      color: var(--info);
+    }
+    
+    .user-role-badge.committee_manager {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    
+    .user-role-badge.user {
+      background: var(--surface-hover);
+      color: var(--text-muted);
+    }
+    
+    .user-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+    }
+    
+    .user-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .user-info-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .user-info-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-info-value.mono {
+      font-family: 'Courier New', monospace;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+    
+    .user-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    
+    .user-status-badge.active {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    
+    .user-status-badge.inactive {
+      background: var(--error-soft);
+      color: var(--error);
+    }
+    
+    .user-status-badge.online {
+      background: var(--info-soft);
+      color: var(--info);
+    }
+    
+    .user-status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    
+    .user-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    
+    .user-last-seen {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      padding: 0;
+    }
+    
+    .icon-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .icon-btn.danger:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .icon-btn.success:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-soft);
+    }
+    
+    .icon-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    
+    .icon-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ LOADING ============ */
+    .admin-loader {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .admin-loader.show { display: block; }
+    
+    .admin-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .admin-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ EMPTY ============ */
+    .admin-empty {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .admin-empty.show { display: block; }
+    
+    .admin-empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .admin-empty-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .admin-empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .admin-empty-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    
+    /* ============ MODAL ============ */
+    .user-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .user-modal-overlay.show {
+      display: flex;
+    }
+    
+    .user-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.3s ease;
+    }
+    
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    
+    .user-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    
+    .user-modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-modal-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--primary);
+    }
+    
+    .user-modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    
+    .user-modal-close:hover {
+      background: var(--error-soft);
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    .user-modal-close svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .user-modal-body {
+      padding: 24px;
+    }
+    
+    .form-field {
+      margin-bottom: 16px;
+    }
+    
+    .form-field:last-child {
+      margin-bottom: 0;
+    }
+    
+    .form-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    
+    .form-field label.required::after {
+      content: " *";
+      color: var(--error);
+    }
+    
+    .form-field input,
+    .form-field select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+      outline: none;
+    }
+    
+    .form-field input:focus,
+    .form-field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .form-field input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .form-field select {
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+      padding-left: 34px;
+    }
+    
+    .form-field select option {
+      background: var(--surface-elevated);
+      color: var(--text);
+    }
+    
+    .form-field input:disabled,
+    .form-field select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    .form-error {
+      font-size: 11px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+    
+    .form-error.show {
+      display: block;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .user-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    
+    .user-modal-footer .btn {
+      min-width: 100px;
+      justify-content: center;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1024px) {
+      .mini-stats { grid-template-columns: repeat(2, 1fr); }
+      .users-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    }
+    
+    @media (max-width: 640px) {
+      .mini-stats { grid-template-columns: 1fr 1fr; }
+      .users-grid { grid-template-columns: 1fr; }
+      .filters-row { flex-direction: column; align-items: stretch; }
+      .filters-search-wrap { min-width: unset; }
+      .page-header-admin { flex-direction: column; align-items: stretch; }
+      .page-header-actions { justify-content: flex-start; }
+      .user-modal { max-width: 100%; }
+      .user-modal-body { padding: 20px; }
+      .user-modal-header, .user-modal-footer { padding: 16px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .user-body { grid-template-columns: 1fr; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<!-- ✅ حماية الصفحة - سوبر أدمن فقط -->
+<body data-requires-auth data-required-roles="super_admin">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">إدارة المستخدمين</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="../home.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span>الموقع</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-info">
+              <h2>المستخدمون</h2>
+              <p>إدارة المستخدمين والأدوار والصلاحيات</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn btn-primary btn-sm" id="addUserBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="8.5" cy="7" r="4"></circle>
+                  <line x1="20" y1="8" x2="20" y2="14"></line>
+                  <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                <span>إضافة مستخدم</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mini Stats -->
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">الإجمالي</div>
+              <div class="mini-stat-value primary" id="miniTotal">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">نشط</div>
+              <div class="mini-stat-value success" id="miniActive">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">أدمن + سوبر</div>
+              <div class="mini-stat-value info" id="miniAdmins">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">متصل الآن</div>
+              <div class="mini-stat-value warning" id="miniOnline">—</div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-card">
+            <div class="filters-row">
+              <div class="filters-search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input 
+                  type="text" 
+                  class="filters-search-input" 
+                  id="searchInput" 
+                  placeholder="بحث بالاسم أو البريد الإلكتروني..."
+                  autocomplete="off"
+                >
+              </div>
+              <select class="filter-select" id="roleFilter">
+                <option value="">كل الأدوار</option>
+                <option value="super_admin">سوبر أدمن</option>
+                <option value="admin">أدمن</option>
+                <option value="committee_manager">إدارة اللجنة</option>
+                <option value="user">مستخدم</option>
+              </select>
+              <select class="filter-select" id="statusFilter">
+                <option value="">كل الحالات</option>
+                <option value="active">نشط</option>
+                <option value="inactive">معطل</option>
+                <option value="online">متصل الآن</option>
+              </select>
+              <select class="filter-select" id="sortFilter">
+                <option value="newest">الأحدث أولاً</option>
+                <option value="oldest">الأقدم أولاً</option>
+                <option value="name">الاسم (أ-ي)</option>
+                <option value="role">الدور</option>
+              </select>
+              <button class="filter-reset-btn" id="resetBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>إعادة تعيين</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="admin-loader" id="adminLoader">
+            <div class="admin-loader-spinner"></div>
+            <div class="admin-loader-text">جاري تحميل المستخدمين...</div>
+          </div>
+
+          <!-- Grid -->
+          <div class="users-grid" id="usersGrid" style="display:none;"></div>
+
+          <!-- Empty -->
+          <div class="admin-empty" id="adminEmpty">
+            <div class="admin-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <h3 class="admin-empty-title">لا يوجد مستخدمون</h3>
+            <p class="admin-empty-text">لم يتم العثور على مستخدمين مطابقين للفلاتر.</p>
+            <button class="filter-reset-btn" id="emptyResetBtn" type="button" style="margin:0 auto;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+              <span>عرض كل المستخدمين</span>
+            </button>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ============ USER MODAL ============ -->
+  <div class="user-modal-overlay" id="userModal">
+    <div class="user-modal">
+      <div class="user-modal-header">
+        <h3 class="user-modal-title" id="modalTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+          </svg>
+          <span id="modalTitleText">إضافة مستخدم جديد</span>
+        </h3>
+        <button class="user-modal-close" id="modalCloseBtn" type="button" aria-label="إغلاق">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="userForm" novalidate>
+        <div class="user-modal-body">
+          <input type="hidden" id="editUserId" value="">
+
+          <div class="form-field">
+            <label class="required">الاسم الكامل</label>
+            <input type="text" id="userFullName" placeholder="الاسم الكامل" required maxlength="100" autocomplete="off">
+            <div class="form-error" id="userFullNameError"></div>
+          </div>
+
+          <div class="form-field">
+            <label class="required">البريد الإلكتروني</label>
+            <input type="email" id="userEmail" placeholder="user@example.com" required autocomplete="off">
+            <div class="form-hint" id="emailHint">سيُستخدم لتسجيل الدخول</div>
+            <div class="form-error" id="userEmailError"></div>
+          </div>
+
+          <div class="form-field" id="passwordField">
+            <label class="required" id="passwordLabel">كلمة المرور</label>
+            <input type="text" id="userPassword" placeholder="8 أحرف على الأقل" autocomplete="new-password">
+            <div class="form-hint">ستُرسل للمستخدم بأمان لتسجيل الدخول</div>
+            <div class="form-error" id="userPasswordError"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="required">الدور / الصلاحية</label>
+              <select id="userRole" required>
+                <option value="">اختر الدور</option>
+                <option value="user">مستخدم</option>
+                <option value="committee_manager">إدارة اللجنة</option>
+                <option value="admin">أدمن</option>
+                <option value="super_admin">سوبر أدمن</option>
+              </select>
+              <div class="form-error" id="userRoleError"></div>
+            </div>
+
+            <div class="form-field">
+              <label class="required">الحالة</label>
+              <select id="userStatus" required>
+                <option value="true">نشط</option>
+                <option value="false">معطل</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="user-modal-footer">
+          <button type="button" class="btn btn-outline" id="cancelBtn">
+            <span>إلغاء</span>
+          </button>
+          <button type="submit" class="btn btn-primary" id="saveUserBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span id="saveUserBtnText">إضافة المستخدم</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+  <script src="../assets/js/pages/admin/users.js"></script>
+
+</body>
+</html>
