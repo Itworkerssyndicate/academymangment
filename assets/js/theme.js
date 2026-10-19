@@ -2,32 +2,34 @@
 // [6/50] ITWS Platform - Theme Manager
 // Path: assets/js/theme.js
 // ============================================
-// 💡 الملف الأهم في نظام الثيمات
-// 💡 يعمل قبل تحميل CSS لمنع FOUC (وميض الألوان)
-// 💡 يزامن مع Supabase للثيم الافتراضي
-// 💡 يستمع لتغيير الافتراضي في الوقت الحقيقي
+// إصلاح: يقرأ من 'theme' key (بدل general)
+// إصلاح: يعتمد على AppSettings كأولوية
+// إصلاح: Event delegation للـ theme picker
+// إصلاح: بدون إيموجي
 // ============================================
 
 (function () {
   'use strict';
 
-  // ============ حماية من التهيئة المكررة ============
   if (window.ThemeManager && window.ThemeManager.booted) return;
 
   var cfg = window.ITWS_CONFIG;
   var STORAGE_KEY = (cfg && cfg.STORAGE_KEYS && cfg.STORAGE_KEYS.THEME) || 'itws_theme';
   var root = document.documentElement;
 
-  // ============ حالة داخلية ============
   var state = {
     currentThemeId: null,
     currentColors: null,
-    source: 'none',        // 'local' | 'default' | 'fallback' | 'none'
+    source: 'none',
     channel: null,
-    initialized: false
+    initialized: false,
+    currentFont: null,
+    realtimeSubscribed: false
   };
 
-  // ============ 1. تطبيق الألوان على DOM ============
+  // ============================================
+  // 1. تطبيق الألوان على DOM
+  // ============================================
   function applyColors(colors) {
     if (!colors || typeof colors !== 'object') return;
     Object.keys(colors).forEach(function (key) {
@@ -38,7 +40,9 @@
     });
   }
 
-  // ============ 2. إضافة/إزالة class بناءً على نوع الثيم ============
+  // ============================================
+  // 2. تطبيق class الثيم (light/dark)
+  // ============================================
   function applyThemeClass(themeObj) {
     if (!themeObj) return;
     var isLight = themeObj.is_light === true;
@@ -47,7 +51,37 @@
     root.setAttribute('data-theme', themeObj.id || '');
   }
 
-  // ============ 3. قراءة الثيم المحلي ============
+  // ============================================
+  // 3. تطبيق الخط ديناميكياً
+  // ============================================
+  function applyFont(fontFamily) {
+    if (!fontFamily) fontFamily = 'Cairo';
+    if (state.currentFont === fontFamily) return;
+    state.currentFont = fontFamily;
+
+    root.style.setProperty('--font', "'" + fontFamily + "', 'Segoe UI', 'Tahoma', sans-serif");
+
+    if (fontFamily !== 'Cairo' && fontFamily !== 'system') {
+      injectFontLink(fontFamily);
+    }
+  }
+
+  function injectFontLink(fontFamily) {
+    var id = 'itws-font-' + fontFamily.replace(/\s+/g, '-').toLowerCase();
+    if (document.getElementById(id)) return;
+
+    var link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=' +
+      encodeURIComponent(fontFamily) +
+      ':wght@300;400;500;600;700;800;900&display=swap';
+    document.head.appendChild(link);
+  }
+
+  // ============================================
+  // 4. قراءة الثيم المحلي
+  // ============================================
   function readLocalTheme() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -60,7 +94,6 @@
     }
   }
 
-  // ============ 4. حفظ الثيم المحلي ============
   function writeLocalTheme(themeId, colors) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -68,19 +101,18 @@
         colors: colors,
         savedAt: Date.now()
       }));
-    } catch (e) {
-      // قد يكون localStorage ممتلئ — نتجاهل بهدوء
-    }
+    } catch (e) {}
   }
 
-  // ============ 5. مسح الثيم المحلي ============
   function clearLocalTheme() {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (e) {}
   }
 
-  // ============ 6. تطبيق الثيم من الكائن الكامل ============
+  // ============================================
+  // 5. تطبيق theme object
+  // ============================================
   function applyThemeObject(themeObj, source) {
     if (!themeObj || !themeObj.colors) return false;
     applyColors(themeObj.colors);
@@ -91,12 +123,24 @@
     return true;
   }
 
-  // ============ 7. Boot — التنفيذ الفوري قبل CSS ============
-  // ده الجزء اللي بيمنع FOUC
+  // ============================================
+  // 6. Boot — قبل CSS (يمنع FOUC)
+  // ============================================
   function boot() {
     if (state.initialized) return;
 
-    // (أ) لو فيه ثيم محلي → طبقه فوراً
+    // (أ) تطبيق الخط فوراً من AppSettings (لو متاح)
+    var fontFromSettings = null;
+    if (window.AppSettings && window.AppSettings.get) {
+      fontFromSettings = window.AppSettings.get('behavior.font_family', 'Cairo');
+    }
+    if (fontFromSettings) {
+      applyFont(fontFromSettings);
+    } else {
+      applyFont('Cairo');
+    }
+
+    // (ب) ثيم محلي
     var local = readLocalTheme();
     if (local && local.colors) {
       applyColors(local.colors);
@@ -112,8 +156,8 @@
       return;
     }
 
-    // (ب) لو مفيش محلي → استخدم fallback من themes-data
-    var fallbackId = window.ITWS_DEFAULT_THEME || 'formal_dark';
+    // (ج) Fallback من themes-data
+    var fallbackId = window.ITWS_DEFAULT_THEME || 'watanii_dark';
     var fallback = window.ITWS_THEMES && window.ITWS_THEMES[fallbackId];
     if (fallback) {
       applyColors(fallback.colors);
@@ -126,37 +170,52 @@
       return;
     }
 
-    // (ج) مفيش ولا حاجة → نسيب CSS الافتراضي في theme.css
     state.source = 'css-default';
     state.initialized = true;
-    logDebug('Boot: using CSS defaults');
   }
 
-  // ============ 8. جلب الثيم الافتراضي من Supabase ============
+  // ============================================
+  // 7. جلب الثيم الافتراضي
+  // ============================================
   function fetchDefaultTheme() {
+    // (أ) من AppSettings (أسرع - localStorage)
+    if (window.AppSettings && window.AppSettings.get) {
+      var themeIdFromSettings = window.AppSettings.get('theme.default_theme', null);
+      if (themeIdFromSettings) {
+        var localDef = window.ITWS_THEMES && window.ITWS_THEMES[themeIdFromSettings];
+        if (localDef) {
+          logDebug('fetchDefaultTheme: from AppSettings', themeIdFromSettings);
+          return Promise.resolve({
+            id: themeIdFromSettings,
+            colors: localDef.colors,
+            is_light: localDef.is_light
+          });
+        }
+      }
+    }
+
+    // (ب) من Supabase (لو AppSettings مش متاح)
     if (!window.sb) return Promise.resolve(null);
 
     return window.sb
       .from('settings')
       .select('value')
-      .eq('key', 'general')
+      .eq('key', 'theme')  // ← إصلاح: 'theme' بدل 'general'
       .maybeSingle()
       .then(function (res) {
-        if (res.error) {
-          logDebug('fetchDefaultTheme error:', res.error.message);
+        if (res.error || !res.data || !res.data.value) {
+          logDebug('fetchDefaultTheme: no theme key in Supabase');
           return null;
         }
-        if (!res.data || !res.data.value) return null;
         var themeId = res.data.value.default_theme;
         if (!themeId) return null;
 
-        // (أ) لو الثيم موجود محلياً في themes-data → استخدمه مباشرة
-        var localDef = window.ITWS_THEMES && window.ITWS_THEMES[themeId];
-        if (localDef) {
-          return { id: themeId, colors: localDef.colors, is_light: localDef.is_light };
+        var localDef2 = window.ITWS_THEMES && window.ITWS_THEMES[themeId];
+        if (localDef2) {
+          return { id: themeId, colors: localDef2.colors, is_light: localDef2.is_light };
         }
 
-        // (ب) لو مش موجود → اجلبه من جدول themes
+        // من جدول themes
         return window.sb
           .from('themes')
           .select('id, colors, is_light')
@@ -172,14 +231,16 @@
           });
       })
       .catch(function (err) {
-        logDebug('fetchDefaultTheme catch:', err.message);
+        logDebug('fetchDefaultTheme error:', err.message);
         return null;
       });
   }
 
-  // ============ 9. المزامنة مع Supabase ============
+  // ============================================
+  // 8. Sync — مزامنة الثيم مع Supabase
+  // ============================================
   function sync() {
-    // لو فيه ثيم محلي → المستخدم اختار بنفسه، متلمسوش
+    // لو المستخدم عنده ثيم محلي → متلمسوش
     if (state.source === 'local') {
       logDebug('Sync: skipped (user has local theme)');
       return Promise.resolve();
@@ -187,7 +248,7 @@
 
     return fetchDefaultTheme().then(function (remote) {
       if (!remote || !remote.colors) {
-        logDebug('Sync: no remote theme, keeping fallback');
+        logDebug('Sync: no remote theme');
         return;
       }
       applyColors(remote.colors);
@@ -195,26 +256,29 @@
       state.currentThemeId = remote.id;
       state.currentColors = remote.colors;
       state.source = 'default';
-      logDebug('Sync: applied remote default theme', remote.id);
       notifyThemeChanged();
+      logDebug('Sync: applied default theme', remote.id);
     });
   }
 
-  // ============ 10. تغيير الثيم (من المستخدم) ============
+  // ============================================
+  // 9. تغيير الثيم (من المستخدم)
+  // ============================================
   function change(themeId) {
     if (!themeId) return false;
 
-    // (أ) لو الثيم موجود في themes-data
+    // (أ) من themes-data
     var themeObj = window.ITWS_THEMES && window.ITWS_THEMES[themeId];
     if (themeObj) {
       applyThemeObject(themeObj, 'local');
       writeLocalTheme(themeObj.id, themeObj.colors);
       updateThemePickerUI(themeObj.id);
       notifyThemeChanged();
+      logDebug('Change: applied local theme', themeId);
       return true;
     }
 
-    // (ب) لو مش موجود محلياً → نحاول نجيبه من Supabase
+    // (ب) من Supabase (لو مش موجود محلياً)
     if (window.sb) {
       window.sb
         .from('themes')
@@ -235,6 +299,7 @@
           writeLocalTheme(remoteTheme.id, remoteTheme.colors);
           updateThemePickerUI(remoteTheme.id);
           notifyThemeChanged();
+          logDebug('Change: applied remote theme', themeId);
         });
       return true;
     }
@@ -242,7 +307,9 @@
     return false;
   }
 
-  // ============ 11. الرجوع للافتراضي ============
+  // ============================================
+  // 10. Reset
+  // ============================================
   function reset() {
     clearLocalTheme();
     state.source = 'none';
@@ -255,8 +322,7 @@
         state.currentColors = remote.colors;
         state.source = 'default';
       } else {
-        // Fallback
-        var fb = window.ITWS_THEMES && window.ITWS_THEMES[window.ITWS_DEFAULT_THEME || 'formal_dark'];
+        var fb = window.ITWS_THEMES && window.ITWS_THEMES[window.ITWS_DEFAULT_THEME || 'watanii_dark'];
         if (fb) {
           applyColors(fb.colors);
           applyThemeClass(fb);
@@ -267,10 +333,13 @@
       }
       updateThemePickerUI(state.currentThemeId);
       notifyThemeChanged();
+      logDebug('Reset to default');
     });
   }
 
-  // ============ 12. تحديث UI اختيار الثيم ============
+  // ============================================
+  // 11. تحديث UI الـ picker
+  // ============================================
   function updateThemePickerUI(activeId) {
     var pickers = document.querySelectorAll('[data-theme-option]');
     if (!pickers.length) return;
@@ -281,7 +350,9 @@
     });
   }
 
-  // ============ 13. إرسال حدث عند التغيير ============
+  // ============================================
+  // 12. إرسال حدث التغيير
+  // ============================================
   function notifyThemeChanged() {
     try {
       window.dispatchEvent(new CustomEvent('itws:theme-changed', {
@@ -294,33 +365,26 @@
     } catch (e) {}
   }
 
-  // ============ 14. الاستماع لتغيير الافتراضي (realtime) ============
+  // ============================================
+  // 13. Realtime subscribe
+  // ============================================
   function subscribe() {
-    if (!window.sb || state.channel) return;
+    if (!window.sb || state.realtimeSubscribed) return;
 
     try {
       state.channel = window.sb
         .channel('itws-theme-realtime')
         .on(
           'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'settings',
-            filter: 'key=eq.general'
-          },
+          { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'key=eq.theme' },
           function (payload) {
-            // لو المستخدم عنده ثيم محلي → متلمسوش
             if (state.source === 'local') {
               logDebug('Realtime: skipped (user has local theme)');
               return;
             }
-            // نجيب الافتراضي الجديد
             var newDefault = payload && payload.new && payload.new.value && payload.new.value.default_theme;
-            if (!newDefault) return;
-            if (newDefault === state.currentThemeId) return;
+            if (!newDefault || newDefault === state.currentThemeId) return;
 
-            // نطبقه
             var localDef = window.ITWS_THEMES && window.ITWS_THEMES[newDefault];
             if (localDef) {
               applyColors(localDef.colors);
@@ -333,7 +397,7 @@
               return;
             }
 
-            // لو مش موجود محلياً → نجيبه من themes
+            // لو مش موجود محلياً → من جدول themes
             window.sb
               .from('themes')
               .select('id, colors, is_light')
@@ -348,19 +412,38 @@
                 };
                 applyThemeObject(themeObj, 'default');
                 notifyThemeChanged();
-                logDebug('Realtime: applied new default theme (from DB)', newDefault);
+                logDebug('Realtime: applied new theme from DB', newDefault);
               });
           }
         )
         .subscribe(function (status) {
           logDebug('Realtime channel:', status);
         });
-    } catch (err) {
-      logDebug('Realtime subscribe failed:', err.message);
+      state.realtimeSubscribed = true;
+    } catch (e) {
+      logDebug('Realtime subscribe error:', e.message);
+    }
+
+    // استمع لتغيير الخط من AppSettings
+    if (window.AppSettings && window.AppSettings.onChange) {
+      window.AppSettings.onChange(function (cache, changedKey) {
+        if (changedKey === 'behavior') {
+          var font = window.AppSettings.get('behavior.font_family', 'Cairo');
+          applyFont(font);
+        }
+        if (changedKey === 'theme') {
+          // لو الثيم الافتراضي اتغير من الإعدادات
+          if (state.source !== 'local') {
+            sync();
+          }
+        }
+      });
     }
   }
 
-  // ============ 15. مساعدات ============
+  // ============================================
+  // 14. Helpers
+  // ============================================
   function logDebug() {
     if (cfg && cfg.DEBUG) {
       console.log.apply(console, ['[ThemeManager]'].concat(Array.prototype.slice.call(arguments)));
@@ -375,7 +458,9 @@
     }
   }
 
-  // ============ 16. الواجهة العامة ============
+  // ============================================
+  // 15. Public API
+  // ============================================
   window.ThemeManager = {
     booted: true,
     boot: boot,
@@ -384,11 +469,13 @@
     reset: reset,
     subscribe: subscribe,
     applyColors: applyColors,
+    applyFont: applyFont,
     getCurrent: function () {
       return {
         id: state.currentThemeId,
         colors: state.currentColors,
-        source: state.source
+        source: state.source,
+        font: state.currentFont
       };
     },
     getCurrentId: function () {
@@ -399,31 +486,36 @@
     }
   };
 
-  // ============ 17. التنفيذ الفوري ============
-  // (١) Boot — قبل أي CSS أو HTML
+  // ============================================
+  // 16. التنفيذ الفوري (قبل CSS)
+  // ============================================
   boot();
 
-  // (٢) عند DOMContentLoaded — نربط الـ pickers
+  // ============================================
+  // 17. بعد DOMContentLoaded
+  // ============================================
   function onDOMReady() {
+    // تحديث الـ picker (لو موجود)
     updateThemePickerUI(state.currentThemeId);
 
-    // ربط الـ pickers
-    document.querySelectorAll('[data-theme-option]').forEach(function (el) {
-      if (el.__themeBound) return;
-      el.__themeBound = true;
-      el.addEventListener('click', function () {
-        var themeId = el.getAttribute('data-theme-option');
-        if (themeId) change(themeId);
-      });
+    // Event delegation — يشتغل مع أزرار ديناميكية
+    document.addEventListener('click', function (e) {
+      var target = e.target.closest ? e.target.closest('[data-theme-option]') : null;
+      if (!target) return;
+
+      var themeId = target.getAttribute('data-theme-option');
+      if (themeId) {
+        change(themeId);
+      }
     });
 
-    // مزامنة مع Supabase
+    // مزامنة + realtime
     sync().then(function () {
       subscribe();
     });
   }
 
-  // (٣) عند تحميل الصفحة — إخفاء loader
+  // إخفاء الـ boot loader
   function hideLoader() {
     var loader = document.getElementById('themeBootLoader');
     if (!loader) return;
@@ -445,7 +537,7 @@
     hideLoader();
   }
 
-  // (٤) أمان إضافي: لو الـ loader لسه موجود بعد 2.5 ثانية → اخفيه
+  // أمان إضافي: إخفاء الـ loader بعد 2.5 ثانية
   setTimeout(hideLoader, 2500);
 
 })();
