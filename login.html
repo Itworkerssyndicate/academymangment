@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>تسجيل الدخول | نقابة تكنولوجيا المعلومات</title>
+  <meta name="description" content="تسجيل الدخول إلى النظام الرسمي للتحقق من الشهادات">
+  <meta name="theme-color" content="#0A0E14">
+  
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="assets/js/settings-defaults.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/themes-data.js"></script>
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+    
+    body {
+      font-family: 'Cairo', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      direction: rtl;
+      overflow-x: hidden;
+    }
+    
+    /* ============ AUTH LAYOUT ============ */
+    .auth-layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Left panel - form */
+    .auth-form-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 24px;
+      position: relative;
+      z-index: 2;
+      background: var(--bg);
+    }
+    
+    .auth-form-wrapper {
+      width: 100%;
+      max-width: 420px;
+    }
+    
+    /* Right panel - branding */
+    .auth-brand-side {
+      position: relative;
+      background: linear-gradient(135deg, var(--surface) 0%, var(--bg-alt) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 48px;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    
+    .auth-brand-side::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 30% 30%, var(--primary-soft) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 70% 80%, var(--accent-soft) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
+    .auth-brand-side::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.4;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%);
+      pointer-events: none;
+    }
+    
+    .brand-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    .brand-logo-wrap {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--primary-text);
+      box-shadow: 
+        0 0 0 8px var(--primary-soft),
+        0 20px 60px var(--primary-soft);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .brand-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 16px;
+    }
+    
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 12px;
+      line-height: 1.35;
+      letter-spacing: -0.5px;
+    }
+    
+    .brand-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin: 0 0 40px;
+      line-height: 1.7;
+    }
+    
+    .brand-features {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: right;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+    
+    .brand-feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    .brand-feature-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    
+    /* ============ FORM ============ */
+    .auth-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .auth-header-logo {
+      display: none;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary-text);
+      overflow: hidden;
+    }
+    
+    .auth-header-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+    
+    .auth-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 8px;
+      line-height: 1.3;
+    }
+    
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+    
+    .auth-alert {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .auth-alert.show { display: block; }
+    
+    .auth-alert.error {
+      background: var(--error-soft);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+    
+    .auth-alert.success {
+      background: var(--success-soft);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+    
+    .auth-alert.info {
+      background: var(--info-soft);
+      border: 1px solid var(--info);
+      color: var(--info);
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .form-field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .input-wrap input {
+      width: 100%;
+      padding: 14px 46px 14px 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+      outline: none;
+      direction: ltr;
+      text-align: left;
+    }
+    
+    .input-wrap input[type="email"] {
+      letter-spacing: 0;
+    }
+    
+    .input-wrap input[type="password"] {
+      letter-spacing: 2px;
+    }
+    
+    .input-wrap input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+      background: var(--surface-elevated);
+    }
+    
+    .input-wrap input::placeholder {
+      color: var(--text-muted);
+      letter-spacing: 0;
+      font-family: 'Cairo', sans-serif;
+      direction: rtl;
+      text-align: right;
+    }
+    
+    .input-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+    
+    .input-wrap input:focus ~ .input-icon {
+      color: var(--primary);
+    }
+    
+    .input-toggle {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .input-toggle:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+    
+    .input-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .form-field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: -4px;
+    }
+    
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    
+    .form-checkbox input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    
+    .form-link {
+      font-size: 13px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    
+    .form-link:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+    
+    .form-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    
+    .form-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px var(--primary-soft);
+    }
+    
+    .form-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .form-submit .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .auth-footer p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0 0 12px;
+    }
+    
+    .auth-footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .auth-footer-link:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .auth-footer-link svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .auth-version {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+    
+    /* ============ PASSWORD STRENGTH ============ */
+    .password-strength {
+      display: none;
+      margin-top: 8px;
+    }
+    
+    .password-strength.show { display: block; }
+    
+    .strength-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    
+    .strength-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: all 0.3s;
+    }
+    
+    .strength-bar-fill.weak { width: 33%; background: var(--error); }
+    .strength-bar-fill.medium { width: 66%; background: var(--warning); }
+    .strength-bar-fill.strong { width: 100%; background: var(--success); }
+    
+    .strength-text {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1024px) {
+      .auth-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .auth-brand-side {
+        display: none;
+      }
+      
+      .auth-header-logo {
+        display: flex;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .auth-form-side {
+        padding: 24px 16px;
+      }
+      
+      .auth-title {
+        font-size: 22px;
+      }
+      
+      .auth-subtitle {
+        font-size: 13px;
+      }
+      
+      .input-wrap input {
+        padding: 13px 44px 13px 14px;
+        font-size: 14px;
+      }
+      
+      .form-submit {
+        padding: 14px;
+        font-size: 14px;
+      }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-layout">
+    
+    <!-- ============ FORM SIDE ============ -->
+    <div class="auth-form-side">
+      <div class="auth-form-wrapper">
+        
+        <div class="auth-header">
+          <div class="auth-header-logo" id="authHeaderLogo">نت</div>
+          <h1 class="auth-title">تسجيل الدخول</h1>
+          <p class="auth-subtitle" id="authSubtitle">مرحباً بك في النظام الرسمي</p>
+        </div>
+        
+        <div class="auth-alert" id="authAlert"></div>
+        
+        <form class="auth-form" id="loginForm" novalidate>
+          
+          <div class="form-field">
+            <label for="emailInput">البريد الإلكتروني</label>
+            <div class="input-wrap">
+              <input 
+                type="email" 
+                id="emailInput" 
+                placeholder="you@example.com" 
+                autocomplete="username"
+                required
+              >
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </div>
+          </div>
+          
+          <div class="form-field">
+            <label for="passwordInput">كلمة المرور</label>
+            <div class="input-wrap">
+              <input 
+                type="password" 
+                id="passwordInput" 
+                placeholder="••••••••" 
+                autocomplete="current-password"
+                required
+              >
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <button 
+                type="button" 
+                class="input-toggle" 
+                id="passwordToggle"
+                aria-label="إظهار كلمة المرور"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-field-row">
+            <label class="form-checkbox">
+              <input type="checkbox" id="rememberMe">
+              <span>تذكرني</span>
+            </label>
+            <a href="#" class="form-link" id="forgotLink">نسيت كلمة المرور؟</a>
+          </div>
+          
+          <button type="submit" class="form-submit" id="loginBtn">
+            <span id="loginBtnText">تسجيل الدخول</span>
+          </button>
+          
+        </form>
+        
+        <div class="auth-footer">
+          <p>هل تمتلك أكاديمية؟</p>
+          <a href="academy-apply.html" class="auth-footer-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>قدم طلب اعتماد</span>
+          </a>
+          <br><br>
+          <a href="home.html" class="auth-footer-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>العودة إلى الرئيسية</span>
+          </a>
+        </div>
+        
+        <div class="auth-version" id="authVersion">الإصدار 1.0</div>
+        
+      </div>
+    </div>
+    
+    <!-- ============ BRAND SIDE ============ -->
+    <div class="auth-brand-side">
+      <div class="brand-content">
+        <div class="brand-logo-wrap" id="brandLogo">نت</div>
+        <h2 class="brand-title" id="brandTitle">نقابة تكنولوجيا المعلومات والبرمجيات</h2>
+        <p class="brand-subtitle" id="brandSubtitle">لجنة التحول الرقمي والتدريب</p>
+        
+        <div class="brand-features">
+          <div class="brand-feature-item">
+            <span class="brand-feature-check">&#10003;</span>
+            <span>التحقق الرسمي من صحة الشهادات التدريبية</span>
+          </div>
+          <div class="brand-feature-item">
+            <span class="brand-feature-check">&#10003;</span>
+            <span>قاعدة بيانات مركزية لجميع الأكاديميات المعتمدة</span>
+          </div>
+          <div class="brand-feature-item">
+            <span class="brand-feature-check">&#10003;</span>
+            <span>نظام اعتماد رسمي يضمن جودة التدريب</span>
+          </div>
+          <div class="brand-feature-item">
+            <span class="brand-feature-check">&#10003;</span>
+            <span>شهادات موثقة مع QR للتحقق السريع</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth-guard.js"></script>
+  <script src="assets/js/app-title.js"></script>
+  
+  <script>
+    (function () {
+      'use strict';
+      
+      var state = {
+        submitting: false,
+        attempts: 0,
+        maxAttempts: 5
+      };
+      
+      function $(id) { return document.getElementById(id); }
+      
+      function setText(id, t) {
+        var el = $(id);
+        if (el) el.textContent = t;
+      }
+      
+      function getSetting(path, fallback) {
+        if (window.AppSettings && window.AppSettings.get) {
+          return window.AppSettings.get(path, fallback);
+        }
+        if (window.ITWS_SETTINGS_DEFAULTS) {
+          var parts = path.split('.');
+          var value = window.ITWS_SETTINGS_DEFAULTS;
+          for (var i = 0; i < parts.length; i++) {
+            if (value && typeof value === 'object') value = value[parts[i]];
+            else { value = undefined; break; }
+          }
+          if (value !== undefined) return value;
+        }
+        return fallback;
+      }
+      
+      function resolve(path) {
+        if (!path) return '#';
+        if (window.resolveUrl) return window.resolveUrl(path);
+        var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
+        return base + String(path).replace(/^\.?\//, '');
+      }
+      
+      function showAlert(message, type) {
+        var el = $('authAlert');
+        if (!el) return;
+        el.textContent = message;
+        el.className = 'auth-alert show ' + (type || 'info');
+        if (type === 'error') {
+          setTimeout(function () {
+            if (el.textContent === message) {
+              el.className = 'auth-alert';
+            }
+          }, 8000);
+        }
+      }
+      
+      function hideAlert() {
+        var el = $('authAlert');
+        if (el) el.className = 'auth-alert';
+      }
+      
+      // ============================================
+      // 1. تطبيق المحتوى الديناميكي
+      // ============================================
+      function applyDynamicContent() {
+        var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+        var committeeName = getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
+        var logoUrl = getSetting('app_identity.logo_url', null);
+        
+        setText('brandTitle', unionName);
+        setText('brandSubtitle', committeeName);
+        
+        if (logoUrl) {
+          var brandLogo = $('brandLogo');
+          if (brandLogo) brandLogo.innerHTML = '<img src="' + logoUrl + '" alt="">';
+          var headerLogo = $('authHeaderLogo');
+          if (headerLogo) headerLogo.innerHTML = '<img src="' + logoUrl + '" alt="">';
+        }
+        
+        // عنوان التبويب
+        if (unionName) {
+          document.title = 'تسجيل الدخول | ' + unionName;
+        }
+      }
+      
+      // ============================================
+      // 2. إظهار/إخفاء كلمة المرور
+      // ============================================
+      function initPasswordToggle() {
+        var toggle = $('passwordToggle');
+        var input = $('passwordInput');
+        if (!toggle || !input) return;
+        
+        toggle.addEventListener('click', function () {
+          var type = input.type === 'password' ? 'text' : 'password';
+          input.type = type;
+          
+          // تحديث الأيقونة
+          if (type === 'text') {
+            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+            toggle.setAttribute('aria-label', 'إخفاء كلمة المرور');
+          } else {
+            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            toggle.setAttribute('aria-label', 'إظهار كلمة المرور');
+          }
+        });
+      }
+      
+      // ============================================
+      // 3. التحقق من البيانات
+      // ============================================
+      function validateForm() {
+        var email = $('emailInput').value.trim();
+        var password = $('passwordInput').value;
+        
+        if (!email) {
+          showAlert('الرجاء إدخال البريد الإلكتروني', 'error');
+          $('emailInput').focus();
+          return null;
+        }
+        
+        if (!window.Utils || !window.Utils.isValidEmail(email)) {
+          // fallback
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showAlert('البريد الإلكتروني غير صحيح', 'error');
+            $('emailInput').focus();
+            return null;
+          }
+        }
+        
+        if (!password) {
+          showAlert('الرجاء إدخال كلمة المرور', 'error');
+          $('passwordInput').focus();
+          return null;
+        }
+        
+        if (password.length < 6) {
+          showAlert('كلمة المرور قصيرة جداً', 'error');
+          $('passwordInput').focus();
+          return null;
+        }
+        
+        return { email: email, password: password };
+      }
+      
+      // ============================================
+      // 4. تسجيل الدخول
+      // ============================================
+      function handleLogin(e) {
+        if (e) e.preventDefault();
+        if (state.submitting) return;
+        
+        hideAlert();
+        
+        var data = validateForm();
+        if (!data) return;
+        
+        // التحقق من الحد الأقصى للمحاولات
+        if (state.attempts >= state.maxAttempts) {
+          showAlert('تم تجاوز الحد الأقصى للمحاولات. حاول مرة أخرى بعد قليل.', 'error');
+          return;
+        }
+        
+        state.submitting = true;
+        setLoading(true);
+        
+        if (!window.sb) {
+          showAlert('تعذر الاتصال بالخادم. يرجى إعادة تحميل الصفحة.', 'error');
+          state.submitting = false;
+          setLoading(false);
+          return;
+        }
+        
+        window.sb.auth.signInWithEmailAndPassword(data.email, data.password)
+          .then(function (cred) {
+            var user = cred.user;
+            
+            return window.sb
+              .from('profiles')
+              .select('id, email, full_name, role, is_active')
+              .eq('id', user.id)
+              .maybeSingle()
+              .then(function (profileRes) {
+                if (profileRes.error || !profileRes.data) {
+                  // المستخدم موجود في Auth لكن مش في profiles
+                  return window.sb.auth.signOut().then(function () {
+                    throw new Error('الحساب غير مكتمل. تواصل مع الدعم الفني.');
+                  });
+                }
+                
+                if (profileRes.data.is_active === false) {
+                  return window.sb.auth.signOut().then(function () {
+                    throw new Error('هذا الحساب معطل. تواصل مع الإدارة.');
+                  });
+                }
+                
+                // تسجيل النشاط
+                logActivity(user.id, profileRes.data.full_name, profileRes.data.role, 'login', 'تسجيل دخول');
+                
+                return {
+                  user: user,
+                  profile: profileRes.data
+                };
+              });
+          })
+          .then(function (result) {
+            showAlert('تم تسجيل الدخول بنجاح. جاري التحويل...', 'success');
+            
+            // تحديد وجهة التوجيه
+            var role = result.profile.role;
+            var dest;
+            
+            if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
+              dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
+            } else {
+              dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
+            }
+            
+            // تحقق من next parameter
+            var params = new URLSearchParams(window.location.search);
+            var next = params.get('next');
+            if (next) {
+              try {
+                var decodedNext = decodeURIComponent(next);
+                // التحقق إن next ليس خارج الموقع
+                if (decodedNext.indexOf('//') === -1 && decodedNext.indexOf('http') === -1) {
+                  dest = resolve(decodedNext.replace(/^\//, ''));
+                }
+              } catch (e) {}
+            }
+            
+            setTimeout(function () {
+              window.location.href = dest;
+            }, 800);
+          })
+          .catch(function (error) {
+            state.attempts++;
+            state.submitting = false;
+            setLoading(false);
+            
+            var msg = 'فشل تسجيل الدخول';
+            var code = error.code || '';
+            
+            if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'invalid_credentials') {
+              msg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+            } else if (code === 'auth/invalid-email') {
+              msg = 'البريد الإلكتروني غير صحيح';
+            } else if (code === 'auth/too-many-requests') {
+              msg = 'تم حظر الحساب مؤقتاً. حاول لاحقاً.';
+            } else if (error.message) {
+              msg = error.message;
+            }
+            
+            showAlert(msg, 'error');
+            
+            // Log
+            logAttempt(data.email, false, msg);
+            
+            // إعادة تعيين الحقول
+            $('passwordInput').value = '';
+            $('passwordInput').focus();
+          });
+      }
+      
+      // ============================================
+      // 5. Loading state
+      // ============================================
+      function setLoading(isLoading) {
+        var btn = $('loginBtn');
+        var text = $('loginBtnText');
+        if (!btn || !text) return;
+        
+        if (isLoading) {
+          btn.disabled = true;
+          text.innerHTML = '<span class="spinner"></span> جاري التحقق...';
+        } else {
+          btn.disabled = false;
+          text.textContent = 'تسجيل الدخول';
+        }
+      }
+      
+      // ============================================
+      // 6. Log activity
+      // ============================================
+      function logActivity(userId, userName, role, type, description) {
+        if (!window.sb) return;
+        window.sb.from('activities').insert({
+          user_id: userId,
+          user_name: userName,
+          user_role: role,
+          action_type: type,
+          description: description
+        }).catch(function () {});
+      }
+      
+      function logAttempt(email, success, errorMsg) {
+        if (!window.sb) return;
+        window.sb.from('login_logs').insert({
+          email: email,
+          success: success,
+          error_message: errorMsg || null,
+          ip_address: null,
+          user_agent: navigator.userAgent.substring(0, 200)
+        }).catch(function () {});
+      }
+      
+      // ============================================
+      // 7. Forgot password
+      // ============================================
+      function handleForgot(e) {
+        if (e) e.preventDefault();
+        
+        var email = $('emailInput').value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showAlert('أدخل بريدك الإلكتروني أولاً', 'error');
+          $('emailInput').focus();
+          return;
+        }
+        
+        if (!window.sb) {
+          showAlert('تعذر الاتصال بالخادم', 'error');
+          return;
+        }
+        
+        showAlert('جاري إرسال رابط استعادة كلمة المرور...', 'info');
+        
+        window.sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + window.location.pathname.replace(/login\.html.*/, 'reset-password.html')
+        })
+          .then(function () {
+            showAlert('تم إرسال رابط الاستعادة إلى بريدك. تحقق من صندوق الوارد.', 'success');
+          })
+          .catch(function (err) {
+            var msg = err.message || 'تعذر إرسال رابط الاستعادة';
+            if (err.code === 'auth/user-not-found') {
+              msg = 'هذا البريد غير مسجل';
+            }
+            showAlert(msg, 'error');
+          });
+      }
+      
+      // ============================================
+      // 8. Remember me
+      // ============================================
+      function initRememberMe() {
+        try {
+          var savedEmail = localStorage.getItem('itws_saved_email');
+          if (savedEmail) {
+            $('emailInput').value = savedEmail;
+            $('rememberMe').checked = true;
+            $('passwordInput').focus();
+          }
+        } catch (e) {}
+      }
+      
+      function saveRememberMe() {
+        var email = $('emailInput').value.trim();
+        var remember = $('rememberMe').checked;
+        
+        try {
+          if (remember && email) {
+            localStorage.setItem('itws_saved_email', email);
+          } else {
+            localStorage.removeItem('itws_saved_email');
+          }
+        } catch (e) {}
+      }
+      
+      // ============================================
+      // 9. Init
+      // ============================================
+      function init() {
+        applyDynamicContent();
+        initPasswordToggle();
+        initRememberMe();
+        
+        var form = $('loginForm');
+        if (form) {
+          form.addEventListener('submit', function (e) {
+            handleLogin(e);
+            saveRememberMe();
+          });
+        }
+        
+        var forgotLink = $('forgotLink');
+        if (forgotLink) {
+          forgotLink.addEventListener('click', handleForgot);
+        }
+        
+        // AppSettings changes
+        if (window.AppSettings && window.AppSettings.onChange) {
+          window.AppSettings.onChange(function (cache, key) {
+            if (!key || key === 'app_identity') applyDynamicContent();
+          });
+        }
+        
+        // Auto-focus
+        setTimeout(function () {
+          var emailField = $('emailInput');
+          if (emailField && !emailField.value) {
+            emailField.focus();
+          } else {
+            $('passwordInput').focus();
+          }
+        }, 300);
+        
+        // Supabase listener - auto redirect if already logged in
+        if (window.sb) {
+          window.sb.auth.getSession().then(function (res) {
+            if (res && res.data && res.data.session) {
+              // المستخدم مسجل بالفعل
+              window.sb.from('profiles')
+                .select('role, is_active')
+                .eq('id', res.data.session.user.id)
+                .maybeSingle()
+                .then(function (p) {
+                  if (p.data && p.data.is_active !== false) {
+                    var role = p.data.role;
+                    var dest;
+                    if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
+                      dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
+                    } else {
+                      dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
+                    }
+                    window.location.href = dest;
+                  }
+                });
+            }
+          });
+        }
+      }
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+      
+    })();
+  </script>
+
+</body>
+</html>
