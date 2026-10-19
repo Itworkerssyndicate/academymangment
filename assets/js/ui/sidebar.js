@@ -2,9 +2,7 @@
 // [16/50] ITWS Platform - Sidebar Component
 // Path: assets/js/ui/sidebar.js
 // ============================================
-// 💡 يبني الـ Sidebar للـ Admin/Portal حسب الدور
-// 💡 Auto-mount لو لقى #sidebarContainer
-// 💡 يدعم: Active state، Badges، Mobile toggle
+// تصميم رسمي بدون إيموجي
 // ============================================
 
 (function () {
@@ -17,71 +15,64 @@
   var state = {
     currentUser: null,
     settings: null,
-    mode: 'admin',          // 'admin' | 'portal'
+    mode: 'admin',
     open: false,
     badges: {},
     container: null
   };
 
   // ============================================
-  // 1. Menu Definition حسب الدور والوضع
+  // 1. Menu Definition
   // ============================================
   function getMenuItems(role, mode) {
     if (mode === 'portal') {
-      // بوابة الأكاديمية
       return [
         {
           group: 'الرئيسية',
           items: [
-            { href: '/portal/index.html', icon: '📊', label: 'لوحة التحكم', nav: 'dashboard' }
+            { href: 'portal/index.html', label: 'لوحة التحكم', nav: 'dashboard' }
           ]
         },
         {
           group: 'ملف الأكاديمية',
           items: [
-            { href: '/portal/application.html', icon: '📋', label: 'طلب الاعتماد', nav: 'application', badge: 'requests' },
-            { href: '/portal/branches.html', icon: '📍', label: 'الفروع', nav: 'branches' },
-            { href: '/portal/courses.html', icon: '📚', label: 'الكورسات', nav: 'courses' },
-            { href: '/portal/certificates.html', icon: '📜', label: 'الشهادات', nav: 'certificates' }
+            { href: 'portal/application.html', label: 'طلب الاعتماد', nav: 'application', badge: 'requests' },
+            { href: 'portal/branches.html', label: 'الفروع', nav: 'branches' },
+            { href: 'portal/courses.html', label: 'الكورسات', nav: 'courses' },
+            { href: 'portal/certificates.html', label: 'الشهادات', nav: 'certificates' }
           ]
         },
         {
           group: 'الحساب',
           items: [
-            { href: '/portal/profile.html', icon: '👤', label: 'بياناتي', nav: 'profile' }
+            { href: 'portal/profile.html', label: 'بياناتي', nav: 'profile' }
           ]
         }
       ];
     }
 
-    // admin mode
     var isSuperAdmin = role === 'super_admin';
     var isAdmin = role === 'super_admin' || role === 'admin';
     var isCommittee = role === 'super_admin' || role === 'admin' || role === 'committee_manager';
 
     var menu = [];
 
-    // الرئيسية (متاحة للكل)
     menu.push({
       group: 'الرئيسية',
       items: [
-        { href: '/admin/index.html', icon: '📊', label: 'لوحة التحكم', nav: 'dashboard' }
+        { href: 'admin/index.html', label: 'لوحة التحكم', nav: 'dashboard' }
       ]
     });
 
-    // الإدارة (لكل أدوار الإدارة)
     if (isCommittee) {
       var adminItems = [
-        { href: '/admin/requests.html', icon: '📋', label: 'طلبات الاعتماد', nav: 'requests', badge: 'pending_requests' },
-        { href: '/admin/academies.html', icon: '🏛️', label: 'الأكاديميات', nav: 'academies' }
+        { href: 'admin/requests.html', label: 'طلبات الاعتماد', nav: 'requests', badge: 'pending_requests' },
+        { href: 'admin/academies.html', label: 'الأكاديميات', nav: 'academies' },
+        { href: 'admin/certificates.html', label: 'الشهادات', nav: 'certificates' }
       ];
 
-      // إضافة الشهادات (كل الأدوار)
-      adminItems.push({ href: '/admin/certificates.html', icon: '📜', label: 'الشهادات', nav: 'certificates' });
-
-      // إضافة تصنيفات (admin+)
       if (isAdmin) {
-        adminItems.push({ href: '/admin/categories.html', icon: '🏷️', label: 'التصنيفات', nav: 'categories' });
+        adminItems.push({ href: 'admin/categories.html', label: 'التصنيفات', nav: 'categories' });
       }
 
       menu.push({
@@ -90,25 +81,23 @@
       });
     }
 
-    // التحليلات (لكل أدوار الإدارة)
     if (isCommittee) {
       menu.push({
         group: 'التحليلات',
         items: [
-          { href: '/admin/reports.html', icon: '📈', label: 'التقارير', nav: 'reports' },
-          { href: '/admin/activities.html', icon: '📝', label: 'سجل النشاطات', nav: 'activities' }
+          { href: 'admin/reports.html', label: 'التقارير', nav: 'reports' },
+          { href: 'admin/activities.html', label: 'سجل النشاطات', nav: 'activities' }
         ]
       });
     }
 
-    // النظام (سوبر أدمن فقط)
     if (isSuperAdmin) {
       menu.push({
         group: 'النظام',
         items: [
-          { href: '/admin/users.html', icon: '👥', label: 'المستخدمون', nav: 'users' },
-          { href: '/admin/login-logs.html', icon: '🔐', label: 'محاولات الدخول', nav: 'login-logs' },
-          { href: '/admin/settings.html', icon: '⚙️', label: 'الإعدادات', nav: 'settings' }
+          { href: 'admin/users.html', label: 'المستخدمون', nav: 'users' },
+          { href: 'admin/login-logs.html', label: 'محاولات الدخول', nav: 'login-logs' },
+          { href: 'admin/settings/index.html', label: 'الإعدادات', nav: 'settings' }
         ]
       });
     }
@@ -117,7 +106,7 @@
   }
 
   // ============================================
-  // 2. جلب بيانات المستخدم
+  // 2. Load User
   // ============================================
   function loadCurrentUser() {
     if (window.AuthGuard && window.AuthGuard.getCurrentUser) {
@@ -130,15 +119,11 @@
   }
 
   // ============================================
-  // 3. جلب الإعدادات
+  // 3. Load Settings
   // ============================================
   function loadSettings() {
     if (!window.sb) return Promise.resolve(null);
-    return window.sb
-      .from('settings')
-      .select('value')
-      .eq('key', 'general')
-      .maybeSingle()
+    return window.sb.from('settings').select('value').eq('key', 'app_identity').maybeSingle()
       .then(function (res) {
         if (res.error || !res.data) return null;
         state.settings = res.data.value;
@@ -148,18 +133,16 @@
   }
 
   // ============================================
-  // 4. جلب الـ Badges (أرقام الإشعارات)
+  // 4. Load Badges
   // ============================================
   function loadBadges(role, mode) {
     if (!window.sb) return Promise.resolve({});
 
     var promises = [];
 
-    // طلبات اعتماد معلقة (للإدارة)
     if (mode === 'admin' && role && role !== 'user') {
       promises.push(
-        window.sb
-          .from('accreditation_requests')
+        window.sb.from('accreditation_requests')
           .select('*', { count: 'exact', head: true })
           .in('current_stage', ['submitted', 'documents_review', 'site_visit', 'committee_review', 'final_approval'])
           .then(function (r) { return { key: 'pending_requests', value: r.count || 0 }; })
@@ -169,16 +152,14 @@
 
     return Promise.all(promises).then(function (results) {
       var badges = {};
-      results.forEach(function (r) {
-        badges[r.key] = r.value;
-      });
+      results.forEach(function (r) { badges[r.key] = r.value; });
       state.badges = badges;
       return badges;
     });
   }
 
   // ============================================
-  // 5. بناء HTML للـ Sidebar
+  // 5. Build HTML
   // ============================================
   function buildHTML() {
     var user = state.currentUser;
@@ -192,19 +173,14 @@
     var title = isPortal ? 'بوابة الأكاديمية' : 'لوحة الإدارة';
     var subtitle = isPortal ? 'نظام الاعتماد الرسمي' : 'نقابة تكنولوجيا المعلومات';
 
-    // الشعار
     var logoMarkHtml = logoUrl
-      ? '<img src="' + escapeAttr(logoUrl) + '" alt="' + escapeAttr(unionName) + '">'
-      : 'ن.ت';
+      ? '<img src="' + escapeAttr(logoUrl) + '" alt="" style="width:100%;height:100%;object-fit:contain;padding:4px;">'
+      : 'نت';
 
-    // بيانات المستخدم
-    var userInitial = user
-      ? (user.full_name || user.email || '?').charAt(0).toUpperCase()
-      : '?';
+    var userInitial = user ? (user.full_name || user.email || '?').charAt(0).toUpperCase() : '?';
     var userName = user ? (user.full_name || user.email) : 'غير مسجل';
     var userRole = translateRole(role);
 
-    // القائمة
     var menu = getMenuItems(role, state.mode);
     var menuHtml = '';
 
@@ -217,11 +193,11 @@
         if (item.badge && state.badges[item.badge] > 0) {
           badgeHtml = '<span class="sidebar-badge">' + state.badges[item.badge] + '</span>';
         }
+
         itemsHtml += '' +
-          '<a href="' + escapeAttr(item.href) + '" ' +
+          '<a href="' + escapeAttr(resolveUrl(item.href)) + '" ' +
              'class="sidebar-link" ' +
              'data-nav="' + escapeAttr(item.nav) + '">' +
-            '<span class="sidebar-icon">' + item.icon + '</span>' +
             '<span>' + escapeHtml(item.label) + '</span>' +
             badgeHtml +
           '</a>';
@@ -237,7 +213,7 @@
     return '' +
       '<aside class="app-sidebar" id="appSidebar">' +
         '<div class="app-sidebar-header">' +
-          '<a href="' + (isPortal ? '/portal/index.html' : '/admin/index.html') + '" class="logo">' +
+          '<a href="' + resolveUrl(isPortal ? 'portal/index.html' : 'admin/index.html') + '" class="logo">' +
             '<div class="logo-mark">' + logoMarkHtml + '</div>' +
             '<div>' +
               '<div class="logo-title">' + escapeHtml(title) + '</div>' +
@@ -249,7 +225,7 @@
           menuHtml +
         '</nav>' +
         '<div class="app-sidebar-footer">' +
-          '<a href="' + (isPortal ? '/portal/profile.html' : '/home.html') + '" class="sidebar-user" style="text-decoration:none;color:inherit;">' +
+          '<a href="' + resolveUrl(isPortal ? 'portal/profile.html' : 'home.html') + '" class="sidebar-user" style="text-decoration:none;color:inherit;">' +
             '<div class="avatar avatar-primary">' + escapeHtml(userInitial) + '</div>' +
             '<div class="sidebar-user-info">' +
               '<div class="sidebar-user-name">' + escapeHtml(userName) + '</div>' +
@@ -262,7 +238,7 @@
   }
 
   // ============================================
-  // 6. تركيب الـ Sidebar
+  // 6. Mount
   // ============================================
   function mount(targetSelector) {
     targetSelector = targetSelector || '#sidebarContainer';
@@ -282,7 +258,7 @@
   }
 
   // ============================================
-  // 7. تفعيل الـ nav النشط
+  // 7. Active Nav
   // ============================================
   function highlightActiveNav() {
     var path = window.location.pathname;
@@ -306,12 +282,15 @@
       'activities.html': 'activities',
       'users.html': 'users',
       'login-logs.html': 'login-logs',
-      'settings.html': 'settings',
       'application.html': 'application',
       'branches.html': 'branches',
       'courses.html': 'courses',
       'profile.html': 'profile'
     };
+
+    if (path.indexOf('/settings/') !== -1) {
+      navMap[fileName] = 'settings';
+    }
 
     var activeNav = navMap[fileName] || null;
     if (!activeNav) return;
@@ -322,7 +301,7 @@
   }
 
   // ============================================
-  // 8. Mobile handlers
+  // 8. Mobile
   // ============================================
   function setupMobileHandlers() {
     var toggleBtn = document.getElementById('sidebarToggleBtn');
@@ -331,15 +310,10 @@
     }
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && state.open) {
-        close();
-      }
+      if (e.key === 'Escape' && state.open) close();
     });
   }
 
-  // ============================================
-  // 9. Toggle/Close/Open
-  // ============================================
   function toggle() {
     if (state.open) close();
     else open();
@@ -364,18 +338,17 @@
   }
 
   // ============================================
-  // 10. تحديث الـ Badges (بدون إعادة بناء)
+  // 9. Badges Update
   // ============================================
   function updateBadges() {
     Object.keys(state.badges).forEach(function (key) {
       var value = state.badges[key];
-      // نبحث عن الـ link اللي فيه data-nav مرتبط بالـ badge
       var badgeEl = document.querySelector('.sidebar-badge[data-badge-key="' + key + '"]');
+
       if (value > 0) {
         if (badgeEl) {
           badgeEl.textContent = value;
         } else {
-          // نضيفه لو مش موجود
           var link = document.querySelector('.sidebar-link[data-nav="requests"]');
           if (link && key === 'pending_requests') {
             var badge = document.createElement('span');
@@ -392,7 +365,7 @@
   }
 
   // ============================================
-  // 11. Helpers
+  // 10. Helpers
   // ============================================
   function translateRole(role) {
     var map = {
@@ -414,8 +387,13 @@
       .replace(/'/g, '&#039;');
   }
 
-  function escapeAttr(str) {
-    return escapeHtml(str);
+  function escapeAttr(str) { return escapeHtml(str); }
+
+  function resolveUrl(path) {
+    if (!path) return '#';
+    if (window.resolveUrl) return window.resolveUrl(path);
+    var base = (cfg && cfg.BASE_PATH) || '';
+    return base + path;
   }
 
   function logDebug() {
@@ -425,31 +403,29 @@
   }
 
   // ============================================
-  // 12. Init
+  // 11. Init
   // ============================================
   function init(options) {
     options = options || {};
     state.mode = options.mode || 'admin';
     var targetSelector = options.target || '#sidebarContainer';
 
-    Promise.all([
-      loadCurrentUser(),
-      loadSettings()
-    ]).then(function (results) {
-      var user = results[0];
-      var role = user ? user.role : null;
-
-      return loadBadges(role, state.mode).then(function () {
+    Promise.all([loadCurrentUser(), loadSettings()])
+      .then(function (results) {
+        var user = results[0];
+        var role = user ? user.role : null;
+        return loadBadges(role, state.mode).then(function () {
+          mount(targetSelector);
+        });
+      })
+      .catch(function (err) {
+        logDebug('Init error:', err.message);
         mount(targetSelector);
       });
-    }).catch(function (err) {
-      logDebug('Init error:', err.message);
-      mount(targetSelector); // نعرض على الأقل sidebar بسيط
-    });
   }
 
   // ============================================
-  // 13. Public API
+  // 12. Public API
   // ============================================
   window.AppSidebar = {
     initialized: true,
@@ -462,9 +438,7 @@
       return loadBadges(
         state.currentUser ? state.currentUser.role : null,
         state.mode
-      ).then(function () {
-        updateBadges();
-      });
+      ).then(function () { updateBadges(); });
     },
     refresh: function () {
       return init({ mode: state.mode });
@@ -472,13 +446,12 @@
   };
 
   // ============================================
-  // 14. Auto-init
+  // 13. Auto-init
   // ============================================
   function autoInit() {
     var container = document.querySelector('#sidebarContainer');
     if (!container) return;
 
-    // نحدد الـ mode من data attribute
     var mode = container.getAttribute('data-mode') || 'admin';
     init({ mode: mode });
   }
