@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>تفاصيل الأكاديمية | نقابة تكنولوجيا المعلومات</title>
+  <meta name="description" content="تفاصيل الأكاديمية التدريبية المعتمدة من نقابة تكنولوجيا المعلومات والبرمجيات">
+  <meta name="theme-color" content="#0A0E14">
+  
+  <meta property="og:title" content="تفاصيل الأكاديمية">
+  <meta property="og:description" content="تفاصيل الأكاديمية المعتمدة وفروعها">
+  <meta property="og:type" content="website">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="assets/js/settings-defaults.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/themes-data.js"></script>
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/loader.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  
+  <style>
+    /* ============ HERO ============ */
+    .acad-detail-hero {
+      padding: 48px 20px 56px;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .acad-detail-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 20%, var(--primary-soft) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .acad-detail-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+    
+    .breadcrumb a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .breadcrumb a:hover {
+      color: var(--primary);
+    }
+    
+    .breadcrumb svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.5;
+    }
+    
+    .breadcrumb-current {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    /* Hero Content */
+    .acad-hero-card {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .acad-hero-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--primary-text);
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 0 0 6px var(--primary-soft), 0 12px 40px var(--primary-soft);
+    }
+    
+    .acad-hero-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .acad-hero-info {
+      flex: 1;
+      min-width: 240px;
+    }
+    
+    .acad-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--success-soft);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .acad-hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+    
+    .acad-hero-title {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.25;
+      margin: 0 0 12px;
+      letter-spacing: -0.5px;
+    }
+    
+    .acad-hero-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0 0 16px;
+      max-width: 600px;
+    }
+    
+    .acad-hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    .acad-hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .acad-hero-meta-item svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+    
+    .acad-hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    
+    .acad-hero-btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+    }
+    
+    .acad-hero-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .acad-hero-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .acad-hero-btn.primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: var(--primary-text);
+    }
+    
+    .acad-hero-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    /* ============ MAIN ============ */
+    .acad-detail-main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+    
+    /* ============ INFO GRID ============ */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .info-card {
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.2s;
+    }
+    
+    .info-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .info-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    
+    .info-card-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .info-card-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    
+    .info-card-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    
+    .info-card-value.mono {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+      font-size: 13px;
+    }
+    
+    /* ============ SECTION ============ */
+    .section {
+      margin-bottom: 40px;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-title svg {
+      width: 22px;
+      height: 22px;
+      color: var(--primary);
+    }
+    
+    .section-count {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 999px;
+    }
+    
+    /* ============ BRANCHES ============ */
+    .branches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    
+    .branch-card {
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .branch-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    
+    .branch-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    
+    .branch-gov {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .branch-gov svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+    
+    .branch-main-badge {
+      padding: 3px 10px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    
+    .branch-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .branch-info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    
+    .branch-info-row svg {
+      width: 14px;
+      height: 14px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    
+    .branch-info-row a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .branch-info-row a:hover {
+      text-decoration: underline;
+    }
+    
+    /* ============ COURSES ============ */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    
+    .course-card {
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    
+    .course-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .course-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .course-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .course-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .course-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 4px;
+      line-height: 1.4;
+    }
+    
+    .course-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .course-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .course-meta-item svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* ============ EMPTY SECTION ============ */
+    .empty-inline {
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+    }
+    
+    /* ============ LOADER ============ */
+    .acad-detail-loader {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    
+    .acad-detail-loader.show { display: block; }
+    
+    .acad-detail-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .acad-detail-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ ERROR ============ */
+    .acad-detail-error {
+      display: none;
+      text-align: center;
+      padding: 80px 24px;
+      background: var(--surface);
+      border: 1px solid var(--error);
+      border-radius: 20px;
+    }
+    
+    .acad-detail-error.show { display: block; }
+    
+    .acad-detail-error-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: var(--error-soft);
+      color: var(--error);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .acad-detail-error-icon svg {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .acad-detail-error-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--error);
+      margin: 0 0 8px;
+    }
+    
+    .acad-detail-error-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0 0 24px;
+    }
+    
+    .acad-detail-error-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    
+    .acad-detail-error-btn:hover {
+      background: var(--primary-hover);
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+      .acad-detail-hero { padding: 32px 16px 40px; }
+      .acad-detail-main { padding: 24px 16px 48px; }
+      .acad-hero-card { flex-direction: column; text-align: center; }
+      .acad-hero-info { text-align: center; }
+      .acad-hero-meta { justify-content: center; }
+      .acad-hero-actions { justify-content: center; }
+      .acad-hero-btn { flex: 1; justify-content: center; min-width: 140px; }
+      .acad-hero-logo { width: 90px; height: 90px; font-size: 36px; }
+      .info-grid { grid-template-columns: 1fr 1fr; }
+      .branches-grid { grid-template-columns: 1fr; }
+      .courses-grid { grid-template-columns: 1fr; }
+    }
+    
+    @media (max-width: 480px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .section-header { flex-direction: column; align-items: flex-start; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
+    @media print {
+      #headerContainer,
+      .acad-hero-actions,
+      .theme-fab,
+      .theme-panel,
+      .home-footer {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="page-wrapper">
+
+    <div id="headerContainer"></div>
+
+    <!-- HERO -->
+    <section class="acad-detail-hero" id="acadHero" style="display:none;">
+      <div class="acad-detail-inner">
+        
+        <nav class="breadcrumb" aria-label="مسار التنقل">
+          <a href="home.html">الرئيسية</a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <a href="academies.html">الأكاديميات</a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span class="breadcrumb-current" id="breadcrumbCurrent">تفاصيل الأكاديمية</span>
+        </nav>
+        
+        <div class="acad-hero-card">
+          <div class="acad-hero-logo" id="acadLogo">نت</div>
+          <div class="acad-hero-info">
+            <span class="acad-hero-badge">
+              <span class="acad-hero-badge-dot"></span>
+              أكاديمية معتمدة
+            </span>
+            <h1 class="acad-hero-title" id="acadName">—</h1>
+            <p class="acad-hero-desc" id="acadDescription" style="display:none;"></p>
+            <div class="acad-hero-meta">
+              <div class="acad-hero-meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span id="acadLicense">—</span>
+              </div>
+              <div class="acad-hero-meta-item" id="acadCategoryWrap" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                <span id="acadCategory">—</span>
+              </div>
+            </div>
+            <div class="acad-hero-actions">
+              <button class="acad-hero-btn primary" id="shareBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                <span>مشاركة</span>
+              </button>
+              <a href="academies.html" class="acad-hero-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>كل الأكاديميات</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- LOADER -->
+    <div class="acad-detail-loader" id="acadLoader">
+      <div class="acad-detail-loader-spinner"></div>
+      <div class="acad-detail-loader-text">جاري تحميل البيانات...</div>
+    </div>
+
+    <!-- ERROR -->
+    <div class="acad-detail-error" id="acadError">
+      <div class="acad-detail-error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <h2 class="acad-detail-error-title">الأكاديمية غير موجودة</h2>
+      <p class="acad-detail-error-text" id="acadErrorText">
+        لم يتم العثور على أكاديمية بهذا المعرف. تأكد من الرابط أو تصفح الدليل.
+      </p>
+      <a href="academies.html" class="acad-detail-error-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>العودة للدليل</span>
+      </a>
+    </div>
+
+    <!-- MAIN -->
+    <main class="acad-detail-main" id="acadMain" style="display:none;">
+
+      <!-- INFO GRID -->
+      <div class="info-grid" id="infoGrid"></div>
+
+      <!-- BRANCHES -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>الفروع</span>
+          </h2>
+          <span class="section-count" id="branchesCount">0 فرع</span>
+        </div>
+        <div class="branches-grid" id="branchesGrid"></div>
+      </section>
+
+      <!-- COURSES -->
+      <section class="section" id="coursesSection" style="display:none;">
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            <span>الكورسات المقدمة</span>
+          </h2>
+          <span class="section-count" id="coursesCount">0 كورس</span>
+        </div>
+        <div class="courses-grid" id="coursesGrid"></div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="home-footer">
+      <div class="home-footer-inner">
+        <div class="footer-bottom">
+          <span id="footerCopyright">© 2026 نقابة تكنولوجيا المعلومات والبرمجيات</span>
+          <span>
+            <span id="footerPresidentLabel">النقيب العام:</span>
+            <span class="footer-president" id="footerPresidentName">المحاسب / محمود جميل</span>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/session.js"></script>
+  <script src="assets/js/auth-guard.js"></script>
+  <script src="assets/js/app-title.js"></script>
+  <script src="assets/js/ui/header.js"></script>
+  <script src="assets/js/ui/modal.js"></script>
+  <script src="assets/js/pages/academy-details.js"></script>
+
+</body>
+</html>
