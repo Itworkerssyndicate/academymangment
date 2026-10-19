@@ -5,42 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>التحقق من شهادة | نقابة تكنولوجيا المعلومات</title>
-  <meta name="description" content="تحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة - نقابة تكنولوجيا المعلومات والبرمجيات">
+  <meta name="description" content="تحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة">
   <meta name="theme-color" content="#0A0E14">
   
-  <!-- Open Graph -->
-  <meta property="og:title" content="التحقق من شهادة - نقابة تكنولوجيا المعلومات">
+  <meta property="og:title" content="التحقق من شهادة">
   <meta property="og:description" content="تحقق من صحة الشهادات التدريبية المعتمدة">
   <meta property="og:type" content="website">
   
-  <!-- Fonts - Cairo ONLY -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- Settings Defaults -->
   <script src="assets/js/settings-defaults.js"></script>
-  
-  <!-- Theme Bootstrap -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
   <script src="assets/js/app-settings.js"></script>
   
-  <!-- CSS -->
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/loader.css">
   <link rel="stylesheet" href="assets/css/layout.css">
   
-  <!-- Verify Custom Styles -->
   <style>
-    /* ============================================
-       VERIFY PAGE — Official Certificate Verification
-       ============================================ */
-    
-    /* ============ HERO ============ */
     .verify-hero {
       padding: 56px 20px 40px;
       text-align: center;
@@ -79,10 +67,6 @@
       margin-bottom: 16px;
     }
     
-    .verify-badge-icon {
-      font-size: 14px;
-    }
-    
     .verify-title {
       font-size: clamp(26px, 4vw, 38px);
       font-weight: 800;
@@ -92,9 +76,7 @@
       letter-spacing: -0.5px;
     }
     
-    .verify-title-accent {
-      color: var(--primary);
-    }
+    .verify-title-accent { color: var(--primary); }
     
     .verify-subtitle {
       font-size: clamp(14px, 2vw, 16px);
@@ -104,7 +86,6 @@
       margin: 0 auto;
     }
     
-    /* ============ SEARCH SECTION ============ */
     .verify-main {
       max-width: 900px;
       margin: 0 auto;
@@ -128,10 +109,6 @@
       font-weight: 600;
       color: var(--text);
       margin-bottom: 12px;
-    }
-    
-    .verify-search-label-icon {
-      font-size: 18px;
     }
     
     .verify-search-form {
@@ -178,9 +155,6 @@
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
       white-space: nowrap;
     }
     
@@ -190,10 +164,7 @@
       box-shadow: 0 8px 24px var(--primary-soft);
     }
     
-    .verify-search-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .verify-search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
     
     .verify-search-hint {
       font-size: 12px;
@@ -204,11 +175,6 @@
       padding: 0 4px;
     }
     
-    .verify-search-hint-icon {
-      color: var(--primary);
-    }
-    
-    /* ============ LOADING ============ */
     .verify-loader {
       display: none;
       text-align: center;
@@ -230,19 +196,11 @@
       margin: 0 auto 16px;
     }
     
-    .verify-loader-text {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
+    .verify-loader-text { color: var(--text-muted); font-size: 14px; }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     
-    /* ============ RESULT ============ */
-    .verify-result {
-      display: none;
-    }
+    .verify-result { display: none; }
     
     .verify-result.show {
       display: block;
@@ -259,7 +217,6 @@
       to { opacity: 1; }
     }
     
-    /* ============ NOT FOUND / ERROR ============ */
     .verify-message {
       display: none;
       text-align: center;
@@ -269,10 +226,7 @@
       border-radius: 20px;
     }
     
-    .verify-message.show {
-      display: block;
-      animation: slideUp 0.4s ease;
-    }
+    .verify-message.show { display: block; animation: slideUp 0.4s ease; }
     
     .verify-message.error {
       border-color: var(--error);
@@ -280,9 +234,11 @@
     }
     
     .verify-message-icon {
-      font-size: 64px;
+      font-size: 56px;
       margin-bottom: 16px;
       opacity: 0.8;
+      font-weight: 700;
+      color: var(--error);
     }
     
     .verify-message-title {
@@ -299,7 +255,6 @@
       margin: 0;
     }
     
-    /* ============ CERTIFICATE CARD ============ */
     .cert-card {
       background: var(--surface);
       border: 2px solid var(--success);
@@ -313,7 +268,6 @@
       box-shadow: 0 20px 60px rgba(239, 68, 68, 0.15);
     }
     
-    /* ===== Header ===== */
     .cert-header {
       padding: 24px 28px;
       background: linear-gradient(135deg, var(--success-soft), transparent);
@@ -344,7 +298,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
+      font-size: 28px;
+      font-weight: 700;
       flex-shrink: 0;
       box-shadow: 0 0 0 6px var(--success-soft), 0 8px 24px rgba(16, 185, 129, 0.3);
       animation: sealPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -375,7 +330,6 @@
       letter-spacing: 1px;
     }
     
-    /* Status Badge */
     .cert-status {
       padding: 8px 20px;
       border-radius: 999px;
@@ -387,28 +341,13 @@
       flex-shrink: 0;
     }
     
-    .cert-status.valid {
-      background: var(--success);
-      color: #fff;
-    }
+    .cert-status.valid { background: var(--success); color: #fff; }
+    .cert-status.invalid { background: var(--error); color: #fff; }
     
-    .cert-status.invalid {
-      background: var(--error);
-      color: #fff;
-    }
+    .cert-body { padding: 28px; }
     
-    /* ===== Body ===== */
-    .cert-body {
-      padding: 28px;
-    }
-    
-    .cert-section {
-      margin-bottom: 24px;
-    }
-    
-    .cert-section:last-child {
-      margin-bottom: 0;
-    }
+    .cert-section { margin-bottom: 24px; }
+    .cert-section:last-child { margin-bottom: 0; }
     
     .cert-section-title {
       font-size: 12px;
@@ -417,16 +356,8 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     
-    .cert-section-title-icon {
-      font-size: 14px;
-    }
-    
-    /* Data Grid */
     .cert-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -441,17 +372,12 @@
       transition: all 0.2s;
     }
     
-    .cert-item:hover {
-      border-color: var(--border-strong);
-    }
+    .cert-item:hover { border-color: var(--border-strong); }
     
     .cert-item-label {
       font-size: 11px;
       color: var(--text-muted);
       margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
     
     .cert-item-value {
@@ -468,7 +394,6 @@
       font-size: 13px;
     }
     
-    /* Grade Colors */
     .cert-grade {
       display: inline-flex;
       align-items: center;
@@ -485,7 +410,6 @@
     .cert-grade.pass { background: rgba(249, 115, 22, 0.15); color: #F97316; }
     .cert-grade.fail { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
     
-    /* ===== Actions ===== */
     .cert-actions {
       padding: 20px 28px 24px;
       border-top: 1px solid var(--border);
@@ -544,7 +468,6 @@
       color: #fff;
     }
     
-    /* ===== Footer ===== */
     .cert-footer {
       padding: 16px 28px;
       background: var(--bg);
@@ -555,12 +478,8 @@
       line-height: 1.6;
     }
     
-    .cert-footer strong {
-      color: var(--primary);
-      font-weight: 600;
-    }
+    .cert-footer strong { color: var(--primary); font-weight: 600; }
     
-    /* ============ INFO SECTION ============ */
     .verify-info {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -582,11 +501,6 @@
       transform: translateY(-2px);
     }
     
-    .verify-info-icon {
-      font-size: 28px;
-      margin-bottom: 10px;
-    }
-    
     .verify-info-title {
       font-size: 14px;
       font-weight: 700;
@@ -601,52 +515,17 @@
       margin: 0;
     }
     
-    /* ============ RESPONSIVE ============ */
     @media (max-width: 640px) {
-      .verify-search-form {
-        flex-direction: column;
-      }
-      
-      .verify-search-btn {
-        width: 100%;
-        justify-content: center;
-      }
-      
-      .verify-search-card,
-      .verify-main {
-        padding: 20px 16px;
-      }
-      
-      .cert-header {
-        padding: 20px;
-      }
-      
-      .cert-body {
-        padding: 20px;
-      }
-      
-      .cert-actions {
-        padding: 16px 20px 20px;
-        flex-direction: column;
-      }
-      
-      .cert-action-btn {
-        width: 100%;
-      }
-      
-      .cert-seal {
-        width: 52px;
-        height: 52px;
-        font-size: 26px;
-      }
-      
-      .cert-header-title {
-        font-size: 17px;
-      }
-      
-      .cert-grid {
-        grid-template-columns: 1fr;
-      }
+      .verify-search-form { flex-direction: column; }
+      .verify-search-btn { width: 100%; justify-content: center; }
+      .verify-search-card, .verify-main { padding: 20px 16px; }
+      .cert-header { padding: 20px; }
+      .cert-body { padding: 20px; }
+      .cert-actions { padding: 16px 20px 20px; flex-direction: column; }
+      .cert-action-btn { width: 100%; }
+      .cert-seal { width: 52px; height: 52px; font-size: 22px; }
+      .cert-header-title { font-size: 17px; }
+      .cert-grid { grid-template-columns: 1fr; }
     }
     
     @media (prefers-reduced-motion: reduce) {
@@ -657,45 +536,26 @@
     }
     
     @media print {
-      .verify-hero,
-      .verify-search-card,
-      .verify-info,
-      .cert-actions,
-      #headerContainer,
-      .theme-fab,
-      .theme-panel {
-        display: none !important;
-      }
-      
-      .cert-card {
-        border-width: 2px;
-        box-shadow: none;
-        page-break-inside: avoid;
-      }
+      .verify-hero, .verify-search-card, .verify-info, .cert-actions,
+      #headerContainer, .theme-fab, .theme-panel { display: none !important; }
+      .cert-card { border-width: 2px; box-shadow: none; page-break-inside: avoid; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Boot Loader -->
   <div class="theme-boot-loader" id="themeBootLoader">
-    <div class="loader-logo">ن.ت</div>
+    <div class="loader-logo">نت</div>
     <div class="loader-spinner"></div>
   </div>
 
-  <!-- Page Wrapper -->
   <div class="page-wrapper">
 
-    <!-- Header -->
     <div id="headerContainer"></div>
 
-    <!-- ============ HERO ============ -->
     <section class="verify-hero">
       <div class="verify-hero-inner">
-        <div class="verify-badge">
-          <span class="verify-badge-icon">🔍</span>
-          <span>التحقق الرسمي من الشهادات</span>
-        </div>
+        <div class="verify-badge">التحقق الرسمي من الشهادات</div>
         <h1 class="verify-title">
           تحقق من <span class="verify-title-accent">صحة الشهادة</span>
         </h1>
@@ -705,15 +565,10 @@
       </div>
     </section>
 
-    <!-- ============ MAIN ============ -->
     <main class="verify-main">
 
-      <!-- ============ SEARCH ============ -->
       <div class="verify-search-card">
-        <div class="verify-search-label">
-          <span class="verify-search-label-icon">📜</span>
-          <span>كود الشهادة</span>
-        </div>
+        <div class="verify-search-label">كود الشهادة</div>
         
         <form class="verify-search-form" id="verifyForm" onsubmit="return false;">
           <input
@@ -727,50 +582,39 @@
             maxlength="30"
             required
           >
-          <button type="submit" class="verify-search-btn" id="verifyBtn">
-            <span>🔍</span>
-            <span>تحقق</span>
-          </button>
+          <button type="submit" class="verify-search-btn" id="verifyBtn">تحقق</button>
         </form>
         
         <div class="verify-search-hint">
-          <span class="verify-search-hint-icon">💡</span>
-          <span>أدخل الكود المطبوع على الشهادة (مثال: NTI-2026-A7B3C9)</span>
+          أدخل الكود المطبوع على الشهادة (مثال: NTI-2026-A7B3C9)
         </div>
       </div>
 
-      <!-- ============ LOADING ============ -->
       <div class="verify-loader" id="verifyLoader">
         <div class="verify-loader-spinner"></div>
         <div class="verify-loader-text">جاري التحقق من الشهادة...</div>
       </div>
 
-      <!-- ============ ERROR MESSAGE ============ -->
       <div class="verify-message" id="verifyError">
-        <div class="verify-message-icon">❌</div>
+        <div class="verify-message-icon">&#10005;</div>
         <h2 class="verify-message-title" id="errorTitle">لم يتم العثور على الشهادة</h2>
         <p class="verify-message-text" id="errorText">
           تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الأكاديمية المسؤولة
         </p>
       </div>
 
-      <!-- ============ RESULT ============ -->
       <div class="verify-result" id="verifyResult"></div>
 
-      <!-- ============ INFO CARDS ============ -->
       <div class="verify-info" id="verifyInfo">
         <div class="verify-info-card">
-          <div class="verify-info-icon">✅</div>
           <h3 class="verify-info-title">تحقق فوري</h3>
           <p class="verify-info-text">النتيجة تظهر مباشرة من قاعدة البيانات الرسمية</p>
         </div>
         <div class="verify-info-card">
-          <div class="verify-info-icon">🔒</div>
           <h3 class="verify-info-title">موثوق 100%</h3>
           <p class="verify-info-text">الشهادات صادرة عن أكاديميات معتمدة من النقابة</p>
         </div>
         <div class="verify-info-card">
-          <div class="verify-info-icon">📱</div>
           <h3 class="verify-info-title">QR Code</h3>
           <p class="verify-info-text">امسح الكود على الشهادة للتحقق السريع</p>
         </div>
@@ -778,7 +622,6 @@
 
     </main>
 
-    <!-- Footer -->
     <footer class="home-footer">
       <div class="home-footer-inner">
         <div class="footer-bottom">
@@ -793,7 +636,6 @@
 
   </div>
 
-  <!-- ============ Scripts ============ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/utils.js"></script>
