@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>طلبات الاعتماد | لوحة التحكم</title>
+  <meta name="description" content="إدارة طلبات اعتماد الأكاديميات - Kanban Board">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ REQUESTS KANBAN ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .page-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ MINI STATS ============ */
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .mini-stat {
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .mini-stat:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .mini-stat.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .mini-stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .mini-stat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .mini-stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    /* ============ FILTERS ============ */
+    .filters-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filters-search-wrap {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .filters-search-wrap svg {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    .filters-search-input {
+      width: 100%;
+      padding: 10px 42px 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    
+    .filters-search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .filters-search-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .filter-select {
+      padding: 10px 14px;
+      padding-left: 34px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .filter-select option {
+      background: var(--surface-elevated);
+      color: var(--text);
+    }
+    
+    .filter-reset-btn {
+      padding: 10px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    .filter-reset-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .filter-reset-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ KANBAN BOARD ============ */
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+      min-height: 500px;
+    }
+    
+    .kanban-column {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      min-width: 280px;
+      max-height: calc(100vh - 260px);
+      transition: all 0.2s;
+    }
+    
+    .kanban-column.drag-over {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .kanban-column-header {
+      padding: 14px 16px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 2;
+      border-radius: 14px 14px 0 0;
+    }
+    
+    .kanban-column-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .kanban-column-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .kanban-column-count {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--bg);
+      color: var(--text-muted);
+      min-width: 24px;
+      text-align: center;
+    }
+    
+    .kanban-column-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .kanban-column-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    .kanban-column-body::-webkit-scrollbar-track {
+      background: var(--bg);
+      border-radius: 4px;
+    }
+    
+    .kanban-column-body::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 4px;
+    }
+    
+    .kanban-empty {
+      padding: 32px 12px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      margin: 4px 0;
+    }
+    
+    /* ============ REQUEST CARD ============ */
+    .request-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: grab;
+      transition: all 0.2s;
+      position: relative;
+      user-select: none;
+    }
+    
+    .request-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .request-card:active {
+      cursor: grabbing;
+    }
+    
+    .request-card.dragging {
+      opacity: 0.5;
+      transform: rotate(2deg);
+    }
+    
+    .request-card.sla-warning {
+      border-right: 3px solid var(--warning);
+    }
+    
+    .request-card.sla-overdue {
+      border-right: 3px solid var(--error);
+      animation: sla-pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes sla-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2); }
+      50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+    }
+    
+    .request-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .request-academy-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+    
+    .request-sla-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .request-sla-badge.on-time {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    
+    .request-sla-badge.warning {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+    
+    .request-sla-badge.overdue {
+      background: var(--error-soft);
+      color: var(--error);
+    }
+    
+    .request-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    
+    .request-card-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .request-card-meta-item svg {
+      width: 11px;
+      height: 11px;
+    }
+    
+    .request-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 8px;
+      margin-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+    
+    .request-card-date {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    
+    .request-card-actions {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .request-card-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      padding: 0;
+    }
+    
+    .request-card-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .request-card-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* ============ LOADING ============ */
+    .requests-loader {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .requests-loader.show { display: block; }
+    
+    .requests-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .requests-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ EMPTY OVERALL ============ */
+    .requests-empty {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .requests-empty.show { display: block; }
+    
+    .requests-empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .requests-empty-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .requests-empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .requests-empty-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1280px) {
+      .mini-stats { grid-template-columns: repeat(5, 1fr); }
+    }
+    
+    @media (max-width: 1024px) {
+      .mini-stats { grid-template-columns: repeat(3, 1fr); }
+      .kanban-board {
+        grid-template-columns: repeat(5, 280px);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .mini-stats { grid-template-columns: repeat(2, 1fr); }
+      .page-header-admin { flex-direction: column; align-items: stretch; }
+      .page-header-actions { justify-content: flex-start; }
+      .kanban-board {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .kanban-column {
+        max-height: none;
+      }
+      .kanban-column-body {
+        max-height: 400px;
+      }
+      .filters-row { flex-direction: column; align-items: stretch; }
+      .filters-search-wrap { min-width: unset; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<!-- ✅ حماية الصفحة -->
+<body data-requires-auth data-required-roles="super_admin,admin,committee_manager">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">طلبات الاعتماد</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="../home.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span>الموقع</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-info">
+              <h2>طلبات الاعتماد</h2>
+              <p>سير العمل لاعتماد الأكاديميات - اسحب الطلبات بين المراحل</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn btn-outline btn-sm" id="refreshBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                <span>تحديث</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mini Stats -->
+          <div class="mini-stats">
+            <div class="mini-stat" data-stage="submitted">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--info);"></span>
+                تم التقديم
+              </div>
+              <div class="mini-stat-value" id="countSubmitted">—</div>
+            </div>
+            <div class="mini-stat" data-stage="documents_review">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--warning);"></span>
+                مراجعة المستندات
+              </div>
+              <div class="mini-stat-value" id="countDocumentsReview">—</div>
+            </div>
+            <div class="mini-stat" data-stage="site_visit">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--accent);"></span>
+                زيارة الموقع
+              </div>
+              <div class="mini-stat-value" id="countSiteVisit">—</div>
+            </div>
+            <div class="mini-stat" data-stage="committee_review">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:#EC4899;"></span>
+                لجنة المراجعة
+              </div>
+              <div class="mini-stat-value" id="countCommitteeReview">—</div>
+            </div>
+            <div class="mini-stat" data-stage="final_approval">
+              <div class="mini-stat-label">
+                <span class="mini-stat-dot" style="background:var(--success);"></span>
+                الموافقة النهائية
+              </div>
+              <div class="mini-stat-value" id="countFinalApproval">—</div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-card">
+            <div class="filters-row">
+              <div class="filters-search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input 
+                  type="text" 
+                  class="filters-search-input" 
+                  id="searchInput" 
+                  placeholder="بحث برقم الطلب أو اسم الأكاديمية..."
+                  autocomplete="off"
+                >
+              </div>
+              <select class="filter-select" id="slaFilter">
+                <option value="">كل حالات SLA</option>
+                <option value="on-time">في الوقت</option>
+                <option value="warning">قرب الانتهاء</option>
+                <option value="overdue">متأخرة</option>
+              </select>
+              <select class="filter-select" id="sortFilter">
+                <option value="oldest">الأقدم أولاً</option>
+                <option value="newest">الأحدث أولاً</option>
+                <option value="sla">حسب SLA</option>
+              </select>
+              <button class="filter-reset-btn" id="resetBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>إعادة تعيين</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="requests-loader" id="requestsLoader">
+            <div class="requests-loader-spinner"></div>
+            <div class="requests-loader-text">جاري تحميل الطلبات...</div>
+          </div>
+
+          <!-- Empty -->
+          <div class="requests-empty" id="requestsEmpty">
+            <div class="requests-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <h3 class="requests-empty-title">لا توجد طلبات اعتماد</h3>
+            <p class="requests-empty-text">لم يتم استلام أي طلبات اعتماد بعد، أو لا توجد طلبات مطابقة للفلاتر.</p>
+            <button class="filter-reset-btn" id="emptyResetBtn" type="button" style="margin:0 auto;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+              <span>عرض كل الطلبات</span>
+            </button>
+          </div>
+
+          <!-- Kanban Board -->
+          <div class="kanban-board" id="kanbanBoard" style="display:none;">
+            
+            <!-- Column 1: submitted -->
+            <div class="kanban-column" data-stage="submitted">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span class="kanban-column-dot" style="background:var(--info);"></span>
+                  <span>تم التقديم</span>
+                </div>
+                <span class="kanban-column-count" id="colCountSubmitted">0</span>
+              </div>
+              <div class="kanban-column-body" id="colSubmitted">
+                <div class="kanban-empty">لا توجد طلبات</div>
+              </div>
+            </div>
+
+            <!-- Column 2: documents_review -->
+            <div class="kanban-column" data-stage="documents_review">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span class="kanban-column-dot" style="background:var(--warning);"></span>
+                  <span>مراجعة المستندات</span>
+                </div>
+                <span class="kanban-column-count" id="colCountDocumentsReview">0</span>
+              </div>
+              <div class="kanban-column-body" id="colDocumentsReview">
+                <div class="kanban-empty">لا توجد طلبات</div>
+              </div>
+            </div>
+
+            <!-- Column 3: site_visit -->
+            <div class="kanban-column" data-stage="site_visit">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span class="kanban-column-dot" style="background:var(--accent);"></span>
+                  <span>زيارة الموقع</span>
+                </div>
+                <span class="kanban-column-count" id="colCountSiteVisit">0</span>
+              </div>
+              <div class="kanban-column-body" id="colSiteVisit">
+                <div class="kanban-empty">لا توجد طلبات</div>
+              </div>
+            </div>
+
+            <!-- Column 4: committee_review -->
+            <div class="kanban-column" data-stage="committee_review">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span class="kanban-column-dot" style="background:#EC4899;"></span>
+                  <span>لجنة المراجعة</span>
+                </div>
+                <span class="kanban-column-count" id="colCountCommitteeReview">0</span>
+              </div>
+              <div class="kanban-column-body" id="colCommitteeReview">
+                <div class="kanban-empty">لا توجد طلبات</div>
+              </div>
+            </div>
+
+            <!-- Column 5: final_approval -->
+            <div class="kanban-column" data-stage="final_approval">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span class="kanban-column-dot" style="background:var(--success);"></span>
+                  <span>الموافقة النهائية</span>
+                </div>
+                <span class="kanban-column-count" id="colCountFinalApproval">0</span>
+              </div>
+              <div class="kanban-column-body" id="colFinalApproval">
+                <div class="kanban-empty">لا توجد طلبات</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+  <script src="../assets/js/pages/admin/requests.js"></script>
+
+</body>
+</html>
