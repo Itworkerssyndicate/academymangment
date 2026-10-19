@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>إدارة الأكاديميات | لوحة التحكم</title>
+  <meta name="description" content="إدارة الأكاديميات التدريبية المعتمدة">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ ADMIN ACADEMIES ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-admin-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-admin-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .page-header-admin-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ MINI STATS ============ */
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .mini-stat {
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .mini-stat:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .mini-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .mini-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .mini-stat-value.primary { color: var(--primary); }
+    .mini-stat-value.success { color: var(--success); }
+    .mini-stat-value.warning { color: var(--warning); }
+    
+    /* ============ FILTERS ============ */
+    .filters-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    
+    .filters-search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    
+    .filters-search-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .filters-search-wrap svg {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    .filters-search-input {
+      width: 100%;
+      padding: 11px 42px 11px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .filters-search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .filters-search-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .filters-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+    
+    .filter-select {
+      padding: 11px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+      padding-left: 34px;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .filter-select option {
+      background: var(--surface-elevated);
+      color: var(--text);
+    }
+    
+    .filter-reset-btn {
+      padding: 11px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    .filter-reset-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .filter-reset-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ RESULTS TOOLBAR ============ */
+    .results-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .results-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    
+    .results-count strong {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 15px;
+    }
+    
+    /* ============ ACADEMIES GRID ============ */
+    .admin-academies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .admin-academy-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    
+    .admin-academy-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    
+    .admin-academy-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .admin-academy-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .admin-academy-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .admin-academy-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .admin-academy-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      margin: 0 0 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .admin-academy-license {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.3px;
+    }
+    
+    .admin-status-badge {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .admin-status-badge.approved {
+      background: var(--success-soft);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    
+    .admin-status-badge.pending {
+      background: var(--warning-soft);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+    
+    .admin-status-badge.rejected {
+      background: var(--error-soft);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    
+    .admin-status-badge.suspended {
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    
+    .admin-academy-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+    }
+    
+    .admin-academy-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .admin-academy-info-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .admin-academy-info-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .admin-academy-info-value.mono {
+      font-family: 'Courier New', monospace;
+      color: var(--text-secondary);
+    }
+    
+    .admin-academy-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    
+    .admin-academy-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    
+    .admin-action-btn {
+      padding: 6px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .admin-action-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .admin-action-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .admin-action-btn.primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: var(--primary-text);
+    }
+    
+    .admin-action-btn.success {
+      background: var(--success-soft);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    
+    .admin-action-btn.success:hover {
+      background: var(--success);
+      color: #fff;
+    }
+    
+    .admin-action-btn.danger {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+    
+    .admin-action-btn.danger:hover {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .admin-action-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* ============ LOADING ============ */
+    .admin-loader {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .admin-loader.show { display: block; }
+    
+    .admin-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .admin-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ EMPTY ============ */
+    .admin-empty {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .admin-empty.show { display: block; }
+    
+    .admin-empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .admin-empty-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .admin-empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    
+    .admin-empty-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    
+    /* ============ PAGINATION ============ */
+    .admin-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .admin-page-btn {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .admin-page-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .admin-page-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    .admin-page-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    
+    .admin-page-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1024px) {
+      .mini-stats { grid-template-columns: repeat(2, 1fr); }
+      .admin-academies-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    }
+    
+    @media (max-width: 640px) {
+      .mini-stats { grid-template-columns: 1fr 1fr; }
+      .admin-academies-grid { grid-template-columns: 1fr; }
+      .filters-search-row { flex-direction: column; }
+      .admin-academy-body { grid-template-columns: 1fr; }
+      .page-header-admin { flex-direction: column; align-items: stretch; }
+      .page-header-admin-actions { justify-content: flex-start; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<!-- ✅ حماية الصفحة -->
+<body data-requires-auth data-required-roles="super_admin,admin,committee_manager">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">إدارة الأكاديميات</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="../home.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span>الموقع</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-admin-info">
+              <h2>الأكاديميات</h2>
+              <p>إدارة وعرض جميع الأكاديميات التدريبية المعتمدة</p>
+            </div>
+            <div class="page-header-admin-actions">
+              <!-- ✅ زر الإضافة - admin+ فقط -->
+              <a href="academy-add.html" 
+                 class="btn btn-primary btn-sm" 
+                 data-permission="academy.create"
+                 style="text-decoration:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>إضافة أكاديمية</span>
+              </a>
+              <a href="categories.html"
+                 class="btn btn-outline btn-sm"
+                 data-permission="category.view"
+                 style="text-decoration:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                <span>التصنيفات</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Mini Stats -->
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">الإجمالي</div>
+              <div class="mini-stat-value" id="miniTotal">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">معتمدة</div>
+              <div class="mini-stat-value success" id="miniApproved">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">قيد الاعتماد</div>
+              <div class="mini-stat-value warning" id="miniPending">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">الشهادات الصادرة</div>
+              <div class="mini-stat-value primary" id="miniCertificates">—</div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-card">
+            <div class="filters-search-row">
+              <div class="filters-search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input 
+                  type="text" 
+                  class="filters-search-input" 
+                  id="searchInput" 
+                  placeholder="بحث بالاسم أو رقم الاعتماد أو البطاقة الضريبية..."
+                  autocomplete="off"
+                >
+              </div>
+            </div>
+            <div class="filters-options">
+              <select class="filter-select" id="statusFilter">
+                <option value="">كل الحالات</option>
+                <option value="approved">معتمدة</option>
+                <option value="pending">قيد الاعتماد</option>
+                <option value="suspended">موقوفة</option>
+                <option value="rejected">مرفوضة</option>
+              </select>
+              <select class="filter-select" id="categoryFilter">
+                <option value="">كل التصنيفات</option>
+              </select>
+              <select class="filter-select" id="governorateFilter">
+                <option value="">كل المحافظات</option>
+              </select>
+              <select class="filter-select" id="sortFilter">
+                <option value="newest">الأحدث أولاً</option>
+                <option value="oldest">الأقدم أولاً</option>
+                <option value="name">الاسم (أ-ي)</option>
+                <option value="certs">الأكثر شهادات</option>
+              </select>
+              <button class="filter-reset-btn" id="resetBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>إعادة تعيين</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Results Toolbar -->
+          <div class="results-toolbar" id="resultsToolbar" style="display:none;">
+            <div class="results-count">
+              <strong id="resultsCount">0</strong> أكاديمية
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="admin-loader" id="adminLoader">
+            <div class="admin-loader-spinner"></div>
+            <div class="admin-loader-text">جاري تحميل الأكاديميات...</div>
+          </div>
+
+          <!-- Grid -->
+          <div class="admin-academies-grid" id="academiesGrid" style="display:none;"></div>
+
+          <!-- Empty -->
+          <div class="admin-empty" id="adminEmpty">
+            <div class="admin-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <line x1="9" y1="22" x2="9" y2="12"></line>
+                <line x1="15" y1="22" x2="15" y2="12"></line>
+              </svg>
+            </div>
+            <h3 class="admin-empty-title">لا توجد أكاديميات</h3>
+            <p class="admin-empty-text">لم يتم العثور على أكاديميات مطابقة للفلاتر. جرب تغيير معايير البحث.</p>
+            <button class="filter-reset-btn" id="emptyResetBtn" type="button" style="margin:0 auto;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+              <span>عرض كل الأكاديميات</span>
+            </button>
+          </div>
+
+          <!-- Pagination -->
+          <div class="admin-pagination" id="pagination" style="display:none;">
+            <button class="admin-page-btn" id="prevBtn" type="button" aria-label="السابق">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+            <div id="pageNumbers" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;"></div>
+            <button class="admin-page-btn" id="nextBtn" type="button" aria-label="التالي">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+  <script src="../assets/js/pages/admin/academies.js"></script>
+
+</body>
+</html>
