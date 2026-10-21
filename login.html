@@ -14,14 +14,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- Settings Defaults -->
+  <!-- Settings Defaults (لقراءة اسم النقابة واللوجو فقط) -->
   <script src="assets/js/settings-defaults.js"></script>
   
-  <!-- Theme Bootstrap (BEFORE CSS) -->
+  <!-- Config (لقراءة الـ URL والـ Key فقط) -->
   <script src="assets/js/config.js"></script>
-  <script src="assets/js/themes-data.js"></script>
-  <script src="assets/js/theme.js"></script>
-  <script src="assets/js/app-settings.js"></script>
   
   <!-- CSS -->
   <link rel="stylesheet" href="assets/css/theme.css">
@@ -29,12 +26,10 @@
   
   <style>
     /* ============================================
-       LOGIN PAGE - Official Patriotic Design
+       LOGIN PAGE - Standalone & Radical Fix
        ============================================ */
     
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
     
     html, body {
       margin: 0;
@@ -44,8 +39,8 @@
     
     body {
       font-family: 'Cairo', 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg, #0A0E14);
+      color: var(--text, #F8FAFC);
       direction: rtl;
       overflow-x: hidden;
     }
@@ -59,7 +54,6 @@
       overflow: hidden;
     }
     
-    /* ============ FORM SIDE (RIGHT) ============ */
     .auth-form-side {
       display: flex;
       flex-direction: column;
@@ -68,7 +62,7 @@
       padding: 40px 24px;
       position: relative;
       z-index: 2;
-      background: var(--bg);
+      background: var(--bg, #0A0E14);
     }
     
     .auth-form-wrapper {
@@ -76,17 +70,17 @@
       max-width: 420px;
     }
     
-    /* ============ BRAND SIDE (LEFT) ============ */
+    /* ============ BRAND SIDE ============ */
     .auth-brand-side {
       position: relative;
-      background: linear-gradient(135deg, var(--surface) 0%, var(--bg-alt) 100%);
+      background: linear-gradient(135deg, var(--surface, #131820) 0%, var(--bg-alt, #05080D) 100%);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 60px 48px;
       overflow: hidden;
-      border-right: 1px solid var(--border);
+      border-right: 1px solid var(--border, rgba(255,255,255,0.08));
     }
     
     .auth-brand-side::before {
@@ -94,8 +88,8 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 60% 50% at 30% 30%, var(--primary-soft) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 70% 80%, var(--accent-soft) 0%, transparent 60%);
+        radial-gradient(ellipse 60% 50% at 30% 30%, var(--primary-soft, rgba(206,17,38,0.14)) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 70% 80%, var(--accent-soft, rgba(255,255,255,0.08)) 0%, transparent 60%);
       pointer-events: none;
     }
     
@@ -104,8 +98,8 @@
       position: absolute;
       inset: 0;
       background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+        linear-gradient(var(--border, rgba(255,255,255,0.08)) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border, rgba(255,255,255,0.08)) 1px, transparent 1px);
       background-size: 40px 40px;
       opacity: 0.4;
       mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%);
@@ -125,31 +119,23 @@
       height: 120px;
       margin: 0 auto 32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      background: linear-gradient(135deg, var(--primary, #CE1126), var(--primary-hover, #E63946));
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 40px;
       font-weight: 800;
-      color: var(--primary-text);
-      box-shadow:
-        0 0 0 8px var(--primary-soft),
-        0 20px 60px var(--primary-soft);
+      color: var(--primary-text, #FFFFFF);
+      box-shadow: 0 0 0 8px var(--primary-soft, rgba(206,17,38,0.14)), 0 20px 60px var(--primary-soft, rgba(206,17,38,0.14));
       overflow: hidden;
-      position: relative;
     }
     
-    .brand-logo-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      padding: 16px;
-    }
+    .brand-logo-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 16px; }
     
     .brand-title {
       font-size: 26px;
       font-weight: 800;
-      color: var(--text);
+      color: var(--text, #F8FAFC);
       margin: 0 0 12px;
       line-height: 1.35;
       letter-spacing: -0.5px;
@@ -157,7 +143,7 @@
     
     .brand-subtitle {
       font-size: 15px;
-      color: var(--text-muted);
+      color: var(--text-muted, #64748B);
       margin: 0 0 40px;
       line-height: 1.7;
     }
@@ -170,14 +156,14 @@
       padding: 24px;
       background: rgba(0, 0, 0, 0.15);
       border-radius: 16px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--border, rgba(255,255,255,0.08));
     }
     
     .brand-feature-item {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      color: var(--text-secondary);
+      color: var(--text-secondary, #94A3B8);
       font-size: 13px;
       line-height: 1.6;
     }
@@ -186,8 +172,8 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: var(--primary);
-      color: var(--primary-text);
+      background: var(--primary, #CE1126);
+      color: var(--primary-text, #FFFFFF);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -197,11 +183,8 @@
       margin-top: 1px;
     }
     
-    /* ============ AUTH HEADER ============ */
-    .auth-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    /* ============ HEADER ============ */
+    .auth-header { text-align: center; margin-bottom: 32px; }
     
     .auth-header-logo {
       display: none;
@@ -209,33 +192,28 @@
       height: 64px;
       margin: 0 auto 20px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      background: linear-gradient(135deg, var(--primary, #CE1126), var(--primary-hover, #E63946));
       align-items: center;
       justify-content: center;
       font-size: 22px;
       font-weight: 800;
-      color: var(--primary-text);
+      color: var(--primary-text, #FFFFFF);
       overflow: hidden;
     }
     
-    .auth-header-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      padding: 8px;
-    }
+    .auth-header-logo img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
     
     .auth-title {
       font-size: 26px;
       font-weight: 800;
-      color: var(--text);
+      color: var(--text, #F8FAFC);
       margin: 0 0 8px;
       line-height: 1.3;
     }
     
     .auth-subtitle {
       font-size: 14px;
-      color: var(--text-muted);
+      color: var(--text-muted, #64748B);
       margin: 0;
       line-height: 1.6;
     }
@@ -249,29 +227,15 @@
       font-weight: 500;
       margin-bottom: 20px;
       line-height: 1.6;
-      animation: slideDown 0.3s ease;
       text-align: right;
+      animation: slideDown 0.3s ease;
     }
     
     .auth-alert.show { display: block; }
     
-    .auth-alert.error {
-      background: var(--error-soft);
-      border: 1px solid var(--error);
-      color: var(--error);
-    }
-    
-    .auth-alert.success {
-      background: var(--success-soft);
-      border: 1px solid var(--success);
-      color: var(--success);
-    }
-    
-    .auth-alert.info {
-      background: var(--info-soft);
-      border: 1px solid var(--info);
-      color: var(--info);
-    }
+    .auth-alert.error { background: var(--error-soft, rgba(239,68,68,0.12)); border: 1px solid var(--error, #EF4444); color: var(--error, #EF4444); }
+    .auth-alert.success { background: var(--success-soft, rgba(16,185,129,0.12)); border: 1px solid var(--success, #10B981); color: var(--success, #10B981); }
+    .auth-alert.info { background: var(--info-soft, rgba(59,130,246,0.12)); border: 1px solid var(--info, #3B82F6); color: var(--info, #3B82F6); }
     
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-8px); }
@@ -279,37 +243,21 @@
     }
     
     /* ============ FORM ============ */
-    .auth-form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    .auth-form { display: flex; flex-direction: column; gap: 20px; }
     
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .form-field { display: flex; flex-direction: column; gap: 8px; }
     
-    .form-field label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
+    .form-field label { font-size: 13px; font-weight: 600; color: var(--text-secondary, #94A3B8); }
     
-    .input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
+    .input-wrap { position: relative; display: flex; align-items: center; }
     
     .input-wrap input {
       width: 100%;
       padding: 14px 46px 14px 16px;
-      background: var(--surface);
-      border: 2px solid var(--border);
+      background: var(--surface, #131820);
+      border: 2px solid var(--border, rgba(255,255,255,0.08));
       border-radius: 12px;
-      color: var(--text);
+      color: var(--text, #F8FAFC);
       font-family: inherit;
       font-size: 14px;
       transition: all 0.2s;
@@ -318,22 +266,14 @@
       text-align: left;
     }
     
-    .input-wrap input[type="email"] {
-      letter-spacing: 0;
-    }
-    
-    .input-wrap input[type="password"] {
-      letter-spacing: 2px;
-    }
-    
     .input-wrap input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px var(--primary-soft);
-      background: var(--surface-elevated);
+      border-color: var(--primary, #CE1126);
+      box-shadow: 0 0 0 4px var(--primary-soft, rgba(206,17,38,0.14));
+      background: var(--surface-elevated, #1C2430);
     }
     
     .input-wrap input::placeholder {
-      color: var(--text-muted);
+      color: var(--text-muted, #64748B);
       letter-spacing: 0;
       font-family: 'Cairo', sans-serif;
       direction: rtl;
@@ -345,16 +285,14 @@
       right: 14px;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-muted);
+      color: var(--text-muted, #64748B);
       width: 18px;
       height: 18px;
       pointer-events: none;
       transition: color 0.2s;
     }
     
-    .input-wrap input:focus ~ .input-icon {
-      color: var(--primary);
-    }
+    .input-wrap input:focus ~ .input-icon { color: var(--primary, #CE1126); }
     
     .input-toggle {
       position: absolute;
@@ -366,7 +304,7 @@
       border-radius: 8px;
       background: transparent;
       border: none;
-      color: var(--text-muted);
+      color: var(--text-muted, #64748B);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -374,15 +312,9 @@
       transition: all 0.2s;
     }
     
-    .input-toggle:hover {
-      background: var(--surface-hover);
-      color: var(--text);
-    }
+    .input-toggle:hover { background: var(--surface-hover, #252F3D); color: var(--text, #F8FAFC); }
     
-    .input-toggle svg {
-      width: 18px;
-      height: 18px;
-    }
+    .input-toggle svg { width: 18px; height: 18px; }
     
     /* ============ REMEMBER / FORGOT ============ */
     .form-field-row {
@@ -401,35 +333,27 @@
       cursor: pointer;
       user-select: none;
       font-size: 13px;
-      color: var(--text-secondary);
+      color: var(--text-secondary, #94A3B8);
     }
     
-    .form-checkbox input {
-      width: 16px;
-      height: 16px;
-      accent-color: var(--primary);
-      cursor: pointer;
-    }
+    .form-checkbox input { width: 16px; height: 16px; accent-color: var(--primary, #CE1126); cursor: pointer; }
     
     .form-link {
       font-size: 13px;
-      color: var(--primary);
+      color: var(--primary, #CE1126);
       text-decoration: none;
       font-weight: 600;
       transition: color 0.2s;
     }
     
-    .form-link:hover {
-      color: var(--primary-hover);
-      text-decoration: underline;
-    }
+    .form-link:hover { color: var(--primary-hover, #E63946); text-decoration: underline; }
     
-    /* ============ SUBMIT BUTTON ============ */
+    /* ============ SUBMIT ============ */
     .form-submit {
       width: 100%;
       padding: 16px;
-      background: var(--primary);
-      color: var(--primary-text);
+      background: var(--primary, #CE1126);
+      color: var(--primary-text, #FFFFFF);
       border: none;
       border-radius: 12px;
       font-family: inherit;
@@ -445,43 +369,33 @@
     }
     
     .form-submit:hover:not(:disabled) {
-      background: var(--primary-hover);
+      background: var(--primary-hover, #E63946);
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px var(--primary-soft);
+      box-shadow: 0 10px 30px var(--primary-soft, rgba(206,17,38,0.14));
     }
     
-    .form-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     
     .form-submit .spinner {
       width: 18px;
       height: 18px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255,255,255,0.3);
       border-top-color: #fff;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     
     /* ============ FOOTER ============ */
     .auth-footer {
       text-align: center;
       margin-top: 24px;
       padding-top: 24px;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--border, rgba(255,255,255,0.08));
     }
     
-    .auth-footer p {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin: 0 0 12px;
-    }
+    .auth-footer p { font-size: 13px; color: var(--text-muted, #64748B); margin: 0 0 12px; }
     
     .auth-footer-link {
       display: inline-flex;
@@ -489,9 +403,9 @@
       gap: 8px;
       padding: 10px 20px;
       background: transparent;
-      border: 1px solid var(--border);
+      border: 1px solid var(--border, rgba(255,255,255,0.08));
       border-radius: 10px;
-      color: var(--text-secondary);
+      color: var(--text-secondary, #94A3B8);
       font-family: inherit;
       font-size: 13px;
       font-weight: 600;
@@ -502,69 +416,33 @@
     }
     
     .auth-footer-link:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: var(--primary-soft);
+      border-color: var(--primary, #CE1126);
+      color: var(--primary, #CE1126);
+      background: var(--primary-soft, rgba(206,17,38,0.14));
       text-decoration: none;
     }
     
-    .auth-footer-link svg {
-      width: 16px;
-      height: 16px;
-    }
+    .auth-footer-link svg { width: 16px; height: 16px; }
     
-    .auth-version {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 11px;
-      color: var(--text-muted);
-      opacity: 0.5;
-    }
+    .auth-version { text-align: center; margin-top: 20px; font-size: 11px; color: var(--text-muted, #64748B); opacity: 0.5; }
     
     /* ============ RESPONSIVE ============ */
     @media (max-width: 1024px) {
-      .auth-layout {
-        grid-template-columns: 1fr;
-      }
-      
-      .auth-brand-side {
-        display: none;
-      }
-      
-      .auth-header-logo {
-        display: flex;
-      }
+      .auth-layout { grid-template-columns: 1fr; }
+      .auth-brand-side { display: none; }
+      .auth-header-logo { display: flex; }
     }
     
     @media (max-width: 480px) {
-      .auth-form-side {
-        padding: 24px 16px;
-      }
-      
-      .auth-title {
-        font-size: 22px;
-      }
-      
-      .auth-subtitle {
-        font-size: 13px;
-      }
-      
-      .input-wrap input {
-        padding: 13px 44px 13px 14px;
-        font-size: 14px;
-      }
-      
-      .form-submit {
-        padding: 14px;
-        font-size: 14px;
-      }
+      .auth-form-side { padding: 24px 16px; }
+      .auth-title { font-size: 22px; }
+      .auth-subtitle { font-size: 13px; }
+      .input-wrap input { padding: 13px 44px 13px 14px; font-size: 14px; }
+      .form-submit { padding: 14px; font-size: 14px; }
     }
     
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
@@ -576,30 +454,20 @@
     <div class="auth-form-side">
       <div class="auth-form-wrapper">
         
-        <!-- Header -->
         <div class="auth-header">
           <div class="auth-header-logo" id="authHeaderLogo">نت</div>
           <h1 class="auth-title">تسجيل الدخول</h1>
           <p class="auth-subtitle" id="authSubtitle">مرحباً بك في النظام الرسمي</p>
         </div>
         
-        <!-- Alert -->
         <div class="auth-alert" id="authAlert"></div>
         
-        <!-- Form -->
         <form class="auth-form" id="loginForm" novalidate>
           
-          <!-- Email -->
           <div class="form-field">
             <label for="emailInput">البريد الإلكتروني</label>
             <div class="input-wrap">
-              <input 
-                type="email" 
-                id="emailInput" 
-                placeholder="you@example.com" 
-                autocomplete="username"
-                required
-              >
+              <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="username" required>
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                 <polyline points="22,6 12,13 2,6"></polyline>
@@ -607,27 +475,15 @@
             </div>
           </div>
           
-          <!-- Password -->
           <div class="form-field">
             <label for="passwordInput">كلمة المرور</label>
             <div class="input-wrap">
-              <input 
-                type="password" 
-                id="passwordInput" 
-                placeholder="••••••••" 
-                autocomplete="current-password"
-                required
-              >
+              <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" required>
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
-              <button 
-                type="button" 
-                class="input-toggle" 
-                id="passwordToggle"
-                aria-label="إظهار كلمة المرور"
-              >
+              <button type="button" class="input-toggle" id="passwordToggle" aria-label="إظهار كلمة المرور">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
@@ -636,7 +492,6 @@
             </div>
           </div>
           
-          <!-- Remember / Forgot -->
           <div class="form-field-row">
             <label class="form-checkbox">
               <input type="checkbox" id="rememberMe">
@@ -645,14 +500,12 @@
             <a href="#" class="form-link" id="forgotLink">نسيت كلمة المرور؟</a>
           </div>
           
-          <!-- Submit -->
           <button type="submit" class="form-submit" id="loginBtn">
             <span id="loginBtnText">تسجيل الدخول</span>
           </button>
           
         </form>
         
-        <!-- Footer -->
         <div class="auth-footer">
           <p>هل تمتلك أكاديمية؟</p>
           <a href="academy-apply.html" class="auth-footer-link">
@@ -671,7 +524,6 @@
           </a>
         </div>
         
-        <!-- Version -->
         <div class="auth-version" id="authVersion">الإصدار 1.0</div>
         
       </div>
@@ -685,22 +537,10 @@
         <p class="brand-subtitle" id="brandSubtitle">لجنة التحول الرقمي والتدريب</p>
         
         <div class="brand-features">
-          <div class="brand-feature-item">
-            <span class="brand-feature-check">&#10003;</span>
-            <span>التحقق الرسمي من صحة الشهادات التدريبية</span>
-          </div>
-          <div class="brand-feature-item">
-            <span class="brand-feature-check">&#10003;</span>
-            <span>قاعدة بيانات مركزية لجميع الأكاديميات المعتمدة</span>
-          </div>
-          <div class="brand-feature-item">
-            <span class="brand-feature-check">&#10003;</span>
-            <span>نظام اعتماد رسمي يضمن جودة التدريب</span>
-          </div>
-          <div class="brand-feature-item">
-            <span class="brand-feature-check">&#10003;</span>
-            <span>شهادات موثقة مع QR للتحقق السريع</span>
-          </div>
+          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>التحقق الرسمي من صحة الشهادات التدريبية</span></div>
+          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>قاعدة بيانات مركزية لجميع الأكاديميات المعتمدة</span></div>
+          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>نظام اعتماد رسمي يضمن جودة التدريب</span></div>
+          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>شهادات موثقة مع QR للتحقق السريع</span></div>
         </div>
       </div>
     </div>
@@ -708,16 +548,9 @@
   </div>
 
   <!-- ============ Scripts ============ -->
-  <!-- ✅ Supabase SDK - إصدار 2.110.1 (فيه إصلاح تعليق تسجيل الدخول) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js"></script>
+  <!-- ✅ Supabase SDK - إصدار 2.111.0 (أحدث إصدار مستقر) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/dist/umd/supabase.js"></script>
   
-  <script src="assets/js/supabase-client.js"></script>
-  <script src="assets/js/utils.js"></script>
-  <script src="assets/js/session.js"></script>
-  <script src="assets/js/auth-guard.js"></script>
-  <script src="assets/js/app-title.js"></script>
-  
-  <!-- ============ Login Logic ============ -->
   <script>
     (function () {
       'use strict';
@@ -727,58 +560,31 @@
       // ============================================
       // الثوابت
       // ============================================
-      var AUTH_TIMEOUT_MS = 20000;   // 20 ثانية لتسجيل الدخول
-      var PROFILE_TIMEOUT_MS = 10000; // 10 ثوانٍ لجلب البروفايل
-      var SESSION_TIMEOUT_MS = 5000;  // 5 ثوانٍ لفحص الجلسة
+      var AUTH_TIMEOUT_MS = 25000;    // 25 ثانية
+      var PROFILE_TIMEOUT_MS = 10000;  // 10 ثوانٍ
       
       var state = {
         submitting: false,
         attempts: 0,
         maxAttempts: 5,
-        initialized: false
+        initialized: false,
+        supabase: null
       };
       
       // ============================================
       // 1. Helpers
       // ============================================
       function $(id) { return document.getElementById(id); }
-      
-      function setText(id, t) {
-        var el = $(id);
-        if (el) el.textContent = t;
-      }
+      function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
       
       function escapeHtml(s) {
         if (s == null) return '';
-        return String(s)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#039;');
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
       }
       
       function getSetting(p, f) {
-        if (window.AppSettings && window.AppSettings.get) {
-          return window.AppSettings.get(p, f);
-        }
-        if (window.ITWS_SETTINGS_DEFAULTS) {
-          var parts = p.split('.');
-          var value = window.ITWS_SETTINGS_DEFAULTS;
-          for (var i = 0; i < parts.length; i++) {
-            if (value && typeof value === 'object') value = value[parts[i]];
-            else { value = undefined; break; }
-          }
-          if (value !== undefined) return value;
-        }
+        if (window.AppSettings && window.AppSettings.get) return window.AppSettings.get(p, f);
         return f;
-      }
-      
-      function resolve(path) {
-        if (!path) return '#';
-        if (window.resolveUrl) return window.resolveUrl(path);
-        var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
-        return base + String(path).replace(/^\.?\//, '');
       }
       
       function withTimeout(promise, ms, label) {
@@ -802,20 +608,13 @@
         el.className = 'auth-alert show ' + (type || 'info');
         
         if (type === 'success' || type === 'info') {
-          setTimeout(function () {
-            if (el.textContent === message) el.className = 'auth-alert';
-          }, 8000);
+          setTimeout(function () { if (el.textContent === message) el.className = 'auth-alert'; }, 8000);
         } else if (type === 'error') {
-          setTimeout(function () {
-            if (el.textContent === message) el.className = 'auth-alert';
-          }, 12000);
+          setTimeout(function () { if (el.textContent === message) el.className = 'auth-alert'; }, 12000);
         }
       }
       
-      function hideAlert() {
-        var el = $('authAlert');
-        if (el) el.className = 'auth-alert';
-      }
+      function hideAlert() { var el = $('authAlert'); if (el) el.className = 'auth-alert'; }
       
       // ============================================
       // 3. Loading state
@@ -841,35 +640,59 @@
         var email = $('emailInput').value.trim();
         var password = $('passwordInput').value;
         
-        if (!email) {
-          showAlert('الرجاء إدخال البريد الإلكتروني', 'error');
-          $('emailInput').focus();
-          return null;
-        }
-        
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          showAlert('البريد الإلكتروني غير صحيح', 'error');
-          $('emailInput').focus();
-          return null;
-        }
-        
-        if (!password) {
-          showAlert('الرجاء إدخال كلمة المرور', 'error');
-          $('passwordInput').focus();
-          return null;
-        }
-        
-        if (password.length < 6) {
-          showAlert('كلمة المرور قصيرة جداً (6 أحرف على الأقل)', 'error');
-          $('passwordInput').focus();
-          return null;
-        }
+        if (!email) { showAlert('الرجاء إدخال البريد الإلكتروني', 'error'); $('emailInput').focus(); return null; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAlert('البريد الإلكتروني غير صحيح', 'error'); $('emailInput').focus(); return null; }
+        if (!password) { showAlert('الرجاء إدخال كلمة المرور', 'error'); $('passwordInput').focus(); return null; }
+        if (password.length < 6) { showAlert('كلمة المرور قصيرة جداً (6 أحرف على الأقل)', 'error'); $('passwordInput').focus(); return null; }
         
         return { email: email, password: password };
       }
       
       // ============================================
-      // 5. Login handler
+      // 5. تهيئة Supabase (مستقلة تماماً)
+      // ============================================
+      function initSupabase() {
+        if (state.supabase) return state.supabase;
+        
+        if (typeof supabase === 'undefined' || !supabase.createClient) {
+          console.error('[Login] Supabase SDK not loaded');
+          return null;
+        }
+        
+        var cfg = window.ITWS_CONFIG || {};
+        if (!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) {
+          console.error('[Login] SUPABASE_URL not configured');
+          return null;
+        }
+        
+        try {
+          // ✅ الحل الجذري: إنشاء عميل مستقل مع تعطيل القفل بالكامل
+          state.supabase = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+            auth: {
+              persistSession: true,
+              autoRefreshToken: true,
+              detectSessionInUrl: true,
+              storageKey: 'itws_auth',
+              flowType: 'pkce',
+              
+              // ✅ الحل النهائي: no-op lock (تجاوز navigator.locks)
+              lock: function (_name, _acquireTimeout, fn) {
+                return fn();
+              }
+            },
+            realtime: { params: { eventsPerSecond: 5 } }
+          });
+          
+          console.log('%c✅ [Login] Supabase client ready (locks DISABLED)', 'color: #10B981; font-weight: bold;');
+          return state.supabase;
+        } catch (err) {
+          console.error('[Login] Failed to create Supabase client:', err);
+          return null;
+        }
+      }
+      
+      // ============================================
+      // 6. Login handler
       // ============================================
       function handleLogin(e) {
         if (e) e.preventDefault();
@@ -885,7 +708,8 @@
           return;
         }
         
-        if (!window.sb) {
+        var sb = initSupabase();
+        if (!sb) {
           showAlert('تعذر الاتصال بالخادم. يرجى إعادة تحميل الصفحة.', 'error');
           return;
         }
@@ -893,16 +717,20 @@
         state.submitting = true;
         setLoading(true);
         
-        // ✅ signInWithEmailAndPassword مع timeout
-        var signInPromise = window.sb.auth.signInWithEmailAndPassword(data.email, data.password);
+        console.log('[Login] Attempting signIn for:', data.email);
+        
+        // ✅ signInWithEmailAndPassword مع timeout (الحل الجذري)
+        var signInPromise = sb.auth.signInWithEmailAndPassword(data.email, data.password);
         
         withTimeout(signInPromise, AUTH_TIMEOUT_MS, 'تسجيل الدخول')
           .then(function (cred) {
+            console.log('[Login] signIn resolved:', cred.user ? cred.user.id : 'no user');
+            
             var user = cred.user;
             if (!user) throw new Error('لم يتم استلام بيانات المستخدم');
             
-            // ✅ جلب البروفايل مع timeout
-            var profilePromise = window.sb
+            // جلب البروفايل مع timeout
+            var profilePromise = sb
               .from('profiles')
               .select('id, email, full_name, role, is_active')
               .eq('id', user.id)
@@ -911,19 +739,19 @@
             return withTimeout(profilePromise, PROFILE_TIMEOUT_MS, 'جلب بيانات الحساب')
               .then(function (profileRes) {
                 if (profileRes.error || !profileRes.data) {
-                  return window.sb.auth.signOut().then(function () {
+                  return sb.auth.signOut().then(function () {
                     throw new Error('الحساب غير مكتمل. تواصل مع الدعم الفني.');
                   });
                 }
                 
                 if (profileRes.data.is_active === false) {
-                  return window.sb.auth.signOut().then(function () {
+                  return sb.auth.signOut().then(function () {
                     throw new Error('هذا الحساب معطل. تواصل مع الإدارة.');
                   });
                 }
                 
-                // تسجيل النشاط (بدون انتظار)
-                window.sb.from('activities').insert({
+                // Log activity (اختياري)
+                sb.from('activities').insert({
                   user_id: user.id,
                   user_name: profileRes.data.full_name || user.email,
                   user_role: profileRes.data.role,
@@ -931,23 +759,19 @@
                   description: 'تسجيل دخول'
                 }).catch(function () {});
                 
-                return {
-                  user: user,
-                  profile: profileRes.data
-                };
+                return { user: user, profile: profileRes.data };
               });
           })
           .then(function (result) {
             showAlert('تم تسجيل الدخول بنجاح. جاري التحويل...', 'success');
             
-            // Determine destination
             var role = result.profile.role;
             var dest;
             
             if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-              dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
+              dest = resolve('admin/index.html');
             } else {
-              dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
+              dest = resolve('home.html');
             }
             
             // Check next parameter
@@ -962,9 +786,7 @@
               } catch (err) {}
             }
             
-            setTimeout(function () {
-              window.location.href = dest;
-            }, 800);
+            setTimeout(function () { window.location.href = dest; }, 800);
           })
           .catch(function (error) {
             state.attempts++;
@@ -976,19 +798,13 @@
             var message = (error && error.message) || '';
             var lowerMessage = message.toLowerCase();
             
-            // تصنيف الأخطاء
-            if (code === 'invalid_credentials' ||
-                lowerMessage.indexOf('invalid login credentials') !== -1 ||
-                lowerMessage.indexOf('invalid_credentials') !== -1) {
+            console.error('[Login] Error:', code, message);
+            
+            if (code === 'invalid_credentials' || lowerMessage.indexOf('invalid login credentials') !== -1) {
               msg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-            } else if (code === 'email_not_confirmed' ||
-                       lowerMessage.indexOf('email not confirmed') !== -1 ||
-                       lowerMessage.indexOf('email_not_confirmed') !== -1) {
-              msg = 'البريد الإلكتروني لم يتم تأكيده. تواصل مع الإدارة لتأكيد حسابك.';
-            } else if (code === 'user_not_found' || lowerMessage.indexOf('user not found') !== -1) {
-              msg = 'لا يوجد حساب بهذا البريد الإلكتروني';
-            } else if (lowerMessage.indexOf('rate limit') !== -1 ||
-                       lowerMessage.indexOf('too many') !== -1) {
+            } else if (code === 'email_not_confirmed' || lowerMessage.indexOf('email not confirmed') !== -1) {
+              msg = 'البريد الإلكتروني لم يتم تأكيده. تواصل مع الإدارة.';
+            } else if (lowerMessage.indexOf('rate limit') !== -1 || lowerMessage.indexOf('too many') !== -1) {
               msg = 'محاولات كثيرة. حاول بعد دقيقة.';
             } else if (message.indexOf('مهلة') !== -1 || lowerMessage.indexOf('timeout') !== -1) {
               msg = message;
@@ -1007,11 +823,12 @@
       }
       
       // ============================================
-      // 6. Log attempt
+      // 7. Log attempt
       // ============================================
       function logAttempt(email, success, errorMsg) {
-        if (!window.sb) return;
-        window.sb.from('login_logs').insert({
+        var sb = state.supabase;
+        if (!sb) return;
+        sb.from('login_logs').insert({
           email: email,
           success: success,
           error_message: errorMsg || null,
@@ -1020,7 +837,7 @@
       }
       
       // ============================================
-      // 7. Forgot password
+      // 8. Forgot password
       // ============================================
       function handleForgot(e) {
         if (e) e.preventDefault();
@@ -1032,14 +849,12 @@
           return;
         }
         
-        if (!window.sb) {
-          showAlert('تعذر الاتصال بالخادم', 'error');
-          return;
-        }
+        var sb = initSupabase();
+        if (!sb) { showAlert('تعذر الاتصال بالخادم', 'error'); return; }
         
         showAlert('جاري إرسال رابط استعادة كلمة المرور...', 'info');
         
-        var resetPromise = window.sb.auth.resetPasswordForEmail(email, {
+        var resetPromise = sb.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin + window.location.pathname.replace(/login\.html.*/, 'reset-password.html')
         });
         
@@ -1057,7 +872,7 @@
       }
       
       // ============================================
-      // 8. Password toggle
+      // 9. Password toggle
       // ============================================
       function initPasswordToggle() {
         var toggle = $('passwordToggle');
@@ -1079,7 +894,7 @@
       }
       
       // ============================================
-      // 9. Remember me
+      // 10. Remember me
       // ============================================
       function initRememberMe() {
         try {
@@ -1094,18 +909,14 @@
       function saveRememberMe() {
         var email = $('emailInput').value.trim();
         var remember = $('rememberMe').checked;
-        
         try {
-          if (remember && email) {
-            localStorage.setItem('itws_saved_email', email);
-          } else {
-            localStorage.removeItem('itws_saved_email');
-          }
+          if (remember && email) localStorage.setItem('itws_saved_email', email);
+          else localStorage.removeItem('itws_saved_email');
         } catch (e) {}
       }
       
       // ============================================
-      // 10. Dynamic content
+      // 11. Dynamic content
       // ============================================
       function applyDynamicContent() {
         var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
@@ -1122,66 +933,35 @@
           if (headerLogo) headerLogo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="">';
         }
         
-        if (unionName) {
-          document.title = 'تسجيل الدخول | ' + unionName;
-        }
+        if (unionName) document.title = 'تسجيل الدخول | ' + unionName;
       }
       
       // ============================================
-      // 11. Auto-redirect if already logged in
+      // 12. Resolve path
       // ============================================
-      function checkAlreadyLoggedIn() {
-        if (!window.sb) return;
-        
-        var sessionPromise = window.sb.auth.getSession();
-        
-        withTimeout(sessionPromise, SESSION_TIMEOUT_MS, 'فحص الجلسة')
-          .then(function (res) {
-            if (!res || !res.data || !res.data.session) return;
-            
-            var user = res.data.session.user;
-            
-            var profilePromise = window.sb
-              .from('profiles')
-              .select('role, is_active')
-              .eq('id', user.id)
-              .maybeSingle();
-            
-            return withTimeout(profilePromise, SESSION_TIMEOUT_MS, 'جلب البيانات')
-              .then(function (p) {
-                if (p.data && p.data.is_active !== false) {
-                  var role = p.data.role;
-                  var dest;
-                  if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-                    dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
-                  } else {
-                    dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
-                  }
-                  if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-                    console.log('[LoginPage] Already logged in, redirecting to:', dest);
-                  }
-                  window.location.href = dest;
-                }
-              });
-          })
-          .catch(function (err) {
-            // تجاهل — المستخدم لسه يقدر يسجل يدوياً
-            if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-              console.log('[LoginPage] Check session error:', err.message);
-            }
-          });
+      function resolve(path) {
+        if (!path) return '#';
+        if (window.resolveUrl) return window.resolveUrl(path);
+        var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
+        if (base && base.charAt(base.length - 1) !== '/') base += '/';
+        return base + String(path).replace(/^\.?\//, '');
       }
       
       // ============================================
-      // 12. Init
+      // 13. Init
       // ============================================
       function init() {
         if (state.initialized) return;
         state.initialized = true;
         
+        console.log('%c[Login] Initializing standalone login page', 'color: #3B82F6; font-weight: bold;');
+        
         applyDynamicContent();
         initPasswordToggle();
         initRememberMe();
+        
+        // Initialize Supabase immediately
+        initSupabase();
         
         var form = $('loginForm');
         if (form) {
@@ -1192,43 +972,22 @@
         }
         
         var forgotLink = $('forgotLink');
-        if (forgotLink) {
-          forgotLink.addEventListener('click', handleForgot);
-        }
-        
-        // AppSettings changes
-        if (window.AppSettings && window.AppSettings.onChange) {
-          window.AppSettings.onChange(function (cache, key) {
-            if (!key || key === 'app_identity') applyDynamicContent();
-          });
-        }
+        if (forgotLink) forgotLink.addEventListener('click', handleForgot);
         
         // Auto focus
         setTimeout(function () {
           var emailField = $('emailInput');
-          if (emailField && !emailField.value) {
-            emailField.focus();
-          } else {
-            var pwd = $('passwordInput');
-            if (pwd) pwd.focus();
-          }
+          if (emailField && !emailField.value) emailField.focus();
+          else $('passwordInput').focus();
         }, 300);
         
-        // Check if already logged in (after 500ms)
-        setTimeout(checkAlreadyLoggedIn, 500);
-        
-        if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-          console.log('[LoginPage] Initialized');
-        }
+        console.log('[Login] Ready. Fill credentials and submit.');
       }
       
       // ============================================
-      // 13. Public API
+      // 14. Public API
       // ============================================
-      window.LoginPage = {
-        initialized: true,
-        init: init
-      };
+      window.LoginPage = { initialized: true, init: init };
       
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
