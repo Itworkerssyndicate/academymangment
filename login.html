@@ -9,7 +9,6 @@
   <meta name="theme-color" content="#0A0E14">
   <meta name="robots" content="noindex, nofollow">
   
-  <!-- ✅ favicon مضمّن عشان نطفي 404 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23CE1126'/><text x='50' y='65' font-size='45' text-anchor='middle' fill='white' font-family='Cairo,sans-serif' font-weight='800'>ن</text></svg>">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,11 +24,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-    }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
     
     body {
       font-family: 'Cairo', 'Segoe UI', sans-serif;
@@ -297,7 +292,6 @@
 
   <div class="auth-layout">
     
-    <!-- ============ FORM SIDE ============ -->
     <div class="auth-form-side">
       <div class="auth-form-wrapper">
         
@@ -376,7 +370,6 @@
       </div>
     </div>
     
-    <!-- ============ BRAND SIDE ============ -->
     <div class="auth-brand-side">
       <div class="brand-content">
         <div class="brand-logo-wrap" id="brandLogo">نت</div>
@@ -394,12 +387,8 @@
     
   </div>
 
-  <!-- ============================================ -->
-  <!-- ✅ Supabase SDK v2 — latest 2.x               -->
-  <!-- ============================================ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   
-  <!-- ============ Login Logic ============ -->
   <script>
     (function () {
       'use strict';
@@ -453,6 +442,24 @@
       }
       
       // ============================================
+      // ✅ FIX: fire-and-forget insert
+      // wraps in Promise.resolve().then() — لا يعتمد على .catch() على PostgrestFilterBuilder
+      // ============================================
+      function safeInsert(client, table, data) {
+        if (!client || typeof client.from !== 'function') {
+          console.warn('[Login] No client for insert into ' + table);
+          return;
+        }
+        Promise.resolve().then(function () {
+          return client.from(table).insert(data);
+        }).then(function () {
+          // success — ignore
+        }, function (e) {
+          console.warn('[Login] insert ' + table + ' failed:', (e && e.message) || e);
+        });
+      }
+      
+      // ============================================
       // Alert
       // ============================================
       function showAlert(message, type) {
@@ -500,7 +507,7 @@
       }
       
       // ============================================
-      // Init Supabase (بدون lock — deprecated في v2.118.0)
+      // Init Supabase
       // ============================================
       function initSupabase() {
         if (state.sb) return state.sb;
@@ -511,7 +518,6 @@
           return null;
         }
         
-        // ✅ فحص v2 — createClient موجود
         if (typeof supabase.createClient !== 'function') {
           console.error('❌ [Login] SDK is not v2 (missing createClient)');
           showAlert('مكتبة Supabase قديمة. جاري إعادة تحميل الصفحة...', 'error');
@@ -527,7 +533,6 @@
         }
         
         try {
-          // ✅ بدون lock — v2.118.0 مش محتاجاها (deprecated)
           state.sb = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
             auth: {
               persistSession: true,
@@ -541,8 +546,6 @@
             }
           });
           
-          // ✅ فحص صحيح: typeof على الـ method مش Object.keys
-          // الـ methods في JS classes على prototype مش على instance
           var hasSignIn = typeof state.sb.auth.signInWithEmailAndPassword === 'function';
           var hasSignInWithPassword = typeof state.sb.auth.signInWithPassword === 'function';
           
@@ -592,13 +595,11 @@
         
         console.log('[Login] Attempting signIn for:', data.email);
         
-        // ✅ استدعاء signIn — الأولوية لـ signInWithEmailAndPassword، ثم signInWithPassword
         var signInPromise;
         
         if (typeof sb.auth.signInWithEmailAndPassword === 'function') {
           signInPromise = sb.auth.signInWithEmailAndPassword(data.email, data.password);
         } else if (typeof sb.auth.signInWithPassword === 'function') {
-          // v2.118.0 يدعم الاسمين
           signInPromise = sb.auth.signInWithPassword({ email: data.email, password: data.password });
         } else if (typeof sb.auth.signIn === 'function') {
           console.warn('[Login] Using legacy signIn fallback');
@@ -638,13 +639,14 @@
                   });
                 }
                 
-                sb.from('activities').insert({
+                // ✅ FIX: استخدام safeInsert بدل .catch() على insert
+                safeInsert(sb, 'activities', {
                   user_id: user.id,
                   user_name: profileRes.data.full_name || user.email,
                   user_role: profileRes.data.role,
                   action_type: 'login',
                   description: 'تسجيل دخول'
-                }).catch(function () {});
+                });
                 
                 return { user: user, profile: profileRes.data };
               });
@@ -712,16 +714,16 @@
       }
       
       // ============================================
-      // Log attempt
+      // ✅ Log attempt (مُصلَح بنفس الطريقة)
       // ============================================
       function logAttempt(email, success, errorMsg) {
         if (!state.sb) return;
-        state.sb.from('login_logs').insert({
+        safeInsert(state.sb, 'login_logs', {
           email: email,
           success: success,
           error_message: errorMsg || null,
           user_agent: navigator.userAgent.substring(0, 200)
-        }).catch(function () {});
+        });
       }
       
       // ============================================
