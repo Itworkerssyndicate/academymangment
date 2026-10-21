@@ -5,25 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>تسجيل الدخول | نقابة تكنولوجيا المعلومات</title>
-  <meta name="description" content="تسجيل الدخول إلى النظام الرسمي للتحقق من الشهادات">
+  <meta name="description" content="تسجيل الدخول إلى النظام الرسمي لنقابة تكنولوجيا المعلومات والبرمجيات">
   <meta name="theme-color" content="#0A0E14">
-  
   <meta name="robots" content="noindex, nofollow">
   
+  <!-- Fonts - Cairo ONLY -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
+  <!-- Settings Defaults -->
   <script src="assets/js/settings-defaults.js"></script>
+  
+  <!-- Theme Bootstrap (BEFORE CSS) -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
   <script src="assets/js/app-settings.js"></script>
   
+  <!-- CSS -->
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
   
   <style>
+    /* ============================================
+       LOGIN PAGE - Official Patriotic Design
+       ============================================ */
+    
     *, *::before, *::after {
       box-sizing: border-box;
     }
@@ -51,7 +59,7 @@
       overflow: hidden;
     }
     
-    /* Left panel - form */
+    /* ============ FORM SIDE (RIGHT) ============ */
     .auth-form-side {
       display: flex;
       flex-direction: column;
@@ -68,7 +76,7 @@
       max-width: 420px;
     }
     
-    /* Right panel - branding */
+    /* ============ BRAND SIDE (LEFT) ============ */
     .auth-brand-side {
       position: relative;
       background: linear-gradient(135deg, var(--surface) 0%, var(--bg-alt) 100%);
@@ -124,7 +132,7 @@
       font-size: 40px;
       font-weight: 800;
       color: var(--primary-text);
-      box-shadow: 
+      box-shadow:
         0 0 0 8px var(--primary-soft),
         0 20px 60px var(--primary-soft);
       overflow: hidden;
@@ -189,7 +197,7 @@
       margin-top: 1px;
     }
     
-    /* ============ FORM ============ */
+    /* ============ AUTH HEADER ============ */
     .auth-header {
       text-align: center;
       margin-bottom: 32px;
@@ -232,6 +240,7 @@
       line-height: 1.6;
     }
     
+    /* ============ ALERT ============ */
     .auth-alert {
       display: none;
       padding: 14px 16px;
@@ -241,6 +250,7 @@
       margin-bottom: 20px;
       line-height: 1.6;
       animation: slideDown 0.3s ease;
+      text-align: right;
     }
     
     .auth-alert.show { display: block; }
@@ -268,6 +278,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
     
+    /* ============ FORM ============ */
     .auth-form {
       display: flex;
       flex-direction: column;
@@ -373,12 +384,14 @@
       height: 18px;
     }
     
+    /* ============ REMEMBER / FORGOT ============ */
     .form-field-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       margin-top: -4px;
+      flex-wrap: wrap;
     }
     
     .form-checkbox {
@@ -411,6 +424,7 @@
       text-decoration: underline;
     }
     
+    /* ============ SUBMIT BUTTON ============ */
     .form-submit {
       width: 100%;
       padding: 16px;
@@ -455,6 +469,7 @@
       to { transform: rotate(360deg); }
     }
     
+    /* ============ FOOTER ============ */
     .auth-footer {
       text-align: center;
       margin-top: 24px;
@@ -483,12 +498,14 @@
       text-decoration: none;
       cursor: pointer;
       transition: all 0.2s;
+      margin: 4px;
     }
     
     .auth-footer-link:hover {
       border-color: var(--primary);
       color: var(--primary);
       background: var(--primary-soft);
+      text-decoration: none;
     }
     
     .auth-footer-link svg {
@@ -502,38 +519,6 @@
       font-size: 11px;
       color: var(--text-muted);
       opacity: 0.5;
-    }
-    
-    /* ============ PASSWORD STRENGTH ============ */
-    .password-strength {
-      display: none;
-      margin-top: 8px;
-    }
-    
-    .password-strength.show { display: block; }
-    
-    .strength-bar {
-      height: 3px;
-      background: var(--border);
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 6px;
-    }
-    
-    .strength-bar-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      transition: all 0.3s;
-    }
-    
-    .strength-bar-fill.weak { width: 33%; background: var(--error); }
-    .strength-bar-fill.medium { width: 66%; background: var(--warning); }
-    .strength-bar-fill.strong { width: 100%; background: var(--success); }
-    
-    .strength-text {
-      font-size: 11px;
-      color: var(--text-muted);
     }
     
     /* ============ RESPONSIVE ============ */
@@ -591,16 +576,20 @@
     <div class="auth-form-side">
       <div class="auth-form-wrapper">
         
+        <!-- Header -->
         <div class="auth-header">
           <div class="auth-header-logo" id="authHeaderLogo">نت</div>
           <h1 class="auth-title">تسجيل الدخول</h1>
           <p class="auth-subtitle" id="authSubtitle">مرحباً بك في النظام الرسمي</p>
         </div>
         
+        <!-- Alert -->
         <div class="auth-alert" id="authAlert"></div>
         
+        <!-- Form -->
         <form class="auth-form" id="loginForm" novalidate>
           
+          <!-- Email -->
           <div class="form-field">
             <label for="emailInput">البريد الإلكتروني</label>
             <div class="input-wrap">
@@ -618,6 +607,7 @@
             </div>
           </div>
           
+          <!-- Password -->
           <div class="form-field">
             <label for="passwordInput">كلمة المرور</label>
             <div class="input-wrap">
@@ -646,6 +636,7 @@
             </div>
           </div>
           
+          <!-- Remember / Forgot -->
           <div class="form-field-row">
             <label class="form-checkbox">
               <input type="checkbox" id="rememberMe">
@@ -654,12 +645,14 @@
             <a href="#" class="form-link" id="forgotLink">نسيت كلمة المرور؟</a>
           </div>
           
+          <!-- Submit -->
           <button type="submit" class="form-submit" id="loginBtn">
             <span id="loginBtnText">تسجيل الدخول</span>
           </button>
           
         </form>
         
+        <!-- Footer -->
         <div class="auth-footer">
           <p>هل تمتلك أكاديمية؟</p>
           <a href="academy-apply.html" class="auth-footer-link">
@@ -669,7 +662,6 @@
             </svg>
             <span>قدم طلب اعتماد</span>
           </a>
-          <br><br>
           <a href="home.html" class="auth-footer-link">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -679,6 +671,7 @@
           </a>
         </div>
         
+        <!-- Version -->
         <div class="auth-version" id="authVersion">الإصدار 1.0</div>
         
       </div>
@@ -714,6 +707,7 @@
     
   </div>
 
+  <!-- ============ Scripts ============ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/utils.js"></script>
@@ -721,29 +715,44 @@
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/app-title.js"></script>
   
+  <!-- ============ Login Logic ============ -->
   <script>
     (function () {
       'use strict';
       
+      if (window.LoginPage && window.LoginPage.initialized) return;
+      
+      var AUTH_TIMEOUT_MS = 20000; // 20 ثانية
+      
       var state = {
         submitting: false,
         attempts: 0,
-        maxAttempts: 5
+        maxAttempts: 5,
+        initialized: false
       };
       
+      // ============================================
+      // 1. Helpers
+      // ============================================
       function $(id) { return document.getElementById(id); }
+      function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
       
-      function setText(id, t) {
-        var el = $(id);
-        if (el) el.textContent = t;
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
       }
       
-      function getSetting(path, fallback) {
+      function getSetting(p, f) {
         if (window.AppSettings && window.AppSettings.get) {
-          return window.AppSettings.get(path, fallback);
+          return window.AppSettings.get(p, f);
         }
         if (window.ITWS_SETTINGS_DEFAULTS) {
-          var parts = path.split('.');
+          var parts = p.split('.');
           var value = window.ITWS_SETTINGS_DEFAULTS;
           for (var i = 0; i < parts.length; i++) {
             if (value && typeof value === 'object') value = value[parts[i]];
@@ -751,7 +760,7 @@
           }
           if (value !== undefined) return value;
         }
-        return fallback;
+        return f;
       }
       
       function resolve(path) {
@@ -761,17 +770,35 @@
         return base + String(path).replace(/^\.?\//, '');
       }
       
+      function withTimeout(promise, ms, label) {
+        return Promise.race([
+          promise,
+          new Promise(function (_, reject) {
+            setTimeout(function () {
+              reject(new Error('انتهت مهلة ' + (label || 'العملية') + ' — تحقق من الاتصال أو أعد تحميل الصفحة'));
+            }, ms);
+          })
+        ]);
+      }
+      
+      // ============================================
+      // 2. Alert
+      // ============================================
       function showAlert(message, type) {
         var el = $('authAlert');
         if (!el) return;
         el.textContent = message;
         el.className = 'auth-alert show ' + (type || 'info');
-        if (type === 'error') {
+        
+        // Auto hide success/info after 8s, errors stay longer
+        if (type === 'success' || type === 'info') {
           setTimeout(function () {
-            if (el.textContent === message) {
-              el.className = 'auth-alert';
-            }
+            if (el.textContent === message) el.className = 'auth-alert';
           }, 8000);
+        } else if (type === 'error') {
+          setTimeout(function () {
+            if (el.textContent === message) el.className = 'auth-alert';
+          }, 12000);
         }
       }
       
@@ -781,210 +808,7 @@
       }
       
       // ============================================
-      // 1. تطبيق المحتوى الديناميكي
-      // ============================================
-      function applyDynamicContent() {
-        var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
-        var committeeName = getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
-        var logoUrl = getSetting('app_identity.logo_url', null);
-        
-        setText('brandTitle', unionName);
-        setText('brandSubtitle', committeeName);
-        
-        if (logoUrl) {
-          var brandLogo = $('brandLogo');
-          if (brandLogo) brandLogo.innerHTML = '<img src="' + logoUrl + '" alt="">';
-          var headerLogo = $('authHeaderLogo');
-          if (headerLogo) headerLogo.innerHTML = '<img src="' + logoUrl + '" alt="">';
-        }
-        
-        // عنوان التبويب
-        if (unionName) {
-          document.title = 'تسجيل الدخول | ' + unionName;
-        }
-      }
-      
-      // ============================================
-      // 2. إظهار/إخفاء كلمة المرور
-      // ============================================
-      function initPasswordToggle() {
-        var toggle = $('passwordToggle');
-        var input = $('passwordInput');
-        if (!toggle || !input) return;
-        
-        toggle.addEventListener('click', function () {
-          var type = input.type === 'password' ? 'text' : 'password';
-          input.type = type;
-          
-          // تحديث الأيقونة
-          if (type === 'text') {
-            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
-            toggle.setAttribute('aria-label', 'إخفاء كلمة المرور');
-          } else {
-            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-            toggle.setAttribute('aria-label', 'إظهار كلمة المرور');
-          }
-        });
-      }
-      
-      // ============================================
-      // 3. التحقق من البيانات
-      // ============================================
-      function validateForm() {
-        var email = $('emailInput').value.trim();
-        var password = $('passwordInput').value;
-        
-        if (!email) {
-          showAlert('الرجاء إدخال البريد الإلكتروني', 'error');
-          $('emailInput').focus();
-          return null;
-        }
-        
-        if (!window.Utils || !window.Utils.isValidEmail(email)) {
-          // fallback
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            showAlert('البريد الإلكتروني غير صحيح', 'error');
-            $('emailInput').focus();
-            return null;
-          }
-        }
-        
-        if (!password) {
-          showAlert('الرجاء إدخال كلمة المرور', 'error');
-          $('passwordInput').focus();
-          return null;
-        }
-        
-        if (password.length < 6) {
-          showAlert('كلمة المرور قصيرة جداً', 'error');
-          $('passwordInput').focus();
-          return null;
-        }
-        
-        return { email: email, password: password };
-      }
-      
-      // ============================================
-      // 4. تسجيل الدخول
-      // ============================================
-      function handleLogin(e) {
-        if (e) e.preventDefault();
-        if (state.submitting) return;
-        
-        hideAlert();
-        
-        var data = validateForm();
-        if (!data) return;
-        
-        // التحقق من الحد الأقصى للمحاولات
-        if (state.attempts >= state.maxAttempts) {
-          showAlert('تم تجاوز الحد الأقصى للمحاولات. حاول مرة أخرى بعد قليل.', 'error');
-          return;
-        }
-        
-        state.submitting = true;
-        setLoading(true);
-        
-        if (!window.sb) {
-          showAlert('تعذر الاتصال بالخادم. يرجى إعادة تحميل الصفحة.', 'error');
-          state.submitting = false;
-          setLoading(false);
-          return;
-        }
-        
-        window.sb.auth.signInWithEmailAndPassword(data.email, data.password)
-          .then(function (cred) {
-            var user = cred.user;
-            
-            return window.sb
-              .from('profiles')
-              .select('id, email, full_name, role, is_active')
-              .eq('id', user.id)
-              .maybeSingle()
-              .then(function (profileRes) {
-                if (profileRes.error || !profileRes.data) {
-                  // المستخدم موجود في Auth لكن مش في profiles
-                  return window.sb.auth.signOut().then(function () {
-                    throw new Error('الحساب غير مكتمل. تواصل مع الدعم الفني.');
-                  });
-                }
-                
-                if (profileRes.data.is_active === false) {
-                  return window.sb.auth.signOut().then(function () {
-                    throw new Error('هذا الحساب معطل. تواصل مع الإدارة.');
-                  });
-                }
-                
-                // تسجيل النشاط
-                logActivity(user.id, profileRes.data.full_name, profileRes.data.role, 'login', 'تسجيل دخول');
-                
-                return {
-                  user: user,
-                  profile: profileRes.data
-                };
-              });
-          })
-          .then(function (result) {
-            showAlert('تم تسجيل الدخول بنجاح. جاري التحويل...', 'success');
-            
-            // تحديد وجهة التوجيه
-            var role = result.profile.role;
-            var dest;
-            
-            if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-              dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
-            } else {
-              dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
-            }
-            
-            // تحقق من next parameter
-            var params = new URLSearchParams(window.location.search);
-            var next = params.get('next');
-            if (next) {
-              try {
-                var decodedNext = decodeURIComponent(next);
-                // التحقق إن next ليس خارج الموقع
-                if (decodedNext.indexOf('//') === -1 && decodedNext.indexOf('http') === -1) {
-                  dest = resolve(decodedNext.replace(/^\//, ''));
-                }
-              } catch (e) {}
-            }
-            
-            setTimeout(function () {
-              window.location.href = dest;
-            }, 800);
-          })
-          .catch(function (error) {
-            state.attempts++;
-            state.submitting = false;
-            setLoading(false);
-            
-            var msg = 'فشل تسجيل الدخول';
-            var code = error.code || '';
-            
-            if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'invalid_credentials') {
-              msg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-            } else if (code === 'auth/invalid-email') {
-              msg = 'البريد الإلكتروني غير صحيح';
-            } else if (code === 'auth/too-many-requests') {
-              msg = 'تم حظر الحساب مؤقتاً. حاول لاحقاً.';
-            } else if (error.message) {
-              msg = error.message;
-            }
-            
-            showAlert(msg, 'error');
-            
-            // Log
-            logAttempt(data.email, false, msg);
-            
-            // إعادة تعيين الحقول
-            $('passwordInput').value = '';
-            $('passwordInput').focus();
-          });
-      }
-      
-      // ============================================
-      // 5. Loading state
+      // 3. Loading state
       // ============================================
       function setLoading(isLoading) {
         var btn = $('loginBtn');
@@ -1001,26 +825,184 @@
       }
       
       // ============================================
-      // 6. Log activity
+      // 4. Validate
       // ============================================
-      function logActivity(userId, userName, role, type, description) {
-        if (!window.sb) return;
-        window.sb.from('activities').insert({
-          user_id: userId,
-          user_name: userName,
-          user_role: role,
-          action_type: type,
-          description: description
-        }).catch(function () {});
+      function validateForm() {
+        var email = $('emailInput').value.trim();
+        var password = $('passwordInput').value;
+        
+        if (!email) {
+          showAlert('الرجاء إدخال البريد الإلكتروني', 'error');
+          $('emailInput').focus();
+          return null;
+        }
+        
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showAlert('البريد الإلكتروني غير صحيح', 'error');
+          $('emailInput').focus();
+          return null;
+        }
+        
+        if (!password) {
+          showAlert('الرجاء إدخال كلمة المرور', 'error');
+          $('passwordInput').focus();
+          return null;
+        }
+        
+        if (password.length < 6) {
+          showAlert('كلمة المرور قصيرة جداً (6 أحرف على الأقل)', 'error');
+          $('passwordInput').focus();
+          return null;
+        }
+        
+        return { email: email, password: password };
       }
       
+      // ============================================
+      // 5. Login handler
+      // ============================================
+      function handleLogin(e) {
+        if (e) e.preventDefault();
+        if (state.submitting) return;
+        
+        hideAlert();
+        
+        var data = validateForm();
+        if (!data) return;
+        
+        if (state.attempts >= state.maxAttempts) {
+          showAlert('تم تجاوز الحد الأقصى للمحاولات. حاول مرة أخرى بعد قليل.', 'error');
+          return;
+        }
+        
+        if (!window.sb) {
+          showAlert('تعذر الاتصال بالخادم. يرجى إعادة تحميل الصفحة.', 'error');
+          return;
+        }
+        
+        state.submitting = true;
+        setLoading(true);
+        
+        // ✅ signInWithEmailAndPassword مع timeout
+        var signInPromise = window.sb.auth.signInWithEmailAndPassword(data.email, data.password);
+        
+        withTimeout(signInPromise, AUTH_TIMEOUT_MS, 'تسجيل الدخول')
+          .then(function (cred) {
+            var user = cred.user;
+            if (!user) throw new Error('لم يتم استلام بيانات المستخدم');
+            
+            // ✅ جلب البروفايل مع timeout
+            var profilePromise = window.sb
+              .from('profiles')
+              .select('id, email, full_name, role, is_active')
+              .eq('id', user.id)
+              .maybeSingle();
+            
+            return withTimeout(profilePromise, 10000, 'جلب بيانات الحساب')
+              .then(function (profileRes) {
+                if (profileRes.error || !profileRes.data) {
+                  return window.sb.auth.signOut().then(function () {
+                    throw new Error('الحساب غير مكتمل. تواصل مع الدعم الفني.');
+                  });
+                }
+                
+                if (profileRes.data.is_active === false) {
+                  return window.sb.auth.signOut().then(function () {
+                    throw new Error('هذا الحساب معطل. تواصل مع الإدارة.');
+                  });
+                }
+                
+                // Log activity
+                window.sb.from('activities').insert({
+                  user_id: user.id,
+                  user_name: profileRes.data.full_name || user.email,
+                  user_role: profileRes.data.role,
+                  action_type: 'login',
+                  description: 'تسجيل دخول'
+                }).catch(function () {});
+                
+                return {
+                  user: user,
+                  profile: profileRes.data
+                };
+              });
+          })
+          .then(function (result) {
+            showAlert('تم تسجيل الدخول بنجاح. جاري التحويل...', 'success');
+            
+            // Determine destination based on role
+            var role = result.profile.role;
+            var dest;
+            
+            if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
+              dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
+            } else {
+              dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
+            }
+            
+            // Check next parameter
+            var params = new URLSearchParams(window.location.search);
+            var next = params.get('next');
+            if (next) {
+              try {
+                var decodedNext = decodeURIComponent(next);
+                if (decodedNext.indexOf('//') === -1 && decodedNext.indexOf('http') === -1) {
+                  dest = resolve(decodedNext.replace(/^\//, ''));
+                }
+              } catch (err) {}
+            }
+            
+            setTimeout(function () {
+              window.location.href = dest;
+            }, 800);
+          })
+          .catch(function (error) {
+            state.attempts++;
+            state.submitting = false;
+            setLoading(false);
+            
+            var msg = 'فشل تسجيل الدخول';
+            var code = (error && error.code) || '';
+            var message = (error && error.message) || '';
+            
+            // تصنيف الأخطاء
+            if (code === 'invalid_credentials' || 
+                message.indexOf('Invalid login credentials') !== -1 ||
+                message.indexOf('invalid_credentials') !== -1) {
+              msg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+            } else if (code === 'email_not_confirmed' || 
+                       message.indexOf('Email not confirmed') !== -1 ||
+                       message.indexOf('email_not_confirmed') !== -1) {
+              msg = 'البريد الإلكتروني لم يتم تأكيده. تواصل مع الإدارة لتأكيد حسابك.';
+            } else if (code === 'user_not_found' || message.indexOf('User not found') !== -1) {
+              msg = 'لا يوجد حساب بهذا البريد الإلكتروني';
+            } else if (code === 'over_email_send_rate_limit' || message.indexOf('rate limit') !== -1) {
+              msg = 'محاولات كثيرة. حاول بعد دقيقة.';
+            } else if (message.indexOf('مهلة') !== -1 || message.indexOf('timeout') !== -1) {
+              msg = message;
+            } else if (message) {
+              msg = message;
+            }
+            
+            showAlert(msg, 'error');
+            
+            // Log failed attempt
+            logAttempt(data.email, false, msg);
+            
+            $('passwordInput').value = '';
+            $('passwordInput').focus();
+          });
+      }
+      
+      // ============================================
+      // 6. Log attempt
+      // ============================================
       function logAttempt(email, success, errorMsg) {
         if (!window.sb) return;
         window.sb.from('login_logs').insert({
           email: email,
           success: success,
           error_message: errorMsg || null,
-          ip_address: null,
           user_agent: navigator.userAgent.substring(0, 200)
         }).catch(function () {});
       }
@@ -1033,7 +1015,7 @@
         
         var email = $('emailInput').value.trim();
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          showAlert('أدخل بريدك الإلكتروني أولاً', 'error');
+          showAlert('أدخل بريدك الإلكتروني أولاً ثم اضغط "نسيت كلمة المرور"', 'error');
           $('emailInput').focus();
           return;
         }
@@ -1045,23 +1027,47 @@
         
         showAlert('جاري إرسال رابط استعادة كلمة المرور...', 'info');
         
-        window.sb.auth.resetPasswordForEmail(email, {
+        var resetPromise = window.sb.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin + window.location.pathname.replace(/login\.html.*/, 'reset-password.html')
-        })
+        });
+        
+        withTimeout(resetPromise, AUTH_TIMEOUT_MS, 'إرسال رابط الاستعادة')
           .then(function () {
             showAlert('تم إرسال رابط الاستعادة إلى بريدك. تحقق من صندوق الوارد.', 'success');
           })
           .catch(function (err) {
             var msg = err.message || 'تعذر إرسال رابط الاستعادة';
-            if (err.code === 'auth/user-not-found') {
-              msg = 'هذا البريد غير مسجل';
+            if (err.code === 'user_not_found' || msg.indexOf('User not found') !== -1) {
+              msg = 'هذا البريد غير مسجل في النظام';
             }
             showAlert(msg, 'error');
           });
       }
       
       // ============================================
-      // 8. Remember me
+      // 8. Password toggle
+      // ============================================
+      function initPasswordToggle() {
+        var toggle = $('passwordToggle');
+        var input = $('passwordInput');
+        if (!toggle || !input) return;
+        
+        toggle.addEventListener('click', function () {
+          var type = input.type === 'password' ? 'text' : 'password';
+          input.type = type;
+          
+          if (type === 'text') {
+            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+            toggle.setAttribute('aria-label', 'إخفاء كلمة المرور');
+          } else {
+            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            toggle.setAttribute('aria-label', 'إظهار كلمة المرور');
+          }
+        });
+      }
+      
+      // ============================================
+      // 9. Remember me
       // ============================================
       function initRememberMe() {
         try {
@@ -1069,7 +1075,6 @@
           if (savedEmail) {
             $('emailInput').value = savedEmail;
             $('rememberMe').checked = true;
-            $('passwordInput').focus();
           }
         } catch (e) {}
       }
@@ -1088,9 +1093,74 @@
       }
       
       // ============================================
-      // 9. Init
+      // 10. Dynamic content
+      // ============================================
+      function applyDynamicContent() {
+        var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+        var committeeName = getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
+        var logoUrl = getSetting('app_identity.logo_url', null);
+        
+        setText('brandTitle', unionName);
+        setText('brandSubtitle', committeeName);
+        
+        if (logoUrl) {
+          var brandLogo = $('brandLogo');
+          if (brandLogo) brandLogo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="">';
+          var headerLogo = $('authHeaderLogo');
+          if (headerLogo) headerLogo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="">';
+        }
+        
+        if (unionName) {
+          document.title = 'تسجيل الدخول | ' + unionName;
+        }
+      }
+      
+      // ============================================
+      // 11. Auto-redirect if already logged in
+      // ============================================
+      function checkAlreadyLoggedIn() {
+        if (!window.sb) return;
+        
+        var sessionPromise = window.sb.auth.getSession();
+        
+        withTimeout(sessionPromise, 5000, 'فحص الجلسة')
+          .then(function (res) {
+            if (!res || !res.data || !res.data.session) return;
+            
+            // Already logged in - redirect
+            var user = res.data.session.user;
+            var profilePromise = window.sb
+              .from('profiles')
+              .select('role, is_active')
+              .eq('id', user.id)
+              .maybeSingle();
+            
+            return withTimeout(profilePromise, 5000, 'جلب البيانات')
+              .then(function (p) {
+                if (p.data && p.data.is_active !== false) {
+                  var role = p.data.role;
+                  var dest;
+                  if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
+                    dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
+                  } else {
+                    dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
+                  }
+                  window.location.href = dest;
+                }
+              });
+          })
+          .catch(function () {
+            // Ignore errors - user can still login manually
+          });
+      }
+      
+      // ============================================
+      // 12. Init
       // ============================================
       function init() {
+        if (state.initialized) return;
+        state.initialized = true;
+        
         applyDynamicContent();
         initPasswordToggle();
         initRememberMe();
@@ -1098,8 +1168,8 @@
         var form = $('loginForm');
         if (form) {
           form.addEventListener('submit', function (e) {
-            handleLogin(e);
             saveRememberMe();
+            handleLogin(e);
           });
         }
         
@@ -1115,41 +1185,32 @@
           });
         }
         
-        // Auto-focus
+        // Auto focus
         setTimeout(function () {
           var emailField = $('emailInput');
           if (emailField && !emailField.value) {
             emailField.focus();
           } else {
-            $('passwordInput').focus();
+            var pwd = $('passwordInput');
+            if (pwd) pwd.focus();
           }
         }, 300);
         
-        // Supabase listener - auto redirect if already logged in
-        if (window.sb) {
-          window.sb.auth.getSession().then(function (res) {
-            if (res && res.data && res.data.session) {
-              // المستخدم مسجل بالفعل
-              window.sb.from('profiles')
-                .select('role, is_active')
-                .eq('id', res.data.session.user.id)
-                .maybeSingle()
-                .then(function (p) {
-                  if (p.data && p.data.is_active !== false) {
-                    var role = p.data.role;
-                    var dest;
-                    if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-                      dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
-                    } else {
-                      dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
-                    }
-                    window.location.href = dest;
-                  }
-                });
-            }
-          });
+        // Check if already logged in
+        setTimeout(checkAlreadyLoggedIn, 500);
+        
+        if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
+          console.log('[LoginPage] Initialized');
         }
       }
+      
+      // ============================================
+      // 13. Public API
+      // ============================================
+      window.LoginPage = {
+        initialized: true,
+        init: init
+      };
       
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
