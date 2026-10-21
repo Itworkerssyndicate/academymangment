@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>طلب الاعتماد | بوابة الأكاديمية</title>
+  <meta name="description" content="متابعة طلب اعتماد الأكاديمية - المراحل والمستندات">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ APPLICATION TRACKER ============ */
+    
+    .app-header-card {
+      background: linear-gradient(135deg, var(--surface), var(--surface-elevated));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .app-header-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, var(--primary-soft) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .app-header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .app-header-title-box {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .app-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .app-header-number {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    
+    .app-header-title {
+      font-size: clamp(18px, 3vw, 24px);
+      font-weight: 800;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.3;
+    }
+    
+    .app-header-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    
+    .app-header-status.submitted { background: var(--info-soft); color: var(--info); }
+    .app-header-status.documents_review { background: var(--warning-soft); color: var(--warning); }
+    .app-header-status.site_visit { background: rgba(139,92,246,0.15); color: #A78BFA; }
+    .app-header-status.committee_review { background: rgba(236,72,153,0.15); color: #EC4899; }
+    .app-header-status.final_approval { background: var(--success-soft); color: var(--success); }
+    .app-header-status.approved { background: var(--success); color: #fff; }
+    .app-header-status.rejected { background: var(--error); color: #fff; }
+    
+    .app-header-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .app-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .app-meta-item {
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    
+    .app-meta-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+    
+    .app-meta-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .app-meta-value.mono {
+      font-family: 'Courier New', monospace;
+      color: var(--primary);
+      font-size: 13px;
+    }
+    
+    .sla-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    
+    .sla-badge.on-time { background: var(--success-soft); color: var(--success); }
+    .sla-badge.warning { background: var(--warning-soft); color: var(--warning); }
+    .sla-badge.overdue { background: var(--error-soft); color: var(--error); }
+    
+    /* ============ BANNERS ============ */
+    .result-banner {
+      padding: 20px 24px;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    
+    .result-banner.approved {
+      background: linear-gradient(135deg, var(--success-soft), transparent);
+      border: 2px solid var(--success);
+    }
+    
+    .result-banner.rejected {
+      background: linear-gradient(135deg, var(--error-soft), transparent);
+      border: 2px solid var(--error);
+    }
+    
+    .result-banner-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .result-banner.approved .result-banner-icon { background: var(--success); color: #fff; }
+    .result-banner.rejected .result-banner-icon { background: var(--error); color: #fff; }
+    
+    .result-banner-icon svg {
+      width: 26px;
+      height: 26px;
+    }
+    
+    .result-banner-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .result-banner-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 0 0 6px;
+    }
+    
+    .result-banner.approved .result-banner-title { color: var(--success); }
+    .result-banner.rejected .result-banner-title { color: var(--error); }
+    
+    .result-banner-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0;
+    }
+    
+    .result-banner-meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    
+    .result-banner-meta-item {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .result-banner-meta-item strong {
+      color: var(--text);
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+    }
+    
+    /* ============ TIMELINE ============ */
+    .timeline-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    
+    .timeline-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .timeline-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+    
+    .timeline {
+      position: relative;
+      padding-right: 40px;
+    }
+    
+    .timeline::before {
+      content: "";
+      position: absolute;
+      right: 15px;
+      top: 20px;
+      bottom: 20px;
+      width: 2px;
+      background: var(--border);
+    }
+    
+    .timeline-item {
+      position: relative;
+      padding-bottom: 32px;
+    }
+    
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+    
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      right: -33px;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid var(--surface);
+      background: var(--border);
+      z-index: 2;
+    }
+    
+    .timeline-item.completed::before {
+      background: var(--success);
+      box-shadow: 0 0 0 4px var(--success-soft);
+    }
+    
+    .timeline-item.current::before {
+      background: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+      animation: timelinePulse 1.8s ease-in-out infinite;
+    }
+    
+    .timeline-item.rejected::before {
+      background: var(--error);
+      box-shadow: 0 0 0 4px var(--error-soft);
+    }
+    
+    @keyframes timelinePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
+    .timeline-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    
+    .timeline-stage {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .timeline-item.completed .timeline-stage { color: var(--success); }
+    .timeline-item.current .timeline-stage { color: var(--primary); }
+    .timeline-item.rejected .timeline-stage { color: var(--error); }
+    
+    .timeline-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+    }
+    
+    .timeline-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .timeline-notes {
+      margin-top: 8px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-right: 3px solid var(--primary);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    
+    .timeline-notes.rejected {
+      border-right-color: var(--error);
+      background: var(--error-soft);
+      color: var(--error);
+    }
+    
+    /* ============ DOCUMENTS ============ */
+    .documents-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .documents-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .documents-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--primary);
+    }
+    
+    .documents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    
+    .document-item {
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+    
+    .document-item:hover {
+      border-color: var(--primary);
+    }
+    
+    .document-item.missing {
+      border-color: var(--error);
+      background: var(--error-soft);
+    }
+    
+    .document-item.optional {
+      opacity: 0.7;
+    }
+    
+    .document-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .document-item.missing .document-icon {
+      background: var(--error-soft);
+      color: var(--error);
+    }
+    
+    .document-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .document-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .document-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    
+    .document-status {
+      font-size: 10px;
+      font-weight: 700;
+    }
+    
+    .document-status.uploaded { color: var(--success); }
+    .document-status.missing { color: var(--error); }
+    .document-status.optional { color: var(--text-muted); }
+    
+    .document-action {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    
+    .document-action:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    
+    .document-action svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* ============ LOADER ============ */
+    .app-loader {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    
+    .app-loader.show { display: block; }
+    
+    .app-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .app-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ ERROR ============ */
+    .app-error {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .app-error.show { display: block; }
+    
+    .app-error-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .app-error-icon svg { width: 32px; height: 32px; }
+    
+    .app-error-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 8px;
+    }
+    
+    .app-error-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 0 0 20px;
+    }
+    
+    .app-error-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    
+    .app-error-btn:hover {
+      background: var(--primary-hover);
+      color: var(--primary-text);
+    }
+    
+    /* ============ EMPTY NO APP ============ */
+    .no-app-card {
+      background: var(--surface);
+      border: 2px dashed var(--border-strong);
+      border-radius: 16px;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    
+    .no-app-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .no-app-icon svg { width: 36px; height: 36px; }
+    
+    .no-app-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 8px;
+    }
+    
+    .no-app-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 500px;
+      margin: 0 auto 24px;
+    }
+    
+    .no-app-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 26px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    
+    .no-app-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      color: var(--primary-text);
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 640px) {
+      .app-header-card { padding: 20px; }
+      .app-header-top { flex-direction: column; align-items: stretch; }
+      .app-header-status { align-self: flex-start; }
+      .timeline-card, .documents-card { padding: 20px; }
+      .timeline { padding-right: 32px; }
+      .timeline::before { right: 11px; }
+      .timeline-item::before { right: -25px; width: 14px; height: 14px; }
+      .documents-grid { grid-template-columns: 1fr; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body data-requires-auth>
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="portal"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">طلب الاعتماد</h1>
+        </div>
+        <div class="app-topbar-right">
+          <button class="btn btn-outline btn-sm" id="refreshBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>تحديث</span>
+          </button>
+        </div>
+      </div>
+
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Loader -->
+          <div class="app-loader" id="appLoader">
+            <div class="app-loader-spinner"></div>
+            <div class="app-loader-text">جاري تحميل بيانات الطلب...</div>
+          </div>
+
+          <!-- Error -->
+          <div class="app-error" id="appError">
+            <div class="app-error-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <h2 class="app-error-title" id="errorTitle">تعذر التحميل</h2>
+            <p class="app-error-text" id="errorText">حدث خطأ أثناء تحميل بيانات الطلب. يرجى المحاولة مرة أخرى.</p>
+            <a href="index.html" class="app-error-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>العودة للبوابة</span>
+            </a>
+          </div>
+
+          <!-- No Application -->
+          <div class="no-app-card" id="noAppCard" style="display:none;">
+            <div class="no-app-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <h2 class="no-app-title">لا يوجد طلب اعتماد</h2>
+            <p class="no-app-text">
+              لم يتم تقديم طلب اعتماد لهذه الأكاديمية بعد. إذا كنت صاحب الأكاديمية، يمكنك تقديم طلب اعتماد جديد من الموقع العام.
+            </p>
+            <a href="../academy-apply.html" class="no-app-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>تقديم طلب اعتماد</span>
+            </a>
+          </div>
+
+          <!-- Content -->
+          <div id="appContent" style="display:none;">
+
+            <!-- Header Card -->
+            <div class="app-header-card">
+              <div class="app-header-top">
+                <div class="app-header-title-box">
+                  <div class="app-header-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>طلب اعتماد</span>
+                  </div>
+                  <div class="app-header-number" id="headerNumber">—</div>
+                  <h1 class="app-header-title" id="headerTitle">—</h1>
+                </div>
+                <span class="app-header-status" id="headerStatus">
+                  <span class="app-header-status-dot"></span>
+                  <span id="headerStatusText">—</span>
+                </span>
+              </div>
+
+              <div class="app-meta-grid">
+                <div class="app-meta-item">
+                  <div class="app-meta-label">تاريخ التقديم</div>
+                  <div class="app-meta-value" id="metaSubmitted">—</div>
+                </div>
+                <div class="app-meta-item">
+                  <div class="app-meta-label">آخر تحديث</div>
+                  <div class="app-meta-value" id="metaUpdated">—</div>
+                </div>
+                <div class="app-meta-item">
+                  <div class="app-meta-label">حالة SLA</div>
+                  <div id="metaSla">—</div>
+                </div>
+                <div class="app-meta-item" id="metaExpiresItem" style="display:none;">
+                  <div class="app-meta-label">ينتهي في</div>
+                  <div class="app-meta-value" id="metaExpires">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Result Banner (Approved/Rejected) -->
+            <div id="resultBannerContainer"></div>
+
+            <!-- Timeline -->
+            <div class="timeline-card">
+              <h2 class="timeline-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>مراحل الطلب</span>
+              </h2>
+              <div class="timeline" id="timeline"></div>
+            </div>
+
+            <!-- Documents -->
+            <div class="documents-card">
+              <h2 class="documents-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>المستندات المرفوعة</span>
+              </h2>
+              <div class="documents-grid" id="documentsGrid"></div>
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+
+  <!-- ============ INLINE JS ============ -->
+  <script>
+    (function () {
+      'use strict';
+
+      if (window.PortalApplication && window.PortalApplication.initialized) return;
+
+      var STAGES_ORDER = [
+        { key: 'submitted', label: 'تم التقديم', desc: 'تم استلام طلب الاعتماد بنجاح' },
+        { key: 'documents_review', label: 'مراجعة المستندات', desc: 'يقوم فريق النقابة بمراجعة المستندات المرفوعة' },
+        { key: 'site_visit', label: 'زيارة الموقع', desc: 'زيارة ميدانية للتحقق من مقر الأكاديمية' },
+        { key: 'committee_review', label: 'لجنة المراجعة', desc: 'عرض الطلب على لجنة المراجعة للتصويت' },
+        { key: 'final_approval', label: 'الموافقة النهائية', desc: 'المراجعة النهائية من النقيب العام' },
+        { key: 'approved', label: 'تم الاعتماد', desc: 'تم اعتماد الأكاديمية رسمياً' }
+      ];
+
+      var state = {
+        currentUser: null,
+        academy: null,
+        application: null,
+        history: [],
+        loading: false,
+        initialized: false
+      };
+
+      // ============ Helpers ============
+      function $(id) { return document.getElementById(id); }
+      function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      }
+
+      function formatDate(date) {
+        if (!date) return '—';
+        try {
+          var d = date instanceof Date ? date : new Date(date);
+          if (isNaN(d.getTime())) return '—';
+          return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+        } catch (e) { return '—'; }
+      }
+
+      function formatDateTime(date) {
+        if (!date) return '—';
+        try {
+          var d = date instanceof Date ? date : new Date(date);
+          if (isNaN(d.getTime())) return '—';
+          return d.toLocaleDateString('ar-EG', {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          });
+        } catch (e) { return '—'; }
+      }
+
+      function toast(msg, type) {
+        if (window.Utils && window.Utils.showToast) window.Utils.showToast(msg, type || 'info');
+        else if (type === 'error') alert(msg);
+      }
+
+      function logDebug() {
+        if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
+          console.log.apply(console, ['[PortalApplication]'].concat(Array.prototype.slice.call(arguments)));
+        }
+      }
+
+      function getSetting(p, f) {
+        if (window.AppSettings && window.AppSettings.get) return window.AppSettings.get(p, f);
+        return f;
+      }
+
+      // ============ SLA ============
+      function getSlaDays(stage) {
+        var slaDays = getSetting('accreditation.sla_days', {
+          submitted: 3, documents_review: 3, site_visit: 14,
+          committee_review: 7, final_approval: 5
+        });
+        return slaDays[stage] || 7;
+      }
+
+      function calculateSLA(application) {
+        var stage = application.current_stage;
+        if (!stage || stage === 'approved' || stage === 'rejected') {
+          return { status: 'done', daysRemaining: null };
+        }
+
+        var slaDays = getSlaDays(stage);
+        var enteredAt = application.updated_at || application.submitted_at;
+        if (!enteredAt) return { status: 'on-time', daysRemaining: slaDays };
+
+        try {
+          var entered = enteredAt instanceof Date ? enteredAt : new Date(enteredAt);
+          if (isNaN(entered.getTime())) return { status: 'on-time', daysRemaining: slaDays };
+
+          var elapsedMs = Date.now() - entered.getTime();
+          var elapsedDays = elapsedMs / (1000 * 60 * 60 * 24);
+          var remaining = slaDays - elapsedDays;
+
+          var status;
+          if (remaining < 0) status = 'overdue';
+          else if (remaining < slaDays * 0.3) status = 'warning';
+          else status = 'on-time';
+
+          return { status: status, daysRemaining: Math.ceil(remaining) };
+        } catch (e) {
+          return { status: 'on-time', daysRemaining: slaDays };
+        }
+      }
+
+      // ============ Load Data ============
+      function loadAcademy(userId) {
+        if (!window.sb) return Promise.reject(new Error('No Supabase'));
+        return window.sb
+          .from('academies')
+          .select('id, name, license_number, status, owner_user_id, approved_at, expires_at, created_at')
+          .eq('owner_user_id', userId)
+          .eq('is_deleted', false)
+          .maybeSingle()
+          .then(function (res) {
+            if (res.error) throw new Error(res.error.message);
+            return res.data;
+          });
+      }
+
+      function loadApplication(academyId) {
+        if (!academyId || !window.sb) return Promise.resolve(null);
+        return window.sb
+          .from('accreditation_requests')
+          .select('*')
+          .eq('academy_id', academyId)
+          .order('submitted_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+          .then(function (res) {
+            if (res.error || !res.data) return null;
+            return res.data;
+          })
+          .catch(function () { return null; });
+      }
+
+      function loadHistory(requestId) {
+        if (!requestId || !window.sb) return Promise.resolve([]);
+        return window.sb
+          .from('request_stage_history')
+          .select('id, from_stage, to_stage, notes, moved_at')
+          .eq('request_id', requestId)
+          .order('moved_at', { ascending: true })
+          .then(function (res) {
+            if (res.error || !res.data) return [];
+            return res.data;
+          })
+          .catch(function () { return []; });
+      }
+
+      // ============ Status Info ============
+      function getStatusInfo(stage) {
+        var map = {
+          'submitted': { label: 'تم التقديم', cls: 'submitted' },
+          'documents_review': { label: 'مراجعة المستندات', cls: 'documents_review' },
+          'site_visit': { label: 'زيارة الموقع', cls: 'site_visit' },
+          'committee_review': { label: 'لجنة المراجعة', cls: 'committee_review' },
+          'final_approval': { label: 'الموافقة النهائية', cls: 'final_approval' },
+          'approved': { label: 'معتمدة', cls: 'approved' },
+          'rejected': { label: 'مرفوضة', cls: 'rejected' }
+        };
+        return map[stage] || { label: stage || '—', cls: 'submitted' };
+      }
+
+      // ============ Render Header ============
+      function renderHeader() {
+        var app = state.application;
+        var academy = state.academy;
+        if (!app) return;
+
+        var statusInfo = getStatusInfo(app.current_stage);
+
+        setText('headerNumber', app.request_number || '—');
+        setText('headerTitle', academy ? academy.name : '—');
+
+        // Status
+        var statusEl = $('headerStatus');
+        if (statusEl) {
+          statusEl.className = 'app-header-status ' + statusInfo.cls;
+          setText('headerStatusText', statusInfo.label);
+        }
+
+        // Meta
+        setText('metaSubmitted', formatDate(app.submitted_at));
+        setText('metaUpdated', formatDate(app.updated_at));
+
+        // SLA
+        var slaEl = $('metaSla');
+        if (slaEl) {
+          if (app.current_stage === 'approved' || app.current_stage === 'rejected') {
+            slaEl.innerHTML = '<span class="app-meta-value" style="color:var(--text-muted);">—</span>';
+          } else {
+            var sla = calculateSLA(app);
+            var slaText = sla.status === 'overdue'
+              ? 'متأخر ' + Math.abs(sla.daysRemaining) + ' يوم'
+              : 'متبقي ' + sla.daysRemaining + ' يوم';
+            var slaCls = sla.status === 'overdue' ? 'overdue' : sla.status;
+            slaEl.innerHTML = '<span class="sla-badge ' + slaCls + '">' + slaText + '</span>';
+          }
+        }
+
+        // Expires
+        if (app.approval_expires_at) {
+          var expItem = $('metaExpiresItem');
+          if (expItem) expItem.style.display = 'block';
+          setText('metaExpires', formatDate(app.approval_expires_at));
+        }
+      }
+
+      // ============ Render Result Banner ============
+      function renderResultBanner() {
+        var container = $('resultBannerContainer');
+        var app = state.application;
+        var academy = state.academy;
+        if (!container || !app) return;
+
+        container.innerHTML = '';
+
+        if (app.current_stage === 'approved') {
+          var expiryText = academy && academy.expires_at
+            ? 'تاريخ انتهاء الاعتماد: ' + formatDate(academy.expires_at)
+            : '';
+
+          container.innerHTML = '' +
+            '<div class="result-banner approved">' +
+              '<div class="result-banner-icon">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>' +
+                  '<polyline points="22 4 12 14.01 9 11.01"></polyline>' +
+                '</svg>' +
+              '</div>' +
+              '<div class="result-banner-content">' +
+                '<h3 class="result-banner-title">تم اعتماد أكاديميتك رسمياً</h3>' +
+                '<p class="result-banner-text">أصبحت أكاديميتك معتمدة من النقابة. يمكنك الآن إدارة الفروع والكورسات والشهادات من البوابة.</p>' +
+                '<div class="result-banner-meta">' +
+                  (academy && academy.license_number ? '<div class="result-banner-meta-item">رقم الاعتماد: <strong>' + escapeHtml(academy.license_number) + '</strong></div>' : '') +
+                  (academy && academy.approved_at ? '<div class="result-banner-meta-item">تاريخ الاعتماد: <strong>' + formatDate(academy.approved_at) + '</strong></div>' : '') +
+                  (expiryText ? '<div class="result-banner-meta-item">' + expiryText + '</div>' : '') +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        } else if (app.current_stage === 'rejected') {
+          var reason = app.rejection_reason || 'يرجى التواصل مع النقابة للمزيد من التفاصيل.';
+
+          container.innerHTML = '' +
+            '<div class="result-banner rejected">' +
+              '<div class="result-banner-icon">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<circle cx="12" cy="12" r="10"></circle>' +
+                  '<line x1="15" y1="9" x2="9" y2="15"></line>' +
+                  '<line x1="9" y1="9" x2="15" y2="15"></line>' +
+                '</svg>' +
+              '</div>' +
+              '<div class="result-banner-content">' +
+                '<h3 class="result-banner-title">تم رفض طلب الاعتماد</h3>' +
+                '<p class="result-banner-text">' + escapeHtml(reason) + '</p>' +
+                (app.decided_at ? '<div class="result-banner-meta"><div class="result-banner-meta-item">تاريخ القرار: <strong>' + formatDate(app.decided_at) + '</strong></div></div>' : '') +
+              '</div>' +
+            '</div>';
+        }
+      }
+
+      // ============ Render Timeline ============
+      function renderTimeline() {
+        var container = $('timeline');
+        var app = state.application;
+        if (!container || !app) return;
+
+        var currentStage = app.current_stage;
+        var isRejected = currentStage === 'rejected';
+        var history = state.history || [];
+
+        var currentIndex = STAGES_ORDER.findIndex(function (s) { return s.key === currentStage; });
+        if (isRejected) currentIndex = STAGES_ORDER.length;
+
+        var html = '';
+
+        STAGES_ORDER.forEach(function (stage, index) {
+          var isCompleted = index < currentIndex;
+          var isCurrent = index === currentIndex;
+          var isFinal = stage.key === 'approved' && currentStage === 'approved';
+
+          if (isRejected && index <= currentIndex - 1) {
+            isCompleted = true;
+            isCurrent = false;
+          }
+
+          if (isFinal) {
+            isCompleted = true;
+            isCurrent = false;
+          }
+
+          var historyEntry = history.find(function (h) { return h.to_stage === stage.key; });
+          var dateText = historyEntry ? formatDateTime(historyEntry.moved_at) : (isCompleted ? 'تم' : '—');
+          var notes = historyEntry && historyEntry.notes ? historyEntry.notes : null;
+
+          var itemCls = 'timeline-item';
+          if (isCompleted) itemCls += ' completed';
+          if (isCurrent) itemCls += ' current';
+          if (isRejected && index === currentIndex) itemCls += ' rejected';
+
+          html += '' +
+            '<div class="' + itemCls + '">' +
+              '<div class="timeline-header">' +
+                '<div class="timeline-stage">' + escapeHtml(stage.label) + '</div>' +
+                '<div class="timeline-date">' + dateText + '</div>' +
+              '</div>' +
+              '<p class="timeline-desc">' + escapeHtml(stage.desc) + '</p>' +
+              (notes ? '<div class="timeline-notes">' + escapeHtml(notes) + '</div>' : '') +
+            '</div>';
+        });
+
+        // Rejected item
+        if (isRejected) {
+          var rejectedEntry = history.find(function (h) { return h.to_stage === 'rejected'; });
+          var rejectedDate = rejectedEntry ? formatDateTime(rejectedEntry.moved_at) : formatDate(app.decided_at);
+          var rejectedNotes = app.rejection_reason || (rejectedEntry && rejectedEntry.notes);
+
+          html += '' +
+            '<div class="timeline-item rejected">' +
+              '<div class="timeline-header">' +
+                '<div class="timeline-stage">مرفوض</div>' +
+                '<div class="timeline-date">' + rejectedDate + '</div>' +
+              '</div>' +
+              '<p class="timeline-desc">تم رفض طلب الاعتماد</p>' +
+              (rejectedNotes ? '<div class="timeline-notes rejected">' + escapeHtml(rejectedNotes) + '</div>' : '') +
+            '</div>';
+        }
+
+        container.innerHTML = html;
+      }
+
+      // ============ Render Documents ============
+      function renderDocuments() {
+        var container = $('documentsGrid');
+        var app = state.application;
+        if (!container || !app) return;
+
+        var docs = [
+          { name: 'السجل التجاري', key: 'commercial_registry_url', required: true },
+          { name: 'البطاقة الضريبية', key: 'tax_card_url', required: true },
+          { name: 'صورة المكان', key: 'place_photo_url', required: true },
+          { name: 'إيصال التحويل', key: 'payment_receipt_url', required: false }
+        ];
+
+        container.innerHTML = docs.map(function (doc) {
+          var url = app[doc.key];
+          var isUploaded = !!url;
+          var itemCls = 'document-item';
+          var statusCls = 'uploaded';
+          var statusText = 'تم الرفع';
+
+          if (!isUploaded) {
+            if (doc.required) {
+              itemCls += ' missing';
+              statusCls = 'missing';
+              statusText = 'مفقود';
+            } else {
+              itemCls += ' optional';
+              statusCls = 'optional';
+              statusText = 'اختياري';
+            }
+          }
+
+          return '' +
+            '<div class="' + itemCls + '">' +
+              '<div class="document-icon">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' +
+                  '<polyline points="14 2 14 8 20 8"></polyline>' +
+                '</svg>' +
+              '</div>' +
+              '<div class="document-info">' +
+                '<div class="document-name">' + escapeHtml(doc.name) + '</div>' +
+                '<div class="document-status ' + statusCls + '">' + statusText + '</div>' +
+              '</div>' +
+              (isUploaded
+                ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" class="document-action" title="عرض">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                      '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>' +
+                      '<circle cx="12" cy="12" r="3"></circle>' +
+                    '</svg>' +
+                  '</a>'
+                : '') +
+            '</div>';
+        }).join('');
+      }
+
+      // ============ Render All ============
+      function renderAll() {
+        var loader = $('appLoader');
+        var content = $('appContent');
+        var noApp = $('noAppCard');
+        var error = $('appError');
+
+        if (loader) loader.classList.remove('show');
+        if (error) error.classList.remove('show');
+
+        if (!state.academy) {
+          if (noApp) noApp.style.display = 'block';
+          if (content) content.style.display = 'none';
+          return;
+        }
+
+        if (!state.application) {
+          if (noApp) noApp.style.display = 'block';
+          if (content) content.style.display = 'none';
+          return;
+        }
+
+        if (noApp) noApp.style.display = 'none';
+        if (content) content.style.display = 'block';
+
+        renderHeader();
+        renderResultBanner();
+        renderTimeline();
+        renderDocuments();
+      }
+
+      // ============ Show Error ============
+      function showError(title, text) {
+        var loader = $('appLoader');
+        var content = $('appContent');
+        var noApp = $('noAppCard');
+        var error = $('appError');
+
+        if (loader) loader.classList.remove('show');
+        if (content) content.style.display = 'none';
+        if (noApp) noApp.style.display = 'none';
+        if (error) {
+          error.classList.add('show');
+          if (title) setText('errorTitle', title);
+          if (text) setText('errorText', text);
+        }
+      }
+
+      // ============ Load and Render ============
+      function loadAndRender() {
+        var loader = $('appLoader');
+        if (loader) loader.classList.add('show');
+
+        var error = $('appError');
+        if (error) error.classList.remove('show');
+
+        return loadAcademy(state.currentUser.id)
+          .then(function (academy) {
+            if (!academy) {
+              state.academy = null;
+              state.application = null;
+              renderAll();
+              return;
+            }
+
+            state.academy = academy;
+
+            return loadApplication(academy.id).then(function (application) {
+              state.application = application;
+
+              if (!application) {
+                state.history = [];
+                renderAll();
+                return;
+              }
+
+              return loadHistory(application.id).then(function (history) {
+                state.history = history || [];
+                renderAll();
+
+                logDebug('Application loaded:', {
+                  request: application.request_number,
+                  stage: application.current_stage,
+                  history: state.history.length
+                });
+              });
+            });
+          })
+          .catch(function (err) {
+            showError('حدث خطأ', err.message || 'تعذر تحميل بيانات الطلب.');
+            logDebug('Load error:', err.message);
+          });
+      }
+
+      // ============ Bind Events ============
+      function bindEvents() {
+        var refreshBtn = $('refreshBtn');
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', function () {
+            refreshBtn.disabled = true;
+            var orig = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<span>جاري التحديث...</span>';
+
+            loadAndRender().finally(function () {
+              refreshBtn.disabled = false;
+              refreshBtn.innerHTML = orig;
+            });
+          });
+        }
+
+        // Auto-refresh كل 60 ثانية
+        setInterval(function () {
+          if (document.visibilityState === 'visible' && state.currentUser) {
+            loadAndRender();
+          }
+        }, 60000);
+      }
+
+      // ============ Init ============
+      function init() {
+        if (state.initialized) return;
+        state.initialized = true;
+
+        if (window.AuthGuard && window.AuthGuard.getUser) {
+          state.currentUser = window.AuthGuard.getUser();
+        }
+
+        if (!state.currentUser) {
+          // AuthGuard هيتعامل مع الـ redirect
+          return;
+        }
+
+        bindEvents();
+
+        waitForSupabase(function () {
+          loadAndRender();
+        });
+      }
+
+      function waitForSupabase(cb) {
+        if (window.sb) { cb(); return; }
+        var w = 0;
+        var i = setInterval(function () {
+          w += 100;
+          if (window.sb || w >= 3000) {
+            clearInterval(i);
+            if (window.sb) cb();
+          }
+        }, 100);
+      }
+
+      // ============ Public API ============
+      window.PortalApplication = {
+        initialized: true,
+        init: init,
+        refresh: loadAndRender,
+        getState: function () { return state; }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
