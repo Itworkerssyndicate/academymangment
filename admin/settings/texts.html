@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>إدارة النصوص | الإعدادات</title>
+  <meta name="description" content="تعديل كل نصوص المنصة">
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="../assets/js/settings-defaults.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/themes-data.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app-settings.js"></script>
+  
+  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/loader.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  
+  <style>
+    /* ============ TEXTS MANAGEMENT ============ */
+    
+    .page-header-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .page-header-info h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    
+    .page-header-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .page-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    /* ============ LAYOUT ============ */
+    .texts-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    
+    /* ============ SIDEBAR GROUPS ============ */
+    .texts-sidebar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px;
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+    
+    .texts-sidebar-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .texts-sidebar-group:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .texts-sidebar-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 12px 4px;
+    }
+    
+    .texts-sidebar-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+    }
+    
+    .texts-sidebar-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+    
+    .texts-sidebar-btn.active {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    
+    .texts-sidebar-btn svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    
+    .texts-sidebar-count {
+      margin-right: auto;
+      font-size: 10px;
+      padding: 1px 6px;
+      background: var(--bg);
+      border-radius: 999px;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+    }
+    
+    .texts-sidebar-btn.active .texts-sidebar-count {
+      background: var(--primary);
+      color: var(--primary-text);
+    }
+    
+    /* ============ MAIN PANEL ============ */
+    .texts-main {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    
+    .texts-main-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: var(--bg);
+    }
+    
+    .texts-main-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .texts-main-title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+    
+    .texts-main-search {
+      flex: 1;
+      min-width: 200px;
+      max-width: 320px;
+      position: relative;
+    }
+    
+    .texts-main-search input {
+      width: 100%;
+      padding: 7px 32px 7px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      outline: none;
+      transition: all 0.15s;
+    }
+    
+    .texts-main-search input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .texts-main-search svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    /* ============ TEXT FIELDS ============ */
+    .texts-fields {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    
+    .text-field {
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.15s;
+    }
+    
+    .text-field:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    
+    .text-field.modified {
+      border-color: var(--warning);
+      background: rgba(245, 158, 11, 0.03);
+    }
+    
+    .text-field-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .text-field-label-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .text-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    
+    .text-field-key {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: var(--primary);
+      padding: 1px 6px;
+      background: var(--primary-soft);
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+    
+    .text-field-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    
+    .text-field-reset {
+      padding: 3px 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    
+    .text-field-reset:hover {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: var(--warning-soft);
+    }
+    
+    .text-field-reset:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .text-field-reset svg {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .text-field-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.5;
+      outline: none;
+      transition: all 0.15s;
+      resize: vertical;
+    }
+    
+    .text-field-input:focus {
+      border-color: var(--primary);
+      background: var(--surface-elevated);
+    }
+    
+    textarea.text-field-input {
+      min-height: 60px;
+    }
+    
+    .text-field-default {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-style: italic;
+      font-family: 'Courier New', monospace;
+      padding: 4px 8px;
+      background: var(--surface);
+      border-radius: 6px;
+      border: 1px dashed var(--border);
+      display: none;
+    }
+    
+    .text-field.modified .text-field-default {
+      display: block;
+    }
+    
+    /* ============ EMPTY STATE ============ */
+    .texts-empty {
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    
+    .texts-empty svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.3;
+      margin-bottom: 12px;
+    }
+    
+    /* ============ BOTTOM BAR ============ */
+    .texts-save-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface-elevated);
+      border-top: 1px solid var(--border);
+      padding: 12px 24px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 50;
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+      flex-wrap: wrap;
+    }
+    
+    .texts-save-bar.show {
+      display: flex;
+    }
+    
+    .texts-save-bar-info {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .texts-save-bar-info strong {
+      color: var(--warning);
+      font-weight: 700;
+    }
+    
+    .texts-save-bar-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    /* ============ LOADER ============ */
+    .admin-loader {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .admin-loader.show { display: block; }
+    
+    .admin-loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .admin-loader-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 900px) {
+      .texts-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .texts-sidebar {
+        position: static;
+        max-height: none;
+      }
+      
+      .texts-sidebar-group {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      
+      .texts-sidebar-title {
+        width: 100%;
+        padding: 4px 4px 2px;
+      }
+      
+      .texts-sidebar-btn {
+        width: auto;
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+      
+      .texts-sidebar-btn.active {
+        box-shadow: none;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .texts-main-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .texts-main-search {
+        max-width: none;
+      }
+      
+      .texts-fields {
+        padding: 14px;
+      }
+      
+      .text-field-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .text-field-reset {
+        align-self: flex-start;
+      }
+      
+      .texts-save-bar {
+        padding: 10px 16px;
+      }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body data-requires-auth data-required-roles="super_admin">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+
+      <!-- Topbar -->
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">إدارة النصوص</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="index.html" class="btn btn-outline btn-sm" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>رجوع للإعدادات</span>
+          </a>
+        </div>
+      </div>
+
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <!-- Page Header -->
+          <div class="page-header-admin">
+            <div class="page-header-info">
+              <h2>إدارة النصوص</h2>
+              <p>تعديل كل نصوص المنصة — العناوين، الأزرار، الرسائل، والحقول</p>
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div class="admin-loader" id="adminLoader">
+            <div class="admin-loader-spinner"></div>
+            <div class="admin-loader-text">جاري تحميل النصوص...</div>
+          </div>
+
+          <!-- Layout -->
+          <div class="texts-layout" id="textsLayout" style="display:none;">
+
+            <!-- Sidebar Groups -->
+            <aside class="texts-sidebar" id="textsSidebar"></aside>
+
+            <!-- Main Panel -->
+            <div class="texts-main">
+              <div class="texts-main-header">
+                <h3 class="texts-main-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 7V4h16v3"></path>
+                    <line x1="9" y1="20" x2="15" y2="20"></line>
+                    <line x1="12" y1="4" x2="12" y2="20"></line>
+                  </svg>
+                  <span id="currentGroupTitle">—</span>
+                </h3>
+                <div class="texts-main-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="textsSearch" placeholder="بحث في النصوص..." autocomplete="off">
+                </div>
+              </div>
+
+              <div class="texts-fields" id="textsFields"></div>
+
+              <div class="texts-empty" id="textsEmpty" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <div>لا توجد نصوص مطابقة للبحث</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ============ SAVE BAR ============ -->
+  <div class="texts-save-bar" id="saveBar">
+    <div class="texts-save-bar-info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--warning);">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>لديك <strong id="modifiedCount">0</strong> تعديل غير محفوظ</span>
+    </div>
+    <div class="texts-save-bar-actions">
+      <button type="button" class="btn btn-outline btn-sm" id="discardBtn">
+        <span>تجاهل التعديلات</span>
+      </button>
+      <button type="button" class="btn btn-primary btn-sm" id="saveAllBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        <span>حفظ الكل</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/session.js"></script>
+  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/app-title.js"></script>
+  <script src="../assets/js/permissions.js"></script>
+  <script src="../assets/js/ui/sidebar.js"></script>
+  <script src="../assets/js/ui/modal.js"></script>
+
+  <!-- ============ INLINE JS ============ -->
+  <script>
+    (function () {
+      'use strict';
+
+      if (window.AdminTexts && window.AdminTexts.initialized) return;
+
+      // ============================================
+      // تعريف مجموعات النصوص
+      // ============================================
+      var TEXT_GROUPS = [
+        {
+          key: 'public_nav',
+          label: 'القائمة العلوية',
+          icon: 'M3 12h18M3 6h18M3 18h18',
+          fields: [
+            { key: 'public.nav.home', label: 'الرئيسية', default: 'الرئيسية', desc: 'رابط القائمة العلوية', type: 'text' },
+            { key: 'public.nav.verify', label: 'التحقق من شهادة', default: 'التحقق من شهادة', desc: 'رابط القائمة العلوية', type: 'text' },
+            { key: 'public.nav.academies', label: 'الأكاديميات', default: 'الأكاديميات', desc: 'رابط القائمة العلوية', type: 'text' },
+            { key: 'public.nav.apply', label: 'تقديم أكاديمية', default: 'تقديم أكاديمية', desc: 'رابط القائمة العلوية', type: 'text' },
+            { key: 'public.nav.track', label: 'متابعة طلب', default: 'متابعة طلب', desc: 'رابط القائمة العلوية', type: 'text' },
+            { key: 'public.nav.login', label: 'تسجيل الدخول', default: 'تسجيل الدخول', desc: 'زر تسجيل الدخول', type: 'text' },
+            { key: 'public.nav.logout', label: 'تسجيل الخروج', default: 'تسجيل الخروج', desc: 'زر تسجيل الخروج في القائمة', type: 'text' },
+            { key: 'public.nav.dashboard', label: 'لوحة التحكم', default: 'لوحة التحكم', desc: 'زر لوحة التحكم للمسجلين', type: 'text' },
+            { key: 'public.nav.portal', label: 'بوابتي', default: 'بوابتي', desc: 'رابط بوابة الأكاديمية', type: 'text' }
+          ]
+        },
+        {
+          key: 'public_home',
+          label: 'الصفحة الرئيسية',
+          icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+          fields: [
+            { key: 'public.home.hero_badge', label: 'شعار الـ Hero', default: 'النظام الرسمي المعتمد', desc: 'الشعار الصغير فوق العنوان الرئيسي', type: 'text' },
+            { key: 'public.home.hero_title', label: 'عنوان الـ Hero', default: 'تحقق من شهاداتك بثقة', desc: 'العنوان الرئيسي في الصفحة الرئيسية', type: 'text' },
+            { key: 'public.home.hero_subtitle', label: 'وصف الـ Hero', default: 'النظام الرسمي للتحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة من النقابة', desc: 'الوصف تحت العنوان الرئيسي', type: 'textarea' },
+            { key: 'public.home.search.tab_certificate', label: 'تبويب الشهادة', default: 'شهادة', desc: 'تبويب البحث بالكود', type: 'text' },
+            { key: 'public.home.search.tab_student', label: 'تبويب المتدرب', default: 'متدرب', desc: 'تبويب البحث بالرقم القومي', type: 'text' },
+            { key: 'public.home.search.tab_academy', label: 'تبويب الأكاديمية', default: 'أكاديمية', desc: 'تبويب البحث بالأكاديمية', type: 'text' },
+            { key: 'public.home.search.btn', label: 'زر البحث', default: 'بحث', desc: 'زر البحث في الصفحة الرئيسية', type: 'text' },
+            { key: 'public.home.search.placeholder_cert', label: 'Placeholder الشهادة', default: 'أدخل كود الشهادة...', desc: 'نص في حقل البحث', type: 'text' },
+            { key: 'public.home.search.placeholder_student', label: 'Placeholder المتدرب', default: 'أدخل الرقم القومي (14 رقم)...', desc: 'نص في حقل البحث', type: 'text' },
+            { key: 'public.home.search.placeholder_academy', label: 'Placeholder الأكاديمية', default: 'اسم الأكاديمية أو الرقم الاعتمادي...', desc: 'نص في حقل البحث', type: 'text' },
+            { key: 'public.home.about.title', label: 'عنوان "لماذا"', default: 'لماذا هذه المنصة؟', desc: 'عنوان قسم About', type: 'text' },
+            { key: 'public.home.academies.title', label: 'عنوان الأكاديميات', default: 'أحدث الأكاديميات المعتمدة', desc: 'عنوان قسم الأكاديميات', type: 'text' },
+            { key: 'public.home.cta.title', label: 'عنوان CTA', default: 'هل تمتلك أكاديمية تدريبية؟', desc: 'العنوان في قسم الـ CTA', type: 'text' },
+            { key: 'public.home.cta.btn', label: 'زر CTA', default: 'قدم طلب اعتماد', desc: 'الزر في قسم الـ CTA', type: 'text' }
+          ]
+        },
+        {
+          key: 'public_verify',
+          label: 'صفحة التحقق',
+          icon: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z',
+          fields: [
+            { key: 'public.verify.badge', label: 'شعار الصفحة', default: 'التحقق الرسمي من الشهادات', desc: 'الشعار أعلى الصفحة', type: 'text' },
+            { key: 'public.verify.title', label: 'العنوان الرئيسي', default: 'تحقق من صحة الشهادة', desc: 'عنوان صفحة التحقق', type: 'text' },
+            { key: 'public.verify.subtitle', label: 'الوصف', default: 'أدخل كود الشهادة المطبوع عليها للتحقق من صحتها بشكل فوري', desc: 'الوصف تحت العنوان', type: 'textarea' },
+            { key: 'public.verify.label', label: 'تسمية الحقل', default: 'كود الشهادة', desc: 'التسمية قبل حقل الإدخال', type: 'text' },
+            { key: 'public.verify.input_placeholder', label: 'Placeholder الكود', default: 'NTI-2026-XXXXXX', desc: 'نص داخل الحقل', type: 'text' },
+            { key: 'public.verify.btn', label: 'زر التحقق', default: 'تحقق', desc: 'نص الزر', type: 'text' },
+            { key: 'public.verify.loading', label: 'نص التحميل', default: 'جاري التحقق من الشهادة...', desc: 'يظهر أثناء البحث', type: 'text' },
+            { key: 'public.verify.not_found_title', label: 'عنوان عدم الوجود', default: 'لم يتم العثور على الشهادة', desc: 'عندما لا يجد النظام الشهادة', type: 'text' },
+            { key: 'public.verify.not_found_text', label: 'وصف عدم الوجود', default: 'تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الجهة المُصدرة', desc: 'الوصف أسفل العنوان', type: 'textarea' }
+          ]
+        },
+        {
+          key: 'public_student',
+          label: 'صفحة المتدرب',
+          icon: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2',
+          fields: [
+            { key: 'public.student.badge', label: 'شعار الصفحة', default: 'صفحة المتدرب الرسمية', desc: 'أعلى الصفحة', type: 'text' },
+            { key: 'public.student.title', label: 'العنوان', default: 'اعرض شهاداتك في مكان واحد', desc: 'العنوان الرئيسي', type: 'text' },
+            { key: 'public.student.subtitle', label: 'الوصف', default: 'أدخل رقمك القومي لعرض جميع شهاداتك التدريبية المعتمدة وتحميل سيرتك الذاتية', desc: 'تحت العنوان', type: 'textarea' },
+            { key: 'public.student.label', label: 'تسمية الحقل', default: 'الرقم القومي', desc: 'قبل حقل الإدخال', type: 'text' },
+            { key: 'public.student.btn', label: 'زر البحث', default: 'بحث', desc: 'نص الزر', type: 'text' },
+            { key: 'public.student.download_cv', label: 'زر تحميل CV', default: 'تحميل السيرة الذاتية', desc: 'زر في الملف الشخصي', type: 'text' }
+          ]
+        },
+        {
+          key: 'public_academies',
+          label: 'دليل الأكاديميات',
+          icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+          fields: [
+            { key: 'public.academies.badge', label: 'شعار الصفحة', default: 'دليل رسمي معتمد', desc: 'أعلى الصفحة', type: 'text' },
+            { key: 'public.academies.title', label: 'العنوان', default: 'الأكاديميات المعتمدة', desc: 'العنوان الرئيسي', type: 'text' },
+            { key: 'public.academies.subtitle', label: 'الوصف', default: 'تصفح الأكاديميات التدريبية الحاصلة على اعتماد رسمي من النقابة', desc: 'تحت العنوان', type: 'textarea' },
+            { key: 'public.academies.search_placeholder', label: 'Placeholder البحث', default: 'ابحث باسم الأكاديمية أو رقم الاعتماد...', desc: 'نص البحث', type: 'text' },
+            { key: 'public.academies.filter_all_categories', label: 'كل التصنيفات', default: 'جميع التصنيفات', desc: 'في فلتر التصنيفات', type: 'text' },
+            { key: 'public.academies.filter_all_govs', label: 'كل المحافظات', default: 'جميع المحافظات', desc: 'في فلتر المحافظات', type: 'text' },
+            { key: 'public.academies.badge_approved', label: 'Badge "معتمدة"', default: 'معتمدة', desc: 'على كارت الأكاديمية', type: 'text' },
+            { key: 'public.academies.empty_title', label: 'عنوان Empty', default: 'لا توجد أكاديميات', desc: 'عند عدم وجود نتائج', type: 'text' }
+          ]
+        },
+        {
+          key: 'public_apply',
+          label: 'فورم التقديم',
+          icon: 'M12 5v14M5 12h14',
+          fields: [
+            { key: 'public.apply.badge', label: 'شعار الصفحة', default: 'طلب اعتماد رسمي', desc: 'أعلى الصفحة', type: 'text' },
+            { key: 'public.apply.title', label: 'العنوان', default: 'قدم طلب اعتماد أكاديميتك', desc: 'العنوان الرئيسي', type: 'text' },
+            { key: 'public.apply.step1_title', label: 'عنوان الخطوة 1', default: 'البيانات الأساسية', desc: 'خطوة البيانات', type: 'text' },
+            { key: 'public.apply.step2_title', label: 'عنوان الخطوة 2', default: 'فروع الأكاديمية', desc: 'خطوة الفروع', type: 'text' },
+            { key: 'public.apply.step3_title', label: 'عنوان الخطوة 3', default: 'الكورسات المقدمة', desc: 'خطوة الكورسات', type: 'text' },
+            { key: 'public.apply.step4_title', label: 'عنوان الخطوة 4', default: 'المستندات المطلوبة', desc: 'خطوة المستندات', type: 'text' },
+            { key: 'public.apply.step5_title', label: 'عنوان الخطوة 5', default: 'المراجعة النهائية', desc: 'خطوة المراجعة', type: 'text' },
+            { key: 'public.apply.btn_next', label: 'زر التالي', default: 'التالي', desc: 'التنقل بين الخطوات', type: 'text' },
+            { key: 'public.apply.btn_prev', label: 'زر السابق', default: 'السابق', desc: 'التنقل بين الخطوات', type: 'text' },
+            { key: 'public.apply.btn_submit', label: 'زر التقديم', default: 'تقديم الطلب', desc: 'الزر النهائي', type: 'text' },
+            { key: 'public.apply.success_title', label: 'عنوان النجاح', default: 'تم استلام طلبك بنجاح', desc: 'بعد التقديم', type: 'text' },
+            { key: 'public.apply.success_text', label: 'وصف النجاح', default: 'سيتم مراجعة طلبك من قبل فريق النقابة. يرجى الاحتفاظ برقم الطلب لمتابعة حالته.', desc: 'تحت العنوان', type: 'textarea' }
+          ]
+        },
+        {
+          key: 'public_track',
+          label: 'متابعة الطلب',
+          icon: 'M12 6v6l4 2',
+          fields: [
+            { key: 'public.track.badge', label: 'شعار الصفحة', default: 'متابعة الطلب', desc: 'أعلى الصفحة', type: 'text' },
+            { key: 'public.track.title', label: 'العنوان', default: 'تتبع طلب الاعتماد', desc: 'العنوان الرئيسي', type: 'text' },
+            { key: 'public.track.subtitle', label: 'الوصف', default: 'أدخل رقم طلب الاعتماد لمتابعة حالته والمراحل التي تم اجتيازها', desc: 'تحت العنوان', type: 'textarea' },
+            { key: 'public.track.input_placeholder', label: 'Placeholder', default: 'REQ-2026-XXXX', desc: 'نص الحقل', type: 'text' },
+            { key: 'public.track.btn', label: 'زر المتابعة', default: 'متابعة', desc: 'نص الزر', type: 'text' },
+            { key: 'public.track.timeline_title', label: 'عنوان Timeline', default: 'مراحل الطلب', desc: 'قبل المراحل', type: 'text' }
+          ]
+        },
+        {
+          key: 'public_login',
+          label: 'صفحة الدخول',
+          icon: 'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4',
+          fields: [
+            { key: 'public.login.title', label: 'العنوان', default: 'تسجيل الدخول', desc: 'العنوان الرئيسي', type: 'text' },
+            { key: 'public.login.subtitle', label: 'الوصف', default: 'مرحباً بك في النظام الرسمي', desc: 'تحت العنوان', type: 'text' },
+            { key: 'public.login.email_label', label: 'label البريد', default: 'البريد الإلكتروني', desc: 'قبل حقل البريد', type: 'text' },
+            { key: 'public.login.password_label', label: 'label كلمة المرور', default: 'كلمة المرور', desc: 'قبل حقل الباسورد', type: 'text' },
+            { key: 'public.login.remember_me', label: 'تذكرني', default: 'تذكرني', desc: 'خيار', type: 'text' },
+            { key: 'public.login.forgot_password', label: 'نسيت الباسورد', default: 'نسيت كلمة المرور؟', desc: 'رابط', type: 'text' },
+            { key: 'public.login.btn', label: 'زر الدخول', default: 'تسجيل الدخول', desc: 'نص الزر', type: 'text' },
+            { key: 'public.login.loading_btn', label: 'زر جاري التحقق', default: 'جاري التحقق...', desc: 'أثناء الدخول', type: 'text' },
+            { key: 'public.login.apply_link', label: 'رابط "قدم أكاديمية"', default: 'قدم طلب اعتماد', desc: 'في الفوتر', type: 'text' },
+            { key: 'public.login.back_home', label: 'رابط العودة', default: 'العودة إلى الرئيسية', desc: 'في الفوتر', type: 'text' }
+          ]
+        },
+        {
+          key: 'admin_sidebar',
+          label: 'قائمة الإدارة',
+          icon: 'M4 6h16M4 12h16M4 18h16',
+          fields: [
+            { key: 'admin.sidebar.dashboard', label: 'لوحة التحكم', default: 'لوحة التحكم', desc: 'الرابط الرئيسي', type: 'text' },
+            { key: 'admin.sidebar.requests', label: 'طلبات الاعتماد', default: 'طلبات الاعتماد', desc: 'رابط', type: 'text' },
+            { key: 'admin.sidebar.academies', label: 'الأكاديميات', default: 'الأكاديميات', desc: 'رابط', type: 'text' },
+            { key: 'admin.sidebar.certificates', label: 'الشهادات', default: 'الشهادات', desc: 'رابط', type: 'text' },
+            { key: 'admin.sidebar.categories', label: 'التصنيفات', default: 'التصنيفات', desc: 'رابط', type: 'text' },
+            { key: 'admin.sidebar.reports', label: 'التقارير', default: 'التقارير', desc: 'رابط', type: 'text' },
+            { key: 'admin.sidebar.activities', label: 'سجل النشاطات', default: 'سجل النشاطات', desc: 'رابط', type: 'text' },
+            { key: 'admin.sidebar.users', label: 'المستخدمون', default: 'المستخدمون', desc: 'رابط', type: 'text' },
+            { key: 'admin.sidebar.settings', label: 'الإعدادات', default: 'الإعدادات', desc: 'رابط', type: 'text' }
+          ]
+        },
+        {
+          key: 'admin_dashboard',
+          label: 'لوحة التحكم',
+          icon: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
+          fields: [
+            { key: 'admin.dashboard.title', label: 'عنوان الصفحة', default: 'لوحة التحكم', desc: 'في الـ topbar', type: 'text' },
+            { key: 'admin.dashboard.welcome', label: 'مرحباً', default: 'مرحباً', desc: 'بعدها اسم المستخدم', type: 'text' },
+            { key: 'admin.dashboard.subtitle', label: 'الوصف', default: 'نظرة عامة على نشاط النقابة', desc: 'تحت الترحيب', type: 'text' },
+            { key: 'admin.dashboard.stat_academies', label: 'إحصائية الأكاديميات', default: 'أكاديمية', desc: 'label الإحصائية', type: 'text' },
+            { key: 'admin.dashboard.stat_certificates', label: 'إحصائية الشهادات', default: 'شهادة موثقة', desc: 'label الإحصائية', type: 'text' },
+            { key: 'admin.dashboard.stat_online', label: 'إحصائية المتصلين', default: 'زائر الآن', desc: 'label الإحصائية', type: 'text' },
+            { key: 'admin.dashboard.stat_requests', label: 'إحصائية الطلبات', default: 'طلب معلق', desc: 'label الإحصائية', type: 'text' },
+            { key: 'admin.dashboard.recent_activities', label: 'آخر النشاطات', default: 'آخر النشاطات', desc: 'عنوان القسم', type: 'text' },
+            { key: 'admin.dashboard.quick_actions', label: 'إجراءات سريعة', default: 'إجراءات سريعة', desc: 'عنوان القسم', type: 'text' }
+          ]
+        },
+        {
+          key: 'admin_certificates',
+          label: 'إدارة الشهادات',
+          icon: 'M12 8a7 7 0 1 0 0 14 7 7 0 0 0 0-14z',
+          fields: [
+            { key: 'admin.certificates.title', label: 'عنوان الصفحة', default: 'الشهادات', desc: 'في الـ topbar', type: 'text' },
+            { key: 'admin.certificates.add_btn', label: 'زر إضافة', default: 'إضافة شهادة', desc: 'في الـ header', type: 'text' },
+            { key: 'admin.certificates.add_title', label: 'عنوان صفحة الإضافة', default: 'إضافة شهادة جديدة', desc: 'صفحة الإضافة', type: 'text' },
+            { key: 'admin.certificates.issuer_union', label: 'النقابة (radio)', default: 'النقابة مباشرة', desc: 'اختيار الجهة', type: 'text' },
+            { key: 'admin.certificates.issuer_academy', label: 'أكاديمية (radio)', default: 'أكاديمية معتمدة', desc: 'اختيار الجهة', type: 'text' },
+            { key: 'admin.certificates.save_btn', label: 'زر الحفظ', default: 'حفظ الشهادة', desc: 'في نهاية الفورم', type: 'text' },
+            { key: 'admin.certificates.delete_confirm', label: 'رسالة تأكيد الحذف', default: 'هل تريد حذف هذه الشهادة؟', desc: 'في modal الحذف', type: 'text' }
+          ]
+        },
+        {
+          key: 'admin_users',
+          label: 'إدارة المستخدمين',
+          icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2',
+          fields: [
+            { key: 'admin.users.title', label: 'عنوان الصفحة', default: 'المستخدمون', desc: 'في الـ topbar', type: 'text' },
+            { key: 'admin.users.add_btn', label: 'زر إضافة', default: 'إضافة مستخدم', desc: 'في الـ header', type: 'text' },
+            { key: 'admin.users.role_super_admin', label: 'سوبر أدمن', default: 'سوبر أدمن', desc: 'اسم الدور', type: 'text' },
+            { key: 'admin.users.role_admin', label: 'أدمن', default: 'أدمن', desc: 'اسم الدور', type: 'text' },
+            { key: 'admin.users.role_committee', label: 'إدارة اللجنة', default: 'إدارة اللجنة', desc: 'اسم الدور', type: 'text' },
+            { key: 'admin.users.role_user', label: 'مستخدم', default: 'مستخدم', desc: 'اسم الدور', type: 'text' },
+            { key: 'admin.users.status_active', label: 'نشط', default: 'نشط', desc: 'حالة المستخدم', type: 'text' },
+            { key: 'admin.users.status_inactive', label: 'معطل', default: 'معطل', desc: 'حالة المستخدم', type: 'text' },
+            { key: 'admin.users.status_online', label: 'متصل', default: 'متصل', desc: 'حالة المستخدم', type: 'text' }
+          ]
+        },
+        {
+          key: 'admin_requests',
+          label: 'طلبات الاعتماد',
+          icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z',
+          fields: [
+            { key: 'admin.requests.title', label: 'عنوان الصفحة', default: 'طلبات الاعتماد', desc: 'في الـ topbar', type: 'text' },
+            { key: 'admin.requests.stage_submitted', label: 'مرحلة 1', default: 'تم التقديم', desc: 'اسم المرحلة', type: 'text' },
+            { key: 'admin.requests.stage_documents', label: 'مرحلة 2', default: 'مراجعة المستندات', desc: 'اسم المرحلة', type: 'text' },
+            { key: 'admin.requests.stage_site', label: 'مرحلة 3', default: 'زيارة الموقع', desc: 'اسم المرحلة', type: 'text' },
+            { key: 'admin.requests.stage_committee', label: 'مرحلة 4', default: 'لجنة المراجعة', desc: 'اسم المرحلة', type: 'text' },
+            { key: 'admin.requests.stage_final', label: 'مرحلة 5', default: 'الموافقة النهائية', desc: 'اسم المرحلة', type: 'text' }
+          ]
+        },
+        {
+          key: 'common',
+          label: 'نصوص مشتركة',
+          icon: 'M4 4h16v16H4z',
+          fields: [
+            { key: 'common.save', label: 'حفظ', default: 'حفظ', desc: 'زر الحفظ', type: 'text' },
+            { key: 'common.cancel', label: 'إلغاء', default: 'إلغاء', desc: 'زر الإلغاء', type: 'text' },
+            { key: 'common.edit', label: 'تعديل', default: 'تعديل', desc: 'زر التعديل', type: 'text' },
+            { key: 'common.delete', label: 'حذف', default: 'حذف', desc: 'زر الحذف', type: 'text' },
+            { key: 'common.confirm', label: 'تأكيد', default: 'تأكيد', desc: 'زر التأكيد', type: 'text' },
+            { key: 'common.close', label: 'إغلاق', default: 'إغلاق', desc: 'زر الإغلاق', type: 'text' },
+            { key: 'common.loading', label: 'جاري التحميل', default: 'جاري التحميل...', desc: 'نص عام', type: 'text' },
+            { key: 'common.no_results', label: 'لا توجد نتائج', default: 'لا توجد نتائج', desc: 'نص عام', type: 'text' },
+            { key: 'common.yes', label: 'نعم', default: 'نعم', desc: 'نص عام', type: 'text' },
+            { key: 'common.no', label: 'لا', default: 'لا', desc: 'نص عام', type: 'text' },
+            { key: 'common.optional', label: 'اختياري', default: 'اختياري', desc: 'نص عام', type: 'text' },
+            { key: 'common.required', label: 'مطلوب', default: 'مطلوب', desc: 'نص عام', type: 'text' }
+          ]
+        }
+      ];
+
+      // ============================================
+      // الحالة
+      // ============================================
+      var state = {
+        currentUser: null,
+        activeGroup: 'public_nav',
+        savedTexts: {},           // من DB
+        editedTexts: {},          // التعديلات الحالية
+        originalTexts: {},        // نسخة للتراجع
+        searchTerm: '',
+        saving: false,
+        loading: false,
+        initialized: false
+      };
+
+      // ============================================
+      // Helpers
+      // ============================================
+      function $(id) { return document.getElementById(id); }
+      function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      }
+
+      function toast(msg, type) {
+        if (window.Utils && window.Utils.showToast) window.Utils.showToast(msg, type || 'info');
+        else if (type === 'error') alert(msg);
+      }
+
+      function logDebug() {
+        if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
+          console.log.apply(console, ['[AdminTexts]'].concat(Array.prototype.slice.call(arguments)));
+        }
+      }
+
+      function hasPermission(perm) {
+        if (window.Permissions && window.Permissions.can) return window.Permissions.can(perm);
+        if (window.AuthGuard && window.AuthGuard.getUser) {
+          var u = window.AuthGuard.getUser();
+          return u && u.role === 'super_admin';
+        }
+        return false;
+      }
+
+      // ============================================
+      // Load Texts from Supabase
+      // ============================================
+      function loadTexts() {
+        if (!window.sb) return Promise.resolve({});
+        return window.sb
+          .from('settings')
+          .select('value')
+          .eq('key', 'texts')
+          .maybeSingle()
+          .then(function (res) {
+            if (res.error || !res.data || !res.data.value) return {};
+            return res.data.value || {};
+          })
+          .catch(function () { return {}; });
+      }
+
+      // ============================================
+      // Get effective text (edited > saved > default)
+      // ============================================
+      function getTextValue(fieldKey) {
+        if (Object.prototype.hasOwnProperty.call(state.editedTexts, fieldKey)) {
+          return state.editedTexts[fieldKey];
+        }
+        if (Object.prototype.hasOwnProperty.call(state.savedTexts, fieldKey)) {
+          return state.savedTexts[fieldKey];
+        }
+        // default
+        var def = findFieldDefault(fieldKey);
+        return def || '';
+      }
+
+      function findFieldDefault(fieldKey) {
+        for (var i = 0; i < TEXT_GROUPS.length; i++) {
+          var g = TEXT_GROUPS[i];
+          for (var j = 0; j < g.fields.length; j++) {
+            if (g.fields[j].key === fieldKey) return g.fields[j].default;
+          }
+        }
+        return '';
+      }
+
+      function findFieldMeta(fieldKey) {
+        for (var i = 0; i < TEXT_GROUPS.length; i++) {
+          var g = TEXT_GROUPS[i];
+          for (var j = 0; j < g.fields.length; j++) {
+            if (g.fields[j].key === fieldKey) return { group: g, field: g.fields[j] };
+          }
+        }
+        return null;
+      }
+
+      // ============================================
+      // Modified count
+      // ============================================
+      function getModifiedCount() {
+        return Object.keys(state.editedTexts).length;
+      }
+
+      function updateSaveBar() {
+        var bar = $('saveBar');
+        var count = getModifiedCount();
+        setText('modifiedCount', count);
+        if (bar) {
+          bar.classList.toggle('show', count > 0);
+        }
+      }
+
+      // ============================================
+      // Render Sidebar
+      // ============================================
+      function renderSidebar() {
+        var sidebar = $('textsSidebar');
+        if (!sidebar) return;
+
+        sidebar.innerHTML = TEXT_GROUPS.map(function (g) {
+          var isActive = g.key === state.activeGroup;
+          return '' +
+            '<button class="texts-sidebar-btn' + (isActive ? ' active' : '') + '" data-group="' + escapeHtml(g.key) + '">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="' + escapeHtml(g.icon) + '"></path>' +
+              '</svg>' +
+              '<span>' + escapeHtml(g.label) + '</span>' +
+              '<span class="texts-sidebar-count">' + g.fields.length + '</span>' +
+            '</button>';
+        }).join('');
+
+        // Bind
+        sidebar.querySelectorAll('[data-group]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            state.activeGroup = btn.getAttribute('data-group');
+            state.searchTerm = '';
+            var searchInput = $('textsSearch');
+            if (searchInput) searchInput.value = '';
+            renderSidebar();
+            renderFields();
+          });
+        });
+      }
+
+      // ============================================
+      // Render Fields
+      // ============================================
+      function renderFields() {
+        var group = TEXT_GROUPS.find(function (g) { return g.key === state.activeGroup; });
+        if (!group) return;
+
+        setText('currentGroupTitle', group.label);
+
+        var container = $('textsFields');
+        var emptyEl = $('textsEmpty');
+        if (!container) return;
+
+        // Filter by search
+        var fields = group.fields;
+        if (state.searchTerm) {
+          var term = state.searchTerm.toLowerCase();
+          fields = fields.filter(function (f) {
+            return f.label.toLowerCase().indexOf(term) !== -1 ||
+                   f.key.toLowerCase().indexOf(term) !== -1 ||
+                   (f.default && f.default.toLowerCase().indexOf(term) !== -1);
+          });
+        }
+
+        if (fields.length === 0) {
+          container.innerHTML = '';
+          if (emptyEl) emptyEl.style.display = 'block';
+          return;
+        }
+
+        if (emptyEl) emptyEl.style.display = 'none';
+
+        container.innerHTML = fields.map(renderField).join('');
+
+        // Bind events
+        container.querySelectorAll('[data-text-key]').forEach(function (input) {
+          input.addEventListener('input', function () {
+            var key = this.getAttribute('data-text-key');
+            var value = this.value;
+            var defaultValue = findFieldDefault(key);
+
+            if (value === defaultValue && !state.savedTexts[key]) {
+              // رجع للقيمة الافتراضية
+              delete state.editedTexts[key];
+            } else if (state.savedTexts[key] === value) {
+              // رجع للقيمة المحفوظة
+              delete state.editedTexts[key];
+            } else {
+              state.editedTexts[key] = value;
+            }
+
+            // تحديث الـ UI
+            var fieldWrap = this.closest('.text-field');
+            if (fieldWrap) {
+              var isModified = Object.prototype.hasOwnProperty.call(state.editedTexts, key);
+              fieldWrap.classList.toggle('modified', isModified);
+            }
+            var resetBtn = fieldWrap ? fieldWrap.querySelector('[data-reset]') : null;
+            if (resetBtn) resetBtn.disabled = !Object.prototype.hasOwnProperty.call(state.editedTexts, key);
+
+            updateSaveBar();
+          });
+        });
+
+        // Bind reset buttons
+        container.querySelectorAll('[data-reset]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var key = btn.getAttribute('data-reset');
+            delete state.editedTexts[key];
+            renderFields();
+            updateSaveBar();
+          });
+        });
+      }
+
+      function renderField(field) {
+        var value = getTextValue(field.key);
+        var defaultValue = field.default;
+        var isModified = Object.prototype.hasOwnProperty.call(state.editedTexts, field.key);
+
+        var inputHtml;
+        if (field.type === 'textarea') {
+          inputHtml = '<textarea class="text-field-input" data-text-key="' + escapeHtml(field.key) + '" rows="3">' + escapeHtml(value) + '</textarea>';
+        } else {
+          inputHtml = '<input type="text" class="text-field-input" data-text-key="' + escapeHtml(field.key) + '" value="' + escapeHtml(value) + '">';
+        }
+
+        return '' +
+          '<div class="text-field' + (isModified ? ' modified' : '') + '">' +
+            '<div class="text-field-header">' +
+              '<div class="text-field-label-wrap">' +
+                '<div class="text-field-label">' +
+                  escapeHtml(field.label) +
+                  '<span class="text-field-key">' + escapeHtml(field.key) + '</span>' +
+                '</div>' +
+                '<div class="text-field-desc">' + escapeHtml(field.desc) + '</div>' +
+              '</div>' +
+              '<button type="button" class="text-field-reset" data-reset="' + escapeHtml(field.key) + '"' + (isModified ? '' : ' disabled') + '>' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<polyline points="1 4 1 10 7 10"></polyline>' +
+                  '<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>' +
+                '</svg>' +
+                'استعادة' +
+              '</button>' +
+            '</div>' +
+            inputHtml +
+            '<div class="text-field-default">القيمة الافتراضية: ' + escapeHtml(defaultValue) + '</div>' +
+          '</div>';
+      }
+
+      // ============================================
+      // Save
+      // ============================================
+      function saveAll() {
+        if (state.saving) return;
+        if (getModifiedCount() === 0) {
+          toast('لا توجد تعديلات للحفظ', 'info');
+          return;
+        }
+
+        if (!hasPermission('settings.edit')) {
+          toast('غير مصرح لك بتعديل النصوص', 'error');
+          return;
+        }
+
+        if (!window.sb) {
+          toast('تعذر الاتصال بالخادم', 'error');
+          return;
+        }
+
+        state.saving = true;
+
+        var saveBtn = $('saveAllBtn');
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.dataset._origHtml = saveBtn.innerHTML;
+          saveBtn.innerHTML = '<span>جاري الحفظ...</span>';
+        }
+
+        // دمج التعديلات مع القيم المحفوظة
+        var merged = Object.assign({}, state.savedTexts, state.editedTexts);
+
+        window.sb
+          .from('settings')
+          .upsert({ key: 'texts', value: merged }, { onConflict: 'key' })
+          .then(function (res) {
+            if (res.error) throw new Error(res.error.message);
+
+            state.savedTexts = JSON.parse(JSON.stringify(merged));
+            state.editedTexts = {};
+
+            toast('تم حفظ النصوص بنجاح', 'success');
+            logDebug('Texts saved:', Object.keys(merged).length, 'entries');
+
+            // Log activity
+            logActivity('update_texts', 'تحديث نصوص المنصة', {
+              count: Object.keys(state.editedTexts).length
+            });
+
+            // Refresh UI
+            renderFields();
+            updateSaveBar();
+
+            // حدّث الـ AppSettings (لو عنده نصوص)
+            if (window.AppSettings && window.AppSettings.reload) {
+              window.AppSettings.reload();
+            }
+          })
+          .catch(function (err) {
+            toast('فشل الحفظ: ' + err.message, 'error');
+            logDebug('Save error:', err.message);
+          })
+          .finally(function () {
+            state.saving = false;
+            if (saveBtn) {
+              saveBtn.disabled = false;
+              if (saveBtn.dataset._origHtml) {
+                saveBtn.innerHTML = saveBtn.dataset._origHtml;
+                delete saveBtn.dataset._origHtml;
+              }
+            }
+          });
+      }
+
+      // ============================================
+      // Discard
+      // ============================================
+      function discardChanges() {
+        if (getModifiedCount() === 0) return;
+
+        if (!window.Modal || !window.Modal.confirm) {
+          if (!confirm('تجاهل كل التعديلات غير المحفوظة؟')) return;
+          state.editedTexts = {};
+          renderFields();
+          updateSaveBar();
+          return;
+        }
+
+        window.Modal.confirm({
+          title: 'تجاهل التعديلات',
+          message: 'سيتم فقدان كل التعديلات غير المحفوظة. متأكد؟',
+          confirmText: 'تجاهل',
+          cancelText: 'إلغاء',
+          icon: 'warning',
+          danger: true
+        }).then(function (confirmed) {
+          if (confirmed) {
+            state.editedTexts = {};
+            renderFields();
+            updateSaveBar();
+            toast('تم تجاهل التعديلات', 'info');
+          }
+        });
+      }
+
+      // ============================================
+      // Log Activity
+      // ============================================
+      function logActivity(type, description, details) {
+        if (!window.sb || !state.currentUser) return;
+        window.sb.from('activities').insert({
+          user_id: state.currentUser.id,
+          user_name: state.currentUser.full_name,
+          user_role: state.currentUser.role,
+          action_type: type,
+          description: description,
+          details: details || {}
+        }).catch(function () {});
+      }
+
+      // ============================================
+      // Bind Events
+      // ============================================
+      function bindEvents() {
+        var searchInput = $('textsSearch');
+        if (searchInput) {
+          var timer = null;
+          searchInput.addEventListener('input', function () {
+            clearTimeout(timer);
+            var val = this.value;
+            timer = setTimeout(function () {
+              state.searchTerm = val.trim();
+              renderFields();
+            }, 200);
+          });
+        }
+
+        var saveBtn = $('saveAllBtn');
+        if (saveBtn) saveBtn.addEventListener('click', saveAll);
+
+        var discardBtn = $('discardBtn');
+        if (discardBtn) discardBtn.addEventListener('click', discardChanges);
+
+        // Warn before leaving with unsaved changes
+        window.addEventListener('beforeunload', function (e) {
+          if (getModifiedCount() > 0) {
+            var msg = 'لديك تعديلات غير محفوظة — هل تريد المغادرة؟';
+            e.returnValue = msg;
+            return msg;
+          }
+        });
+      }
+
+      // ============================================
+      // Init
+      // ============================================
+      function init() {
+        if (state.initialized) return;
+        state.initialized = true;
+
+        if (!hasPermission('settings.view')) {
+          toast('غير مصرح لك بالوصول للنصوص', 'error');
+          setTimeout(function () {
+            window.location.href = window.resolveUrl ? window.resolveUrl('admin/index.html') : 'index.html';
+          }, 1500);
+          return;
+        }
+
+        if (window.AuthGuard && window.AuthGuard.getUser) {
+          state.currentUser = window.AuthGuard.getUser();
+        }
+
+        var loader = $('adminLoader');
+        if (loader) loader.classList.add('show');
+
+        waitForSupabase(function () {
+          loadTexts().then(function (savedTexts) {
+            state.savedTexts = savedTexts || {};
+
+            if (loader) loader.classList.remove('show');
+            var layout = $('textsLayout');
+            if (layout) layout.style.display = 'grid';
+
+            renderSidebar();
+            renderFields();
+            bindEvents();
+            updateSaveBar();
+
+            logDebug('Texts initialized. Saved:', Object.keys(state.savedTexts).length);
+          });
+        });
+      }
+
+      function waitForSupabase(cb) {
+        if (window.sb) { cb(); return; }
+        var w = 0;
+        var i = setInterval(function () {
+          w += 100;
+          if (window.sb || w >= 3000) {
+            clearInterval(i);
+            if (window.sb) cb();
+          }
+        }, 100);
+      }
+
+      window.AdminTexts = {
+        initialized: true,
+        init: init,
+        getState: function () { return state; },
+        getText: function (key) { return getTextValue(key); },
+        groups: TEXT_GROUPS
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
