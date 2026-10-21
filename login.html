@@ -9,6 +9,9 @@
   <meta name="theme-color" content="#0A0E14">
   <meta name="robots" content="noindex, nofollow">
   
+  <!-- ✅ favicon مضمّن عشان نطفي 404 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23CE1126'/><text x='50' y='65' font-size='45' text-anchor='middle' fill='white' font-family='Cairo,sans-serif' font-weight='800'>ن</text></svg>">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -36,7 +39,6 @@
       overflow-x: hidden;
     }
     
-    /* ============ LAYOUT ============ */
     .auth-layout {
       min-height: 100vh;
       display: grid;
@@ -56,12 +58,8 @@
       background: var(--bg, #0A0E14);
     }
     
-    .auth-form-wrapper {
-      width: 100%;
-      max-width: 420px;
-    }
+    .auth-form-wrapper { width: 100%; max-width: 420px; }
     
-    /* ============ BRAND SIDE ============ */
     .auth-brand-side {
       position: relative;
       background: linear-gradient(135deg, var(--surface, #131820) 0%, var(--bg-alt, #05080D) 100%);
@@ -98,25 +96,13 @@
       pointer-events: none;
     }
     
-    .brand-content {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      max-width: 400px;
-    }
+    .brand-content { position: relative; z-index: 1; text-align: center; max-width: 400px; }
     
     .brand-logo-wrap {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 32px;
-      border-radius: 50%;
+      width: 120px; height: 120px; margin: 0 auto 32px; border-radius: 50%;
       background: linear-gradient(135deg, var(--primary, #CE1126), var(--primary-hover, #E63946));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      font-weight: 800;
-      color: var(--primary-text, #FFFFFF);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; font-weight: 800; color: var(--primary-text, #FFFFFF);
       box-shadow: 0 0 0 8px var(--primary-soft, rgba(206,17,38,0.14)), 0 20px 60px var(--primary-soft, rgba(206,17,38,0.14));
       overflow: hidden;
     }
@@ -124,101 +110,46 @@
     .brand-logo-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 16px; }
     
     .brand-title {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--text, #F8FAFC);
-      margin: 0 0 12px;
-      line-height: 1.35;
-      letter-spacing: -0.5px;
+      font-size: 26px; font-weight: 800; color: var(--text, #F8FAFC);
+      margin: 0 0 12px; line-height: 1.35; letter-spacing: -0.5px;
     }
     
-    .brand-subtitle {
-      font-size: 15px;
-      color: var(--text-muted, #64748B);
-      margin: 0 0 40px;
-      line-height: 1.7;
-    }
+    .brand-subtitle { font-size: 15px; color: var(--text-muted, #64748B); margin: 0 0 40px; line-height: 1.7; }
     
     .brand-features {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      text-align: right;
-      padding: 24px;
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 16px;
+      display: flex; flex-direction: column; gap: 16px; text-align: right;
+      padding: 24px; background: rgba(0, 0, 0, 0.15); border-radius: 16px;
       border: 1px solid var(--border, rgba(255,255,255,0.08));
     }
     
     .brand-feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      color: var(--text-secondary, #94A3B8);
-      font-size: 13px;
-      line-height: 1.6;
+      display: flex; align-items: flex-start; gap: 12px;
+      color: var(--text-secondary, #94A3B8); font-size: 13px; line-height: 1.6;
     }
     
     .brand-feature-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--primary, #CE1126);
-      color: var(--primary-text, #FFFFFF);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
+      width: 20px; height: 20px; border-radius: 50%; background: var(--primary, #CE1126);
+      color: var(--primary-text, #FFFFFF); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
     }
     
-    /* ============ HEADER ============ */
     .auth-header { text-align: center; margin-bottom: 32px; }
     
     .auth-header-logo {
-      display: none;
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 20px;
-      border-radius: 50%;
+      display: none; width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%;
       background: linear-gradient(135deg, var(--primary, #CE1126), var(--primary-hover, #E63946));
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--primary-text, #FFFFFF);
-      overflow: hidden;
+      align-items: center; justify-content: center; font-size: 22px; font-weight: 800;
+      color: var(--primary-text, #FFFFFF); overflow: hidden;
     }
     
     .auth-header-logo img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
     
-    .auth-title {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--text, #F8FAFC);
-      margin: 0 0 8px;
-      line-height: 1.3;
-    }
+    .auth-title { font-size: 26px; font-weight: 800; color: var(--text, #F8FAFC); margin: 0 0 8px; line-height: 1.3; }
+    .auth-subtitle { font-size: 14px; color: var(--text-muted, #64748B); margin: 0; line-height: 1.6; }
     
-    .auth-subtitle {
-      font-size: 14px;
-      color: var(--text-muted, #64748B);
-      margin: 0;
-      line-height: 1.6;
-    }
-    
-    /* ============ ALERT ============ */
     .auth-alert {
-      display: none;
-      padding: 14px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 20px;
-      line-height: 1.6;
-      text-align: right;
+      display: none; padding: 14px 16px; border-radius: 12px; font-size: 13px;
+      font-weight: 500; margin-bottom: 20px; line-height: 1.6; text-align: right;
       animation: slideDown 0.3s ease;
     }
     
@@ -232,27 +163,17 @@
       to { opacity: 1; transform: translateY(0); }
     }
     
-    /* ============ FORM ============ */
     .auth-form { display: flex; flex-direction: column; gap: 20px; }
-    
     .form-field { display: flex; flex-direction: column; gap: 8px; }
     .form-field label { font-size: 13px; font-weight: 600; color: var(--text-secondary, #94A3B8); }
     
     .input-wrap { position: relative; display: flex; align-items: center; }
     
     .input-wrap input {
-      width: 100%;
-      padding: 14px 46px 14px 16px;
-      background: var(--surface, #131820);
-      border: 2px solid var(--border, rgba(255,255,255,0.08));
-      border-radius: 12px;
-      color: var(--text, #F8FAFC);
-      font-family: inherit;
-      font-size: 14px;
-      transition: all 0.2s;
-      outline: none;
-      direction: ltr;
-      text-align: left;
+      width: 100%; padding: 14px 46px 14px 16px; background: var(--surface, #131820);
+      border: 2px solid var(--border, rgba(255,255,255,0.08)); border-radius: 12px;
+      color: var(--text, #F8FAFC); font-family: inherit; font-size: 14px;
+      transition: all 0.2s; outline: none; direction: ltr; text-align: left;
     }
     
     .input-wrap input:focus {
@@ -262,98 +183,53 @@
     }
     
     .input-wrap input::placeholder {
-      color: var(--text-muted, #64748B);
-      letter-spacing: 0;
-      font-family: 'Cairo', sans-serif;
-      direction: rtl;
-      text-align: right;
+      color: var(--text-muted, #64748B); letter-spacing: 0;
+      font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;
     }
     
     .input-icon {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted, #64748B);
-      width: 18px;
-      height: 18px;
-      pointer-events: none;
-      transition: color 0.2s;
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted, #64748B); width: 18px; height: 18px;
+      pointer-events: none; transition: color 0.2s;
     }
     
     .input-wrap input:focus ~ .input-icon { color: var(--primary, #CE1126); }
     
     .input-toggle {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: transparent;
-      border: none;
-      color: var(--text-muted, #64748B);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; border-radius: 8px; background: transparent;
+      border: none; color: var(--text-muted, #64748B); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
     }
     
     .input-toggle:hover { background: var(--surface-hover, #252F3D); color: var(--text, #F8FAFC); }
     .input-toggle svg { width: 18px; height: 18px; }
     
-    /* ============ REMEMBER / FORGOT ============ */
     .form-field-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: -4px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-top: -4px; flex-wrap: wrap;
     }
     
     .form-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      user-select: none;
-      font-size: 13px;
-      color: var(--text-secondary, #94A3B8);
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+      user-select: none; font-size: 13px; color: var(--text-secondary, #94A3B8);
     }
     
     .form-checkbox input { width: 16px; height: 16px; accent-color: var(--primary, #CE1126); cursor: pointer; }
     
     .form-link {
-      font-size: 13px;
-      color: var(--primary, #CE1126);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s;
+      font-size: 13px; color: var(--primary, #CE1126); text-decoration: none;
+      font-weight: 600; transition: color 0.2s;
     }
     
     .form-link:hover { color: var(--primary-hover, #E63946); text-decoration: underline; }
     
-    /* ============ SUBMIT ============ */
     .form-submit {
-      width: 100%;
-      padding: 16px;
-      background: var(--primary, #CE1126);
-      color: var(--primary-text, #FFFFFF);
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 4px;
+      width: 100%; padding: 16px; background: var(--primary, #CE1126);
+      color: var(--primary-text, #FFFFFF); border: none; border-radius: 12px;
+      font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-top: 4px;
     }
     
     .form-submit:hover:not(:disabled) {
@@ -365,56 +241,39 @@
     .form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     
     .form-submit .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    /* ============ FOOTER ============ */
     .auth-footer {
-      text-align: center;
-      margin-top: 24px;
-      padding-top: 24px;
+      text-align: center; margin-top: 24px; padding-top: 24px;
       border-top: 1px solid var(--border, rgba(255,255,255,0.08));
     }
     
     .auth-footer p { font-size: 13px; color: var(--text-muted, #64748B); margin: 0 0 12px; }
     
     .auth-footer-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      background: transparent;
-      border: 1px solid var(--border, rgba(255,255,255,0.08));
-      border-radius: 10px;
-      color: var(--text-secondary, #94A3B8);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin: 4px;
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+      background: transparent; border: 1px solid var(--border, rgba(255,255,255,0.08));
+      border-radius: 10px; color: var(--text-secondary, #94A3B8);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      text-decoration: none; cursor: pointer; transition: all 0.2s; margin: 4px;
     }
     
     .auth-footer-link:hover {
-      border-color: var(--primary, #CE1126);
-      color: var(--primary, #CE1126);
-      background: var(--primary-soft, rgba(206,17,38,0.14));
-      text-decoration: none;
+      border-color: var(--primary, #CE1126); color: var(--primary, #CE1126);
+      background: var(--primary-soft, rgba(206,17,38,0.14)); text-decoration: none;
     }
     
     .auth-footer-link svg { width: 16px; height: 16px; }
     
-    .auth-version { text-align: center; margin-top: 20px; font-size: 11px; color: var(--text-muted, #64748B); opacity: 0.5; }
+    .auth-version {
+      text-align: center; margin-top: 20px; font-size: 11px;
+      color: var(--text-muted, #64748B); opacity: 0.5;
+    }
     
-    /* ============ RESPONSIVE ============ */
     @media (max-width: 1024px) {
       .auth-layout { grid-template-columns: 1fr; }
       .auth-brand-side { display: none; }
@@ -536,8 +395,7 @@
   </div>
 
   <!-- ============================================ -->
-  <!-- ✅ Supabase SDK v2 — الرابط الصحيح 100%      -->
-  <!-- @2 = latest 2.x, dist/umd/supabase.js = UMD -->
+  <!-- ✅ Supabase SDK v2 — latest 2.x               -->
   <!-- ============================================ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   
@@ -594,12 +452,6 @@
         ]);
       }
       
-      function logDebug() {
-        if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-          console.log.apply(console, ['[Login]'].concat(Array.prototype.slice.call(arguments)));
-        }
-      }
-      
       // ============================================
       // Alert
       // ============================================
@@ -621,9 +473,6 @@
         if (el) el.className = 'auth-alert';
       }
       
-      // ============================================
-      // Loading state
-      // ============================================
       function setLoading(isLoading) {
         var btn = $('loginBtn');
         var text = $('loginBtnText');
@@ -638,9 +487,6 @@
         }
       }
       
-      // ============================================
-      // Validation
-      // ============================================
       function validateForm() {
         var email = $('emailInput').value.trim();
         var password = $('passwordInput').value;
@@ -654,44 +500,25 @@
       }
       
       // ============================================
-      // Init Supabase (standalone + version check)
+      // Init Supabase (بدون lock — deprecated في v2.118.0)
       // ============================================
       function initSupabase() {
         if (state.sb) return state.sb;
         
-        // 1. فحص وجود SDK
         if (typeof supabase === 'undefined') {
           console.error('❌ [Login] Supabase SDK not loaded at all');
           showAlert('مكتبة Supabase لم يتم تحميلها. أعد تحميل الصفحة (Ctrl+Shift+R).', 'error');
           return null;
         }
         
-        // 2. فحص الإصدار — v2 لازم يكون فيه createClient
-        var isV2 = typeof supabase.createClient === 'function';
-        
-        console.log('[Login] SDK check:', {
-          hasCreateClient: isV2,
-          hasAuth: !!supabase.auth,
-          version: supabase.version || 'unknown',
-          sdkType: isV2 ? 'v2' : 'v1-or-invalid'
-        });
-        
-        // 3. لو v1 (فيه auth بس مش createClient) → error واضح
-        if (!isV2 && supabase.auth) {
-          console.error('❌ [Login] SDK is v1 (old) — needs v2');
-          showAlert('مكتبة Supabase قديمة (v1). جاري إعادة تحميل الصفحة...', 'error');
+        // ✅ فحص v2 — createClient موجود
+        if (typeof supabase.createClient !== 'function') {
+          console.error('❌ [Login] SDK is not v2 (missing createClient)');
+          showAlert('مكتبة Supabase قديمة. جاري إعادة تحميل الصفحة...', 'error');
           setTimeout(function () { window.location.reload(true); }, 2500);
           return null;
         }
         
-        // 4. لو مش v2 ولا v1 → error
-        if (!isV2) {
-          console.error('❌ [Login] SDK is invalid');
-          showAlert('مكتبة Supabase غير صالحة. أعد تحميل الصفحة.', 'error');
-          return null;
-        }
-        
-        // 5. فحص config
         var cfg = window.ITWS_CONFIG || {};
         if (!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) {
           console.error('❌ [Login] SUPABASE_URL not configured in config.js');
@@ -699,46 +526,38 @@
           return null;
         }
         
-        if (!cfg.SUPABASE_ANON_KEY) {
-          console.error('❌ [Login] SUPABASE_ANON_KEY not configured');
-          showAlert('مفتاح Supabase غير مكتمل. تحقق من config.js.', 'error');
-          return null;
-        }
-        
-        // 6. إنشاء العميل
         try {
+          // ✅ بدون lock — v2.118.0 مش محتاجاها (deprecated)
           state.sb = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
             auth: {
               persistSession: true,
               autoRefreshToken: true,
               detectSessionInUrl: true,
               storageKey: 'itws_auth',
-              flowType: 'pkce',
-              
-              // ✅ الحل الجذري: تعطيل navigator.locks
-              lock: function (_name, _acquireTimeout, fn) {
-                return fn();
-              }
+              flowType: 'pkce'
             },
             realtime: {
               params: { eventsPerSecond: 5 }
-            },
-            global: {
-              headers: {
-                'X-Client-Info': 'itws-login/1.0.0'
-              }
             }
           });
           
-          // 7. فحص إضافي: هل signInWithEmailAndPassword موجود؟
-          if (typeof state.sb.auth.signInWithEmailAndPassword !== 'function') {
-            console.error('❌ [Login] Client created but missing signInWithEmailAndPassword');
-            console.error('[Login] Available auth methods:', Object.keys(state.sb.auth || {}));
-            showAlert('مكتبة Supabase غير متوافقة (missing method). أعد تحميل الصفحة.', 'error');
+          // ✅ فحص صحيح: typeof على الـ method مش Object.keys
+          // الـ methods في JS classes على prototype مش على instance
+          var hasSignIn = typeof state.sb.auth.signInWithEmailAndPassword === 'function';
+          var hasSignInWithPassword = typeof state.sb.auth.signInWithPassword === 'function';
+          
+          console.log('[Login] Client methods check:', {
+            signInWithEmailAndPassword: hasSignIn,
+            signInWithPassword: hasSignInWithPassword
+          });
+          
+          if (!hasSignIn && !hasSignInWithPassword) {
+            console.error('❌ [Login] Neither signInWithEmailAndPassword nor signInWithPassword is available');
+            showAlert('مكتبة Supabase غير متوافقة (missing methods). أعد تحميل الصفحة.', 'error');
             return null;
           }
           
-          console.log('%c✅ [Login] Supabase v2 ready (locks DISABLED)', 'color: #10B981; font-weight: bold;');
+          console.log('%c✅ [Login] Supabase v2 ready', 'color: #10B981; font-weight: bold;');
           return state.sb;
           
         } catch (err) {
@@ -766,28 +585,26 @@
         }
         
         var sb = initSupabase();
-        if (!sb) {
-          return;
-        }
+        if (!sb) return;
         
         state.submitting = true;
         setLoading(true);
         
         console.log('[Login] Attempting signIn for:', data.email);
         
-        // ✅ استدعاء signIn مع فحص نوع الـ method
+        // ✅ استدعاء signIn — الأولوية لـ signInWithEmailAndPassword، ثم signInWithPassword
         var signInPromise;
         
         if (typeof sb.auth.signInWithEmailAndPassword === 'function') {
-          // v2 — الطريقة الصحيحة
           signInPromise = sb.auth.signInWithEmailAndPassword(data.email, data.password);
+        } else if (typeof sb.auth.signInWithPassword === 'function') {
+          // v2.118.0 يدعم الاسمين
+          signInPromise = sb.auth.signInWithPassword({ email: data.email, password: data.password });
         } else if (typeof sb.auth.signIn === 'function') {
-          // v1 — fallback
-          console.warn('[Login] Using v1 signIn fallback');
+          console.warn('[Login] Using legacy signIn fallback');
           signInPromise = sb.auth.signIn({ email: data.email, password: data.password });
         } else {
-          // مش المفروض يوصل هنا
-          console.error('[Login] No signIn method available');
+          console.error('[Login] No signIn method available at all');
           showAlert('مكتبة Supabase غير متوافقة. أعد تحميل الصفحة.', 'error');
           state.submitting = false;
           setLoading(false);
@@ -801,7 +618,6 @@
             var user = cred && cred.user ? cred.user : (cred && cred.data && cred.data.user ? cred.data.user : null);
             if (!user) throw new Error('لم يتم استلام بيانات المستخدم');
             
-            // جلب البروفايل
             var profilePromise = sb
               .from('profiles')
               .select('id, email, full_name, role, is_active')
@@ -822,7 +638,6 @@
                   });
                 }
                 
-                // Log activity
                 sb.from('activities').insert({
                   user_id: user.id,
                   user_name: profileRes.data.full_name || user.email,
@@ -1016,13 +831,11 @@
         if (state.initialized) return;
         state.initialized = true;
         
-        console.log('%c[Login] Initializing standalone login', 'color: #3B82F6; font-weight: bold;');
+        console.log('%c[Login] Initializing', 'color: #3B82F6; font-weight: bold;');
         
         applyDynamicContent();
         initPasswordToggle();
         initRememberMe();
-        
-        // تهيئة Supabase فوراً
         initSupabase();
         
         var form = $('loginForm');
