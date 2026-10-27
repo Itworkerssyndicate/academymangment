@@ -4,13 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>صفحة المتدرب | نقابة تكنولوجيا المعلومات</title>
+  <title>صفحة المتدرب</title>
   <meta name="description" content="اعرض جميع شهادات المتدرب وتحميل السيرة الذاتية الاحترافية">
   <meta name="theme-color" content="#0A0E14">
   
   <meta property="og:title" content="صفحة المتدرب">
   <meta property="og:description" content="جميع شهادات المتدرب في مكان واحد">
   <meta property="og:type" content="profile">
+  <meta property="og:image" content="assets/images/logo.svg">
+  
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +23,28 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
+  
+  <script>
+    (function () {
+      function syncThemeColor() {
+        try {
+          var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+          if (bg) {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', bg);
+          }
+        } catch (e) {}
+      }
+      document.addEventListener('DOMContentLoaded', syncThemeColor);
+      window.addEventListener('load', syncThemeColor);
+      try {
+        new MutationObserver(syncThemeColor).observe(document.documentElement, {
+          attributes: true, attributeFilter: ['data-theme', 'class', 'style']
+        });
+      } catch (e) {}
+    })();
+  </script>
+  
   <script src="assets/js/app-settings.js"></script>
   
   <link rel="stylesheet" href="assets/css/theme.css">
@@ -74,7 +99,6 @@
       color: var(--text);
       line-height: 1.3;
       margin: 0 0 12px;
-      letter-spacing: -0.5px;
     }
     
     .student-title-accent { color: var(--primary); }
@@ -132,6 +156,7 @@
       min-width: 0;
       direction: ltr;
       text-align: center;
+      font-variant-numeric: tabular-nums;
     }
     
     .student-search-input:focus {
@@ -145,7 +170,7 @@
       font-weight: 400;
       letter-spacing: 0;
       direction: rtl;
-      text-align: right;
+      text-align: center;
     }
     
     .student-search-btn {
@@ -506,7 +531,8 @@
     }
     
     .cert-item-code {
-      font-family: 'Courier New', monospace;
+      font-family: inherit;
+      font-variant-numeric: tabular-nums;
       font-size: 12px;
       color: var(--text-muted);
       letter-spacing: 0.5px;
@@ -528,7 +554,6 @@
     .cert-item-detail-label {
       font-size: 10px;
       color: var(--text-muted);
-      text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     
@@ -547,11 +572,26 @@
       font-weight: 700;
     }
     
-    .cert-grade.excellent { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-    .cert-grade.very-good { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
-    .cert-grade.good { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-    .cert-grade.pass { background: rgba(249, 115, 22, 0.15); color: #F97316; }
-    .cert-grade.fail { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+    .cert-grade.excellent {
+      background: var(--grade-excellent-bg, rgba(16, 185, 129, 0.15));
+      color: var(--grade-excellent-text, #10B981);
+    }
+    .cert-grade.very-good {
+      background: var(--grade-very-good-bg, rgba(59, 130, 246, 0.15));
+      color: var(--grade-very-good-text, #3B82F6);
+    }
+    .cert-grade.good {
+      background: var(--grade-good-bg, rgba(245, 158, 11, 0.15));
+      color: var(--grade-good-text, #F59E0B);
+    }
+    .cert-grade.pass {
+      background: var(--grade-pass-bg, rgba(249, 115, 22, 0.15));
+      color: var(--grade-pass-text, #F97316);
+    }
+    .cert-grade.fail {
+      background: var(--grade-fail-bg, rgba(239, 68, 68, 0.15));
+      color: var(--grade-fail-text, #EF4444);
+    }
     
     .cert-item-actions {
       display: flex;
@@ -621,6 +661,17 @@
       color: var(--text-muted);
       line-height: 1.6;
       margin: 0;
+    }
+    
+    .noscript-banner {
+      padding: 16px 20px;
+      background: var(--error-soft, #fef2f2);
+      color: var(--error, #991b1b);
+      border-bottom: 2px solid var(--error, #991b1b);
+      text-align: center;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
     }
     
     /* ============ RESPONSIVE ============ */
@@ -694,6 +745,7 @@
     }
     
     @media print {
+      body { background: #fff !important; }
       .student-hero,
       .student-search-card,
       .student-info,
@@ -701,13 +753,27 @@
       .profile-actions,
       #headerContainer,
       .theme-fab,
-      .theme-panel {
+      .theme-panel,
+      .home-footer,
+      #studentLoader {
         display: none !important;
       }
+      .student-main { padding: 0 !important; }
+      .profile-card, .cert-item {
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+      .profile-header { background: transparent !important; }
     }
   </style>
 </head>
 <body>
+
+  <noscript>
+    <div class="noscript-banner">
+      هذه الصفحة تحتاج تفعيل JavaScript في المتصفح للعمل بشكل صحيح.
+    </div>
+  </noscript>
 
   <div class="theme-boot-loader" id="themeBootLoader">
     <div class="loader-logo">نت</div>
@@ -721,11 +787,11 @@
     <!-- ============ HERO ============ -->
     <section class="student-hero">
       <div class="student-hero-inner">
-        <div class="student-badge">صفحة المتدرب الرسمية</div>
-        <h1 class="student-title">
+        <div class="student-badge" data-dynamic="student_badge">صفحة المتدرب الرسمية</div>
+        <h1 class="student-title" data-dynamic="student_title">
           اعرض <span class="student-title-accent">شهاداتك</span> في مكان واحد
         </h1>
-        <p class="student-subtitle">
+        <p class="student-subtitle" data-dynamic="student_subtitle">
           أدخل رقمك القومي لعرض جميع شهاداتك التدريبية المعتمدة وتحميل سيرتك الذاتية
         </p>
       </div>
@@ -736,7 +802,7 @@
 
       <!-- SEARCH -->
       <div class="student-search-card">
-        <div class="student-search-label">الرقم القومي</div>
+        <div class="student-search-label" data-dynamic="student_search_label">الرقم القومي</div>
         
         <form class="student-search-form" id="studentForm" onsubmit="return false;">
           <input
@@ -745,27 +811,31 @@
             id="nationalIdInput"
             placeholder="أدخل الرقم القومي (14 رقم)"
             inputmode="numeric"
+            pattern="[0-9]{14}"
             maxlength="14"
             autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            dir="ltr"
             required
           >
-          <button type="submit" class="student-search-btn" id="studentBtn">بحث</button>
+          <button type="submit" class="student-search-btn" id="studentBtn" data-dynamic="student_btn">بحث</button>
         </form>
         
-        <div class="student-search-hint">
+        <div class="student-search-hint" data-dynamic="student_hint">
           أدخل الرقم القومي المكون من 14 رقماً لعرض الشهادات
         </div>
       </div>
 
       <!-- LOADER -->
-      <div class="student-loader" id="studentLoader">
-        <div class="student-loader-spinner"></div>
+      <div class="student-loader" id="studentLoader" role="status" aria-live="polite" aria-busy="true">
+        <div class="student-loader-spinner" aria-hidden="true"></div>
         <div class="student-loader-text">جاري البحث عن الشهادات...</div>
       </div>
 
       <!-- ERROR -->
-      <div class="student-message" id="studentError">
-        <div class="student-message-icon">&#10005;</div>
+      <div class="student-message error" id="studentError" role="alert" aria-live="assertive">
+        <div class="student-message-icon" aria-hidden="true">&#10005;</div>
         <h2 class="student-message-title" id="errorTitle">لم يتم العثور على شهادات</h2>
         <p class="student-message-text" id="errorText">
           تأكد من الرقم القومي، أو تواصل مع الأكاديمية المسؤولة
@@ -773,7 +843,7 @@
       </div>
 
       <!-- RESULT -->
-      <div class="student-result" id="studentResult"></div>
+      <div class="student-result" id="studentResult" role="region" aria-live="polite" aria-label="شهادات المتدرب"></div>
 
       <!-- INFO -->
       <div class="student-info">
@@ -797,10 +867,10 @@
     <footer class="home-footer">
       <div class="home-footer-inner">
         <div class="footer-bottom">
-          <span id="footerCopyright">© 2026 نقابة تكنولوجيا المعلومات والبرمجيات</span>
+          <span id="footerCopyright" data-dynamic="footer_copyright"></span>
           <span>
-            <span id="footerPresidentLabel">النقيب العام:</span>
-            <span class="footer-president" id="footerPresidentName">المحاسب / محمود جميل</span>
+            <span id="footerPresidentLabel" data-dynamic="president_label"></span>
+            <span class="footer-president" id="footerPresidentName" data-dynamic="president_name"></span>
           </span>
         </div>
       </div>
@@ -817,6 +887,35 @@
   <script src="assets/js/ui/header.js"></script>
   <script src="assets/js/ui/modal.js"></script>
   <script src="assets/js/pages/student.js"></script>
+
+  <script>
+    (function () {
+      function populateFooter() {
+        try {
+          if (!window.AppSettings || typeof AppSettings.get !== 'function') return;
+          var c = document.getElementById('footerCopyright');
+          if (c && !c.textContent.trim()) {
+            var un = AppSettings.get('app_identity.union_name');
+            if (un) c.textContent = '© ' + new Date().getFullYear() + ' ' + un;
+          }
+          var l = document.getElementById('footerPresidentLabel');
+          if (l && !l.textContent.trim()) {
+            var pl = AppSettings.get('app_identity.president_label');
+            if (pl) l.textContent = pl;
+          }
+          var n = document.getElementById('footerPresidentName');
+          if (n && !n.textContent.trim()) {
+            var pn = AppSettings.get('app_identity.president_name');
+            if (pn) n.textContent = pn;
+          }
+        } catch (e) {}
+      }
+      populateFooter();
+      setTimeout(populateFooter, 600);
+      setTimeout(populateFooter, 1800);
+      setTimeout(populateFooter, 3500);
+    })();
+  </script>
 
 </body>
 </html>
