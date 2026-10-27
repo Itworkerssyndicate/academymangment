@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>تسجيل الدخول | نقابة تكنولوجيا المعلومات</title>
+  <title>تسجيل الدخول</title>
   <meta name="description" content="تسجيل الدخول إلى النظام الرسمي لنقابة تكنولوجيا المعلومات والبرمجيات">
   <meta name="theme-color" content="#0A0E14">
   <meta name="robots" content="noindex, nofollow">
   
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23CE1126'/><text x='50' y='65' font-size='45' text-anchor='middle' fill='white' font-family='Cairo,sans-serif' font-weight='800'>ن</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,31 @@
   
   <script src="assets/js/settings-defaults.js"></script>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/themes-data.js"></script>
+  <script src="assets/js/theme.js"></script>
+  
+  <script>
+    (function () {
+      function syncThemeColor() {
+        try {
+          var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+          if (bg) {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', bg);
+          }
+        } catch (e) {}
+      }
+      document.addEventListener('DOMContentLoaded', syncThemeColor);
+      window.addEventListener('load', syncThemeColor);
+      try {
+        new MutationObserver(syncThemeColor).observe(document.documentElement, {
+          attributes: true, attributeFilter: ['data-theme', 'class', 'style']
+        });
+      } catch (e) {}
+    })();
+  </script>
+  
+  <script src="assets/js/app-settings.js"></script>
   
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
@@ -32,6 +57,17 @@
       color: var(--text, #F8FAFC);
       direction: rtl;
       overflow-x: hidden;
+    }
+    
+    .noscript-banner {
+      padding: 16px 20px;
+      background: #fef2f2;
+      color: #991b1b;
+      border-bottom: 2px solid #991b1b;
+      text-align: center;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
     }
     
     .auth-layout {
@@ -106,7 +142,7 @@
     
     .brand-title {
       font-size: 26px; font-weight: 800; color: var(--text, #F8FAFC);
-      margin: 0 0 12px; line-height: 1.35; letter-spacing: -0.5px;
+      margin: 0 0 12px; line-height: 1.35;
     }
     
     .brand-subtitle { font-size: 15px; color: var(--text-muted, #64748B); margin: 0 0 40px; line-height: 1.7; }
@@ -290,6 +326,12 @@
 </head>
 <body>
 
+  <noscript>
+    <div class="noscript-banner">
+      هذه الصفحة تحتاج تفعيل JavaScript في المتصفح للعمل بشكل صحيح.
+    </div>
+  </noscript>
+
   <div class="auth-layout">
     
     <div class="auth-form-side">
@@ -301,15 +343,15 @@
           <p class="auth-subtitle" id="authSubtitle">مرحباً بك في النظام الرسمي</p>
         </div>
         
-        <div class="auth-alert" id="authAlert"></div>
+        <div class="auth-alert" id="authAlert" role="alert" aria-live="assertive"></div>
         
         <form class="auth-form" id="loginForm" novalidate>
           
           <div class="form-field">
             <label for="emailInput">البريد الإلكتروني</label>
             <div class="input-wrap">
-              <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="username" required>
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="username" spellcheck="false" autocapitalize="off" autocorrect="off" inputmode="email" required>
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
@@ -320,12 +362,12 @@
             <label for="passwordInput">كلمة المرور</label>
             <div class="input-wrap">
               <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" required>
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
               <button type="button" class="input-toggle" id="passwordToggle" aria-label="إظهار كلمة المرور">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
@@ -350,14 +392,14 @@
         <div class="auth-footer">
           <p>هل تمتلك أكاديمية؟</p>
           <a href="academy-apply.html" class="auth-footer-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
             <span>قدم طلب اعتماد</span>
           </a>
           <a href="home.html" class="auth-footer-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
@@ -377,499 +419,18 @@
         <p class="brand-subtitle" id="brandSubtitle">لجنة التحول الرقمي والتدريب</p>
         
         <div class="brand-features">
-          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>التحقق الرسمي من صحة الشهادات التدريبية</span></div>
-          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>قاعدة بيانات مركزية لجميع الأكاديميات المعتمدة</span></div>
-          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>نظام اعتماد رسمي يضمن جودة التدريب</span></div>
-          <div class="brand-feature-item"><span class="brand-feature-check">&#10003;</span><span>شهادات موثقة مع QR للتحقق السريع</span></div>
+          <div class="brand-feature-item"><span class="brand-feature-check" aria-hidden="true">&#10003;</span><span>التحقق الرسمي من صحة الشهادات التدريبية</span></div>
+          <div class="brand-feature-item"><span class="brand-feature-check" aria-hidden="true">&#10003;</span><span>قاعدة بيانات مركزية لجميع الأكاديميات المعتمدة</span></div>
+          <div class="brand-feature-item"><span class="brand-feature-check" aria-hidden="true">&#10003;</span><span>نظام اعتماد رسمي يضمن جودة التدريب</span></div>
+          <div class="brand-feature-item"><span class="brand-feature-check" aria-hidden="true">&#10003;</span><span>شهادات موثقة مع QR للتحقق السريع</span></div>
         </div>
       </div>
     </div>
     
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  
-  <script>
-    (function () {
-      'use strict';
-      
-      if (window.LoginPage && window.LoginPage.initialized) return;
-      
-      var AUTH_TIMEOUT_MS = 25000;
-      var PROFILE_TIMEOUT_MS = 10000;
-      
-      var state = {
-        submitting: false,
-        attempts: 0,
-        maxAttempts: 5,
-        initialized: false,
-        sb: null
-      };
-      
-      // ============================================
-      // Helpers
-      // ============================================
-      function $(id) { return document.getElementById(id); }
-      function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
-      
-      function escapeHtml(s) {
-        if (s == null) return '';
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-      }
-      
-      function getSetting(p, f) {
-        if (window.AppSettings && window.AppSettings.get) return window.AppSettings.get(p, f);
-        return f;
-      }
-      
-      function resolve(path) {
-        if (!path) return '#';
-        if (window.resolveUrl) return window.resolveUrl(path);
-        var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
-        if (base && base.charAt(base.length - 1) !== '/') base += '/';
-        return base + String(path).replace(/^\.?\//, '');
-      }
-      
-      function withTimeout(promise, ms, label) {
-        return Promise.race([
-          promise,
-          new Promise(function (_, reject) {
-            setTimeout(function () {
-              reject(new Error('انتهت مهلة ' + (label || 'العملية') + ' — تحقق من الاتصال أو أعد تحميل الصفحة'));
-            }, ms);
-          })
-        ]);
-      }
-      
-      // ============================================
-      // ✅ FIX: fire-and-forget insert
-      // wraps in Promise.resolve().then() — لا يعتمد على .catch() على PostgrestFilterBuilder
-      // ============================================
-      function safeInsert(client, table, data) {
-        if (!client || typeof client.from !== 'function') {
-          console.warn('[Login] No client for insert into ' + table);
-          return;
-        }
-        Promise.resolve().then(function () {
-          return client.from(table).insert(data);
-        }).then(function () {
-          // success — ignore
-        }, function (e) {
-          console.warn('[Login] insert ' + table + ' failed:', (e && e.message) || e);
-        });
-      }
-      
-      // ============================================
-      // Alert
-      // ============================================
-      function showAlert(message, type) {
-        var el = $('authAlert');
-        if (!el) return;
-        el.textContent = message;
-        el.className = 'auth-alert show ' + (type || 'info');
-        
-        if (type === 'success' || type === 'info') {
-          setTimeout(function () { if (el.textContent === message) el.className = 'auth-alert'; }, 8000);
-        } else if (type === 'error') {
-          setTimeout(function () { if (el.textContent === message) el.className = 'auth-alert'; }, 12000);
-        }
-      }
-      
-      function hideAlert() {
-        var el = $('authAlert');
-        if (el) el.className = 'auth-alert';
-      }
-      
-      function setLoading(isLoading) {
-        var btn = $('loginBtn');
-        var text = $('loginBtnText');
-        if (!btn || !text) return;
-        
-        if (isLoading) {
-          btn.disabled = true;
-          text.innerHTML = '<span class="spinner"></span> جاري التحقق...';
-        } else {
-          btn.disabled = false;
-          text.textContent = 'تسجيل الدخول';
-        }
-      }
-      
-      function validateForm() {
-        var email = $('emailInput').value.trim();
-        var password = $('passwordInput').value;
-        
-        if (!email) { showAlert('الرجاء إدخال البريد الإلكتروني', 'error'); $('emailInput').focus(); return null; }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAlert('البريد الإلكتروني غير صحيح', 'error'); $('emailInput').focus(); return null; }
-        if (!password) { showAlert('الرجاء إدخال كلمة المرور', 'error'); $('passwordInput').focus(); return null; }
-        if (password.length < 6) { showAlert('كلمة المرور قصيرة جداً (6 أحرف على الأقل)', 'error'); $('passwordInput').focus(); return null; }
-        
-        return { email: email, password: password };
-      }
-      
-      // ============================================
-      // Init Supabase
-      // ============================================
-      function initSupabase() {
-        if (state.sb) return state.sb;
-        
-        if (typeof supabase === 'undefined') {
-          console.error('❌ [Login] Supabase SDK not loaded at all');
-          showAlert('مكتبة Supabase لم يتم تحميلها. أعد تحميل الصفحة (Ctrl+Shift+R).', 'error');
-          return null;
-        }
-        
-        if (typeof supabase.createClient !== 'function') {
-          console.error('❌ [Login] SDK is not v2 (missing createClient)');
-          showAlert('مكتبة Supabase قديمة. جاري إعادة تحميل الصفحة...', 'error');
-          setTimeout(function () { window.location.reload(true); }, 2500);
-          return null;
-        }
-        
-        var cfg = window.ITWS_CONFIG || {};
-        if (!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) {
-          console.error('❌ [Login] SUPABASE_URL not configured in config.js');
-          showAlert('إعدادات Supabase غير مكتملة. تحقق من config.js.', 'error');
-          return null;
-        }
-        
-        try {
-          state.sb = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
-            auth: {
-              persistSession: true,
-              autoRefreshToken: true,
-              detectSessionInUrl: true,
-              storageKey: 'itws_auth',
-              flowType: 'pkce'
-            },
-            realtime: {
-              params: { eventsPerSecond: 5 }
-            }
-          });
-          
-          var hasSignIn = typeof state.sb.auth.signInWithEmailAndPassword === 'function';
-          var hasSignInWithPassword = typeof state.sb.auth.signInWithPassword === 'function';
-          
-          console.log('[Login] Client methods check:', {
-            signInWithEmailAndPassword: hasSignIn,
-            signInWithPassword: hasSignInWithPassword
-          });
-          
-          if (!hasSignIn && !hasSignInWithPassword) {
-            console.error('❌ [Login] Neither signInWithEmailAndPassword nor signInWithPassword is available');
-            showAlert('مكتبة Supabase غير متوافقة (missing methods). أعد تحميل الصفحة.', 'error');
-            return null;
-          }
-          
-          console.log('%c✅ [Login] Supabase v2 ready', 'color: #10B981; font-weight: bold;');
-          return state.sb;
-          
-        } catch (err) {
-          console.error('❌ [Login] Failed to create Supabase client:', err);
-          showAlert('تعذر الاتصال بالخادم: ' + err.message, 'error');
-          return null;
-        }
-      }
-      
-      // ============================================
-      // Login handler
-      // ============================================
-      function handleLogin(e) {
-        if (e) e.preventDefault();
-        if (state.submitting) return;
-        
-        hideAlert();
-        
-        var data = validateForm();
-        if (!data) return;
-        
-        if (state.attempts >= state.maxAttempts) {
-          showAlert('تم تجاوز الحد الأقصى للمحاولات. حاول مرة أخرى بعد قليل.', 'error');
-          return;
-        }
-        
-        var sb = initSupabase();
-        if (!sb) return;
-        
-        state.submitting = true;
-        setLoading(true);
-        
-        console.log('[Login] Attempting signIn for:', data.email);
-        
-        var signInPromise;
-        
-        if (typeof sb.auth.signInWithEmailAndPassword === 'function') {
-          signInPromise = sb.auth.signInWithEmailAndPassword(data.email, data.password);
-        } else if (typeof sb.auth.signInWithPassword === 'function') {
-          signInPromise = sb.auth.signInWithPassword({ email: data.email, password: data.password });
-        } else if (typeof sb.auth.signIn === 'function') {
-          console.warn('[Login] Using legacy signIn fallback');
-          signInPromise = sb.auth.signIn({ email: data.email, password: data.password });
-        } else {
-          console.error('[Login] No signIn method available at all');
-          showAlert('مكتبة Supabase غير متوافقة. أعد تحميل الصفحة.', 'error');
-          state.submitting = false;
-          setLoading(false);
-          return;
-        }
-        
-        withTimeout(signInPromise, AUTH_TIMEOUT_MS, 'تسجيل الدخول')
-          .then(function (cred) {
-            console.log('[Login] signIn resolved:', cred && cred.user ? cred.user.id : 'no user');
-            
-            var user = cred && cred.user ? cred.user : (cred && cred.data && cred.data.user ? cred.data.user : null);
-            if (!user) throw new Error('لم يتم استلام بيانات المستخدم');
-            
-            var profilePromise = sb
-              .from('profiles')
-              .select('id, email, full_name, role, is_active')
-              .eq('id', user.id)
-              .maybeSingle();
-            
-            return withTimeout(profilePromise, PROFILE_TIMEOUT_MS, 'جلب بيانات الحساب')
-              .then(function (profileRes) {
-                if (profileRes.error || !profileRes.data) {
-                  return sb.auth.signOut().then(function () {
-                    throw new Error('الحساب غير مكتمل (لا يوجد profile). تواصل مع الدعم الفني.');
-                  });
-                }
-                
-                if (profileRes.data.is_active === false) {
-                  return sb.auth.signOut().then(function () {
-                    throw new Error('هذا الحساب معطل. تواصل مع الإدارة.');
-                  });
-                }
-                
-                // ✅ FIX: استخدام safeInsert بدل .catch() على insert
-                safeInsert(sb, 'activities', {
-                  user_id: user.id,
-                  user_name: profileRes.data.full_name || user.email,
-                  user_role: profileRes.data.role,
-                  action_type: 'login',
-                  description: 'تسجيل دخول'
-                });
-                
-                return { user: user, profile: profileRes.data };
-              });
-          })
-          .then(function (result) {
-            showAlert('تم تسجيل الدخول بنجاح. جاري التحويل...', 'success');
-            
-            var role = result.profile.role;
-            var dest;
-            
-            if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-              dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
-            } else {
-              dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
-            }
-            
-            var params = new URLSearchParams(window.location.search);
-            var next = params.get('next');
-            if (next) {
-              try {
-                var decodedNext = decodeURIComponent(next);
-                if (decodedNext.indexOf('//') === -1 && decodedNext.indexOf('http') === -1) {
-                  dest = resolve(decodedNext.replace(/^\//, ''));
-                }
-              } catch (err) {}
-            }
-            
-            console.log('[Login] Redirecting to:', dest);
-            setTimeout(function () { window.location.href = dest; }, 800);
-          })
-          .catch(function (error) {
-            state.attempts++;
-            state.submitting = false;
-            setLoading(false);
-            
-            var msg = 'فشل تسجيل الدخول';
-            var code = (error && error.code) || '';
-            var message = (error && error.message) || '';
-            var lowerMessage = message.toLowerCase();
-            
-            console.error('[Login] Error:', { code: code, message: message });
-            
-            if (code === 'invalid_credentials' ||
-                lowerMessage.indexOf('invalid login credentials') !== -1 ||
-                lowerMessage.indexOf('invalid_credentials') !== -1) {
-              msg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-            } else if (code === 'email_not_confirmed' ||
-                       lowerMessage.indexOf('email not confirmed') !== -1) {
-              msg = 'البريد الإلكتروني لم يتم تأكيده. تواصل مع الإدارة.';
-            } else if (lowerMessage.indexOf('rate limit') !== -1 ||
-                       lowerMessage.indexOf('too many') !== -1) {
-              msg = 'محاولات كثيرة. حاول بعد دقيقة.';
-            } else if (message.indexOf('مهلة') !== -1 || lowerMessage.indexOf('timeout') !== -1) {
-              msg = message;
-            } else if (message) {
-              msg = message;
-            }
-            
-            showAlert(msg, 'error');
-            logAttempt(data.email, false, msg);
-            
-            $('passwordInput').value = '';
-            $('passwordInput').focus();
-          });
-      }
-      
-      // ============================================
-      // ✅ Log attempt (مُصلَح بنفس الطريقة)
-      // ============================================
-      function logAttempt(email, success, errorMsg) {
-        if (!state.sb) return;
-        safeInsert(state.sb, 'login_logs', {
-          email: email,
-          success: success,
-          error_message: errorMsg || null,
-          user_agent: navigator.userAgent.substring(0, 200)
-        });
-      }
-      
-      // ============================================
-      // Forgot password
-      // ============================================
-      function handleForgot(e) {
-        if (e) e.preventDefault();
-        
-        var email = $('emailInput').value.trim();
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          showAlert('أدخل بريدك الإلكتروني أولاً ثم اضغط "نسيت كلمة المرور"', 'error');
-          $('emailInput').focus();
-          return;
-        }
-        
-        var sb = initSupabase();
-        if (!sb) return;
-        
-        showAlert('جاري إرسال رابط استعادة كلمة المرور...', 'info');
-        
-        var resetPromise = sb.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + window.location.pathname.replace(/login\.html.*/, 'reset-password.html')
-        });
-        
-        withTimeout(resetPromise, AUTH_TIMEOUT_MS, 'إرسال رابط الاستعادة')
-          .then(function () {
-            showAlert('تم إرسال رابط الاستعادة إلى بريدك. تحقق من صندوق الوارد.', 'success');
-          })
-          .catch(function (err) {
-            var msg = err.message || 'تعذر إرسال رابط الاستعادة';
-            if (err.code === 'user_not_found' || msg.toLowerCase().indexOf('user not found') !== -1) {
-              msg = 'هذا البريد غير مسجل في النظام';
-            }
-            showAlert(msg, 'error');
-          });
-      }
-      
-      // ============================================
-      // Password toggle
-      // ============================================
-      function initPasswordToggle() {
-        var toggle = $('passwordToggle');
-        var input = $('passwordInput');
-        if (!toggle || !input) return;
-        
-        toggle.addEventListener('click', function () {
-          var type = input.type === 'password' ? 'text' : 'password';
-          input.type = type;
-          
-          if (type === 'text') {
-            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
-            toggle.setAttribute('aria-label', 'إخفاء كلمة المرور');
-          } else {
-            toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-            toggle.setAttribute('aria-label', 'إظهار كلمة المرور');
-          }
-        });
-      }
-      
-      // ============================================
-      // Remember me
-      // ============================================
-      function initRememberMe() {
-        try {
-          var savedEmail = localStorage.getItem('itws_saved_email');
-          if (savedEmail) {
-            $('emailInput').value = savedEmail;
-            $('rememberMe').checked = true;
-          }
-        } catch (e) {}
-      }
-      
-      function saveRememberMe() {
-        var email = $('emailInput').value.trim();
-        var remember = $('rememberMe').checked;
-        try {
-          if (remember && email) localStorage.setItem('itws_saved_email', email);
-          else localStorage.removeItem('itws_saved_email');
-        } catch (e) {}
-      }
-      
-      // ============================================
-      // Dynamic content
-      // ============================================
-      function applyDynamicContent() {
-        var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
-        var committeeName = getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
-        var logoUrl = getSetting('app_identity.logo_url', null);
-        
-        setText('brandTitle', unionName);
-        setText('brandSubtitle', committeeName);
-        
-        if (logoUrl) {
-          var brandLogo = $('brandLogo');
-          if (brandLogo) brandLogo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="">';
-          var headerLogo = $('authHeaderLogo');
-          if (headerLogo) headerLogo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="">';
-        }
-        
-        if (unionName) document.title = 'تسجيل الدخول | ' + unionName;
-      }
-      
-      // ============================================
-      // Init
-      // ============================================
-      function init() {
-        if (state.initialized) return;
-        state.initialized = true;
-        
-        console.log('%c[Login] Initializing', 'color: #3B82F6; font-weight: bold;');
-        
-        applyDynamicContent();
-        initPasswordToggle();
-        initRememberMe();
-        initSupabase();
-        
-        var form = $('loginForm');
-        if (form) {
-          form.addEventListener('submit', function (e) {
-            saveRememberMe();
-            handleLogin(e);
-          });
-        }
-        
-        var forgotLink = $('forgotLink');
-        if (forgotLink) forgotLink.addEventListener('click', handleForgot);
-        
-        setTimeout(function () {
-          var emailField = $('emailInput');
-          if (emailField && !emailField.value) emailField.focus();
-          else $('passwordInput').focus();
-        }, 300);
-        
-        console.log('[Login] Ready');
-      }
-      
-      window.LoginPage = { initialized: true, init: init };
-      
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
-      
-    })();
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/pages/login.js"></script>
 
 </body>
 </html>
