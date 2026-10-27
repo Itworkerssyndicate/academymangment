@@ -1,546 +1,723 @@
-// ============================================
-// ITWS Platform - Home Page Logic
-// Path: assets/js/pages/home.js
-// ============================================
-
+/* ============================================================
+   ITWS Platform — Home Page Logic
+   File: assets/js/pages/home.js
+   Role: Render hero, search, custom, about, academies, CTA, footer
+   All content is pulled from Supabase.settings via AppSettings.get
+   Rules: No emoji, no absolute paths, Cairo only, all dynamic
+   ============================================================ */
 (function () {
   'use strict';
 
   if (window.HomePage && window.HomePage.initialized) return;
 
   var state = {
-    currentTab: 'certificate',
     initialized: false,
-    contentRetries: 0
+    currentTab: 'certificate',
+    academiesLoaded: false,
+    sb: null
   };
 
-  var searchConfig = {
-    certificate: {
-      placeholder: 'أدخل كود الشهادة...',
-      hint: 'أدخل كود الشهادة المطبوع عليها',
-      url: 'verify.html?code=',
-      validate: function (v) { return v.length >= 4; },
-      errorMsg: 'أدخل كود شهادة صحيح (4 أحرف على الأقل)'
-    },
-    student: {
-      placeholder: 'أدخل الرقم القومي (14 رقم)...',
-      hint: 'ابحث بالرقم القومي لعرض كل الشهادات',
-      url: 'student.html?id=',
-      validate: function (v) { return /^\d{14}$/.test(v); },
-      errorMsg: 'الرقم القومي يجب أن يكون 14 رقم'
-    },
-    academy: {
-      placeholder: 'اسم الأكاديمية أو الرقم الاعتمادي...',
-      hint: 'ابحث باسم الأكاديمية أو رقم اعتمادها',
-      url: 'academies.html?search=',
-      validate: function (v) { return v.length >= 2; },
-      errorMsg: 'أدخل اسم أكاديمية أو رقم اعتماد'
-    }
-  };
+  /* ---------------- Helpers ---------------- */
+  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
+  function byData(name, ctx) { return $('[data-home="' + name + '"]', ctx); }
 
-  function $(id) { return document.getElementById(id); }
-  function setText(id, t) {
-    var el = $(id);
-    if (el) el.textContent = t;
+  function setText(el, v) {
+    if (!el) return;
+    el.textContent = (v == null ? '' : String(v));
   }
+
+  function setHTML(el, v) {
+    if (!el) return;
+    el.innerHTML = v == null ? '' : String(v);
+  }
+
+  function show(el) { if (el) el.removeAttribute('hidden'); }
+  function hide(el) { if (el) el.setAttribute('hidden', ''); }
 
   function escapeHtml(s) {
     if (s == null) return '';
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   function getSetting(path, fallback) {
-    if (window.AppSettings && window.AppSettings.get) {
-      return window.AppSettings.get(path, fallback);
-    }
-    if (window.ITWS_SETTINGS_DEFAULTS) {
-      var parts = path.split('.');
-      var value = window.ITWS_SETTINGS_DEFAULTS;
-      for (var i = 0; i < parts.length; i++) {
-        if (value && typeof value === 'object') value = value[parts[i]];
-        else { value = undefined; break; }
+    try {
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        var v = window.AppSettings.get(path);
+        return (v === undefined || v === null) ? fallback : v;
       }
-      if (value !== undefined) return value;
-    }
+    } catch (e) {}
     return fallback;
   }
 
-  function showError(msg) {
-    if (window.Utils && window.Utils.showToast) window.Utils.showToast(msg, 'error');
-    else alert(msg);
+  function getBool(path, fallback) {
+    var v = getSetting(path, fallback);
+    if (typeof v === 'boolean') return v;
+    if (v === 'true' || v === 1 || v === '1') return true;
+    if (v === 'false' || v === 0 || v === '0') return false;
+    return !!v;
   }
 
-  // ============================================
-  // 1. المحتوى الديناميكي
-  // ============================================
-  function applyDynamicContent() {
-    var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
-    var committeeName = getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
-    var presidentName = getSetting('app_identity.president_name', 'المحاسب / محمود جميل');
-    var presidentLabel = getSetting('app_identity.president_label', 'النقيب العام:');
-    var footerText = getSetting('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات والبرمجيات');
-    var contactEmail = getSetting('app_identity.contact_email', 'info@itws.eg');
-    var contactPhone = getSetting('app_identity.contact_phone', '01234567890');
-    var websiteUrl = getSetting('app_identity.website_url', 'https://itws.eg');
-    var logoUrl = getSetting('app_identity.logo_url', null);
-
-    setText('footerUnionName', unionName);
-    setText('footerCommitteeName', committeeName);
-    setText('footerCopyright', footerText);
-    setText('footerPresidentLabel', presidentLabel);
-    setText('footerPresidentName', presidentName);
-
-    var emailEl = $('footerEmail');
-    if (emailEl) { emailEl.textContent = contactEmail; emailEl.href = 'mailto:' + contactEmail; }
-    var phoneEl = $('footerPhone');
-    if (phoneEl) { phoneEl.textContent = contactPhone; phoneEl.href = 'tel:' + contactPhone; }
-    var websiteEl = $('footerWebsite');
-    if (websiteEl) { websiteEl.textContent = String(websiteUrl).replace(/^https?:\/\//, ''); websiteEl.href = websiteUrl; websiteEl.target = '_blank'; }
-
-    if (logoUrl) {
-      var logoEl = $('footerLogo');
-      if (logoEl) logoEl.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="">';
-    }
-
-    // Footer Link (زر اللينك)
-    applyFooterLink();
-
-    // About Section
-    applyAboutSection();
-
-    // Custom Section
-    applyCustomSection();
-
-    // Hero
-    var heroTitle = getSetting('app_identity.hero_title', '');
-    if (heroTitle && heroTitle.trim()) {
-      var ht = $('heroTitle');
-      if (ht) ht.innerHTML = heroTitle;
-    }
-    var heroSubtitle = getSetting('app_identity.hero_subtitle', '');
-    if (heroSubtitle && heroSubtitle.trim()) {
-      setText('heroSubtitle', heroSubtitle);
-    }
+  function resolve(path) {
+    if (!path) return '#';
+    if (window.resolveUrl) return window.resolveUrl(path);
+    var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
+    if (base && base.charAt(base.length - 1) !== '/') base += '/';
+    return base + String(path).replace(/^\.?\//, '');
   }
 
-  // ============================================
-  // 2. Footer Link (زر تحت الفوتر)
-  // ============================================
-  function applyFooterLink() {
-    var footerLink = getSetting('app_identity.footer_link', null);
-    var footerLinkEl = $('footerLink');
-    var footerLinkTextEl = $('footerLinkText');
-
-    if (!footerLinkEl) return;
-
-    // إظهار الزر لو footer_link موجود + enabled + فيه نص
-    if (footerLink && footerLink.enabled !== false && footerLink.text) {
-      if (footerLinkTextEl) footerLinkTextEl.textContent = footerLink.text;
-      footerLinkEl.href = footerLink.url || '#';
-      footerLinkEl.style.display = 'inline-flex';
-      footerLinkEl.style.visibility = 'visible';
-    } else {
-      footerLinkEl.style.display = 'none';
-    }
+  function getSb() {
+    return window.sb || window.supabaseClient || window.ITWS_SUPABASE || null;
   }
 
-  // ============================================
-  // 3. About Section
-  // ============================================
-  function applyAboutSection() {
-    var showAbout = getSetting('behavior.home_show_about_section', true);
-    var about = getSetting('app_identity.about_section', null);
-    var sec = $('aboutSection');
-
-    if (!showAbout || !about || about.enabled === false) {
-      if (sec) sec.style.display = 'none';
-      return;
-    }
-
-    if (sec) sec.style.display = 'block';
-    setText('aboutTitle', about.title || 'لماذا هذه المنصة؟');
-    setText('aboutSubtitle', about.subtitle || '');
-
-    var container = $('aboutFeatures');
-    if (!container) return;
-
-    var features = about.features || [];
-    if (features.length === 0) {
-      container.innerHTML = '';
-      return;
-    }
-
-    container.innerHTML = features.map(function (f) {
-      return '' +
-        '<div class="about-feature">' +
-          '<h3 class="about-feature-title">' + escapeHtml(f.title || '') + '</h3>' +
-          '<p class="about-feature-desc">' + escapeHtml(f.description || '') + '</p>' +
-        '</div>';
-    }).join('');
+  function safe(url) {
+    if (!url) return '';
+    var u = String(url).trim();
+    if (u.indexOf('javascript:') === 0) return '';
+    if (u.indexOf('data:text/html') === 0) return '';
+    return u;
   }
 
-  // ============================================
-  // 4. Custom Section (قسم مخصص)
-  // ============================================
-  function applyCustomSection() {
-    var showCustom = getSetting('behavior.home_show_custom_section', true);
-    var custom = getSetting('app_identity.custom_section', null);
-    var sec = $('customSection');
+  /* ---------------- Hero ---------------- */
+  function renderHero() {
+    var badge = byData('hero-badge');
+    var title = byData('hero-title');
+    var subtitle = byData('hero-subtitle');
 
-    if (!showCustom || !custom || custom.enabled === false) {
-      if (sec) sec.style.display = 'none';
-      return;
+    var badgeText = getSetting('app_identity.hero_badge', '');
+    if (badge) {
+      if (badgeText) { setText(badge, badgeText); show(badge); }
+      else hide(badge);
     }
 
-    if (sec) sec.style.display = 'block';
-
-    setText('customTitle', custom.title || '');
-    setText('customSubtitle', custom.subtitle || '');
-
-    var contentEl = $('customContent');
-    if (contentEl) {
-      // نسمح بـ HTML بسيط لكن نعمل escape للنصوص العادية
-      if (custom.content) {
-        contentEl.innerHTML = escapeHtml(custom.content).replace(/\n/g, '<br>');
-      } else {
-        contentEl.style.display = 'none';
-      }
+    var titleText = getSetting('app_identity.hero_title', '');
+    if (!titleText) {
+      var union = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+      titleText = 'مرحباً بك في ' + union;
     }
+    setText(title, titleText);
 
-    // زر القسم المخصص
-    var btnEl = $('customBtn');
-    var btnTextEl = $('customBtnText');
-    if (custom.button_text && custom.button_url && btnEl) {
-      if (btnTextEl) btnTextEl.textContent = custom.button_text;
-      btnEl.href = custom.button_url;
-      btnEl.style.display = 'inline-flex';
-    } else if (btnEl) {
-      btnEl.style.display = 'none';
+    var subtitleText = getSetting('app_identity.hero_subtitle', '');
+    if (!subtitleText) {
+      subtitleText = 'منصة رسمية للتحقق من الشهادات التدريبية واكتشاف الأكاديميات المعتمدة';
     }
+    setText(subtitle, subtitleText);
   }
 
-  // ============================================
-  // 5. التبويبات
-  // ============================================
-  function switchTab(tab) {
-    if (!searchConfig[tab] || tab === state.currentTab) return;
-    state.currentTab = tab;
+  /* ---------------- Search ---------------- */
+  var SEARCH_CONFIG = {
+    certificate: {
+      id: 'certificate',
+      placeholderKey: 'behavior.search_certificate_placeholder',
+      placeholderDefault: 'NTI-2026-XXXXXX',
+      hintKey: 'behavior.search_certificate_hint',
+      hintDefault: 'أدخل كود الشهادة المطبوع عليها',
+      minChars: 3,
+      target: 'verify.html',
+      param: 'code',
+      dir: 'ltr'
+    },
+    trainee: {
+      id: 'trainee',
+      placeholderKey: 'behavior.search_trainee_placeholder',
+      placeholderDefault: 'الرقم القومي (14 رقم)',
+      hintKey: 'behavior.search_trainee_hint',
+      hintDefault: 'أدخل الرقم القومي المكون من 14 رقماً',
+      minChars: 14,
+      target: 'student.html',
+      param: 'q',
+      dir: 'ltr'
+    },
+    academy: {
+      id: 'academy',
+      placeholderKey: 'behavior.search_academy_placeholder',
+      placeholderDefault: 'اسم الأكاديمية أو التخصص',
+      hintKey: 'behavior.search_academy_hint',
+      hintDefault: 'ابحث عن أكاديمية معتمدة من النقابة',
+      minChars: 2,
+      target: 'academies.html',
+      param: 'q',
+      dir: 'rtl'
+    }
+  };
 
-    document.querySelectorAll('.search-tab').forEach(function (el) {
-      el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+  function applySearchTab(tabId) {
+    var cfg = SEARCH_CONFIG[tabId];
+    if (!cfg) return;
+
+    state.currentTab = tabId;
+
+    var tabs = $all('[data-search-tab]');
+    tabs.forEach(function (btn) {
+      var isActive = btn.getAttribute('data-search-tab') === tabId;
+      btn.classList.toggle('is-active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
-    var cfg = searchConfig[tab];
-    var form = $('searchForm');
-    var input = $('searchInput');
-    var hint = $('searchHint');
-
-    if (form) form.classList.add('switching-out');
-    if (hint) hint.style.opacity = '0';
-
-    setTimeout(function () {
-      if (input) {
-        input.placeholder = cfg.placeholder;
-        input.value = '';
-        if (tab === 'student') {
-          input.setAttribute('inputmode', 'numeric');
-          input.setAttribute('maxlength', '14');
-        } else {
-          input.removeAttribute('inputmode');
-          input.removeAttribute('maxlength');
-        }
+    var input = $('#homeSearchInput');
+    if (input) {
+      input.value = '';
+      input.setAttribute('dir', cfg.dir);
+      input.setAttribute('placeholder', getSetting(cfg.placeholderKey, cfg.placeholderDefault));
+      if (tabId === 'trainee') {
+        input.setAttribute('inputmode', 'numeric');
+        input.setAttribute('maxlength', '14');
+      } else {
+        input.removeAttribute('inputmode');
+        input.setAttribute('maxlength', '40');
       }
-      if (hint) {
-        hint.textContent = cfg.hint;
-        hint.style.opacity = '1';
-      }
-      if (form) {
-        form.classList.remove('switching-out');
-        form.classList.add('switching-in');
-        setTimeout(function () { form.classList.remove('switching-in'); }, 50);
-      }
+    }
 
-      if (input) input.focus();
-    }, 200);
+    var hint = byData('search-hint');
+    setText(hint, getSetting(cfg.hintKey, cfg.hintDefault));
   }
 
-  function bindTabs() {
-    document.querySelectorAll('.search-tab').forEach(function (el) {
-      el.addEventListener('click', function () {
-        switchTab(el.getAttribute('data-tab'));
+  function handleSearchSubmit(e) {
+    if (e) e.preventDefault();
+
+    var input = $('#homeSearchInput');
+    if (!input) return;
+
+    var value = (input.value || '').trim();
+    var cfg = SEARCH_CONFIG[state.currentTab];
+    if (!cfg) return;
+
+    if (value.length < cfg.minChars) {
+      var hint = byData('search-hint');
+      setText(hint, 'أدخل ' + (cfg.minChars === 14 ? '14 رقماً' : cfg.minChars + ' أحرف على الأقل'));
+      input.focus();
+      return;
+    }
+
+    var url;
+    if (cfg.id === 'trainee') {
+      url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value);
+    } else if (cfg.id === 'certificate') {
+      url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value.toUpperCase());
+    } else {
+      url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value);
+    }
+
+    window.location.href = url;
+  }
+
+  function initSearch() {
+    var enabled = getBool('behavior.enable_search', true);
+    var searchEl = byData('search');
+    if (!enabled) {
+      if (searchEl) hide(searchEl);
+      return;
+    }
+    if (searchEl) show(searchEl);
+
+    $all('[data-search-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        applySearchTab(btn.getAttribute('data-search-tab'));
       });
     });
-  }
 
-  // ============================================
-  // 6. البحث
-  // ============================================
-  function handleSearch(e) {
-    if (e) e.preventDefault();
-    var input = $('searchInput');
-    var value = input ? input.value.trim() : '';
-    var cfg = searchConfig[state.currentTab];
+    var form = $('#homeSearchForm');
+    if (form) form.addEventListener('submit', handleSearchSubmit);
 
-    if (!cfg.validate(value)) {
-      showError(cfg.errorMsg);
-      if (input) input.focus();
-      return false;
+    var submitBtn = $('#homeSearchBtn');
+    if (submitBtn) {
+      var btnText = getSetting('behavior.search_button_text', 'بحث');
+      var span = $('[data-home="search-btn-text"]', submitBtn);
+      setText(span, btnText);
     }
 
-    var btn = $('searchBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'جاري البحث...'; }
-
-    window.location.href = cfg.url + encodeURIComponent(value);
-    return false;
+    applySearchTab('certificate');
   }
 
-  // ============================================
-  // 7. الأكاديميات
-  // ============================================
+  /* ---------------- Custom Section ---------------- */
+  function renderCustomSection() {
+    var enabled = getBool('app_identity.custom_section.enabled', false) &&
+                  getBool('behavior.home_show_custom_section', true);
+    var section = byData('custom-section');
+    if (!section) return;
+    if (!enabled) { hide(section); return; }
+
+    var title = getSetting('app_identity.custom_section.title', '');
+    var subtitle = getSetting('app_identity.custom_section.subtitle', '');
+    var content = getSetting('app_identity.custom_section.content', '');
+    var btnText = getSetting('app_identity.custom_section.button_text', '');
+    var btnUrl = safe(getSetting('app_identity.custom_section.button_url', ''));
+
+    if (!title && !subtitle && !content && !btnText) { hide(section); return; }
+
+    setText(byData('custom-title'), title);
+    setText(byData('custom-subtitle'), subtitle);
+    setText(byData('custom-content'), content);
+
+    var btn = byData('custom-btn');
+    if (btn) {
+      if (btnText && btnUrl) {
+        btn.href = resolve(btnUrl);
+        btn.textContent = btnText;
+        show(btn);
+      } else {
+        hide(btn);
+      }
+    }
+
+    show(section);
+  }
+
+  /* ---------------- About Section ---------------- */
+  var ABOUT_ICONS = [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>'
+  ];
+
+  function renderAboutSection() {
+    var enabled = getBool('app_identity.about_section.enabled', false) &&
+                  getBool('behavior.home_show_about_section', true);
+    var section = byData('about-section');
+    if (!section) return;
+    if (!enabled) { hide(section); return; }
+
+    var title = getSetting('app_identity.about_section.title', '');
+    var subtitle = getSetting('app_identity.about_section.subtitle', '');
+    var features = getSetting('app_identity.about_section.features', []) || [];
+
+    if (!title && !subtitle && (!features || !features.length)) { hide(section); return; }
+
+    setText(byData('about-title'), title);
+    setText(byData('about-subtitle'), subtitle);
+
+    var grid = byData('about-features');
+    if (grid) {
+      grid.innerHTML = '';
+      (features || []).forEach(function (f, idx) {
+        if (!f || (!f.title && !f.description)) return;
+        var card = document.createElement('div');
+        card.className = 'home-about-card';
+        var icon = ABOUT_ICONS[idx % ABOUT_ICONS.length];
+        card.innerHTML =
+          '<div class="home-about-icon">' + icon + '</div>' +
+          '<h3 class="home-about-title">' + escapeHtml(f.title || '') + '</h3>' +
+          '<p class="home-about-desc">' + escapeHtml(f.description || '') + '</p>';
+        grid.appendChild(card);
+      });
+    }
+
+    show(section);
+  }
+
+  /* ---------------- Recent Academies ---------------- */
+  function renderAcademyCard(academy) {
+    var card = document.createElement('a');
+    card.className = 'academy-card';
+    card.href = resolve('academy-details.html?id=' + encodeURIComponent(academy.id || ''));
+
+    var logoHtml;
+    if (academy.logo_url) {
+      logoHtml = '<div class="academy-card-logo"><img src="' + escapeHtml(academy.logo_url) + '" alt="' + escapeHtml(academy.name || '') + '" loading="lazy" onerror="this.parentNode.textContent=\'أ\';"></div>';
+    } else {
+      var initial = (academy.name || 'أ').trim().charAt(0);
+      logoHtml = '<div class="academy-card-logo">' + escapeHtml(initial) + '</div>';
+    }
+
+    var desc = academy.description || academy.short_description || '';
+    card.innerHTML =
+      logoHtml +
+      '<div class="academy-card-body">' +
+        '<h3 class="academy-card-title">' + escapeHtml(academy.name || 'أكاديمية') + '</h3>' +
+        '<p class="academy-card-desc">' + escapeHtml(desc) + '</p>' +
+      '</div>';
+
+    return card;
+  }
+
   function loadRecentAcademies() {
-    if (!window.sb) return;
-    if (!getSetting('behavior.home_show_recent_academies', true)) {
-      var sec = $('academiesSection');
-      if (sec) sec.style.display = 'none';
-      return;
-    }
+    var enabled = getBool('behavior.home_show_recent_academies', true);
+    var section = byData('recent-academies');
+    if (!section) return;
+    if (!enabled) { hide(section); return; }
 
-    var limit = getSetting('behavior.home_stats_academies_count', 6);
-    var grid = $('academiesGrid');
+    var grid = $('#homeAcademiesGrid');
     if (!grid) return;
 
-    window.sb.from('academies')
-      .select('id, name, license_number, category_id, logo_url')
-      .eq('status', 'approved')
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: false })
-      .limit(limit)
-      .then(function (res) {
-        if (res.error || !res.data || res.data.length === 0) {
-          grid.innerHTML = '<div class="empty-section">لا توجد أكاديميات معتمدة بعد</div>';
-          return;
-        }
-        renderAcademies(res.data, grid);
-      })
-      .catch(function () {
-        grid.innerHTML = '<div class="empty-section">تعذر تحميل الأكاديميات</div>';
-      });
-  }
+    // Loading
+    grid.innerHTML = '<div class="home-academies-loading" style="grid-column:1/-1;"><div class="home-academies-spinner"></div></div>';
+    show(section);
 
-  function renderAcademies(academies, grid) {
-    window.sb.from('academy_categories').select('id, name').then(function (catRes) {
-      var cats = {};
-      if (catRes.data) catRes.data.forEach(function (c) { cats[c.id] = c; });
-      renderAcademiesGrid(academies, cats, grid);
-    }).catch(function () {
-      renderAcademiesGrid(academies, {}, grid);
-    });
-  }
-
-  function renderAcademiesGrid(academies, cats, grid) {
-    var html = academies.map(function (a) {
-      var initial = escapeHtml((a.name || '?').charAt(0));
-      var cat = cats[a.category_id];
-      var logoHtml = a.logo_url
-        ? '<img src="' + escapeHtml(a.logo_url) + '" alt="">'
-        : initial;
-
-      return '' +
-        '<div class="academy-card" data-academy-id="' + escapeHtml(a.id) + '" role="button" tabindex="0">' +
-          '<div class="academy-card-header">' +
-            '<div class="academy-logo">' + logoHtml + '</div>' +
-            '<span class="academy-badge">معتمدة</span>' +
-          '</div>' +
-          '<div class="academy-body">' +
-            '<div class="academy-name">' + escapeHtml(a.name) + '</div>' +
-            (cat ? '<div class="academy-category">' + escapeHtml(cat.name) + '</div>' : '') +
-          '</div>' +
-          '<div class="academy-footer">' +
-            '<span class="academy-license">' + escapeHtml(a.license_number || '—') + '</span>' +
-            '<span class="academy-arrow">&#8592;</span>' +
-          '</div>' +
-        '</div>';
-    }).join('');
-
-    grid.innerHTML = html;
-
-    grid.querySelectorAll('[data-academy-id]').forEach(function (card) {
-      card.addEventListener('click', function () {
-        var id = card.getAttribute('data-academy-id');
-        window.location.href = 'academy-details.html?id=' + encodeURIComponent(id);
-      });
-      card.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          var id = card.getAttribute('data-academy-id');
-          window.location.href = 'academy-details.html?id=' + encodeURIComponent(id);
-        }
-      });
-    });
-  }
-
-  // ============================================
-  // 8. Theme Picker (مع fallback)
-  // ============================================
-  function initThemePicker() {
-    if (!getSetting('behavior.enable_theme_picker_for_visitors', true)) {
-      var fab = $('themeFab');
-      if (fab) fab.style.display = 'none';
+    var sb = getSb();
+    if (!sb || typeof sb.from !== 'function') {
+      grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">تعذر الاتصال بالخادم</div>';
       return;
     }
 
-    var fab = $('themeFab');
-    var panel = $('themePanel');
-    var closeBtn = $('themePanelClose');
-    var resetBtn = $('themeReset');
-    var listEl = $('themeList');
+    var limit = parseInt(getSetting('behavior.home_stats_academies_count', 6), 10) || 6;
 
-    if (!fab || !panel || !listEl) return;
+    try {
+      sb.from('academies')
+        .select('id, name, description, logo_url, status, created_at')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(limit)
+        .then(function (res) {
+          if (res && res.error) throw res.error;
+          var list = (res && res.data) || [];
 
-    var themes = window.getThemesList ? window.getThemesList() : [];
-    listEl.innerHTML = themes.map(function (t) {
-      var swatches = (t.preview || []).map(function (c) {
-        return '<span class="theme-swatch" style="background:' + c + '"></span>';
-      }).join('');
-      return '' +
-        '<button class="theme-option" data-theme-option="' + escapeHtml(t.id) + '" type="button">' +
-          '<div class="theme-swatches">' + swatches + '</div>' +
-          '<span class="theme-name">' + escapeHtml(t.name) + '</span>' +
-        '</button>';
-    }).join('');
+          if (!list.length) {
+            grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">لا توجد أكاديميات معتمدة بعد</div>';
+            return;
+          }
 
-    if (window.ThemeManager) window.ThemeManager.refreshPicker();
-
-    // Bind theme options (fallback - مستقل عن theme.js)
-    bindThemeOptions();
-
-    fab.addEventListener('click', function (e) {
-      e.stopPropagation();
-      panel.classList.toggle('open');
-    });
-
-    if (closeBtn) closeBtn.addEventListener('click', function () { panel.classList.remove('open'); });
-
-    if (resetBtn) {
-      resetBtn.addEventListener('click', function () {
-        if (window.ThemeManager) {
-          window.ThemeManager.reset().then(function () {
-            if (window.Utils && window.Utils.showToast) {
-              window.Utils.showToast('تم استعادة الثيم الافتراضي', 'success');
-            }
+          grid.innerHTML = '';
+          list.forEach(function (a) {
+            grid.appendChild(renderAcademyCard(a));
           });
+          state.academiesLoaded = true;
+        })
+        .catch(function (err) {
+          console.warn('[Home] load academies failed:', err && err.message);
+          grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">تعذر تحميل الأكاديميات</div>';
+        });
+    } catch (e) {
+      console.warn('[Home] academies query error:', e);
+      grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">خطأ في تحميل البيانات</div>';
+    }
+  }
+
+  /* ---------------- CTA ---------------- */
+  function renderCTA() {
+    var title = getSetting('app_identity.cta_title', '') ||
+                'هل تدير أكاديمية تدريبية؟';
+    var subtitle = getSetting('app_identity.cta_subtitle', '') ||
+                   'قدم طلب الاعتماد وانضم إلى قائمة الأكاديميات المعتمدة من النقابة';
+    var btnText = getSetting('app_identity.cta_button_text', '') ||
+                  'قدم أكاديميتك';
+    var btnUrl = getSetting('app_identity.cta_button_url', '') ||
+                 'academy-apply.html';
+
+    setText(byData('cta-title'), title);
+    setText(byData('cta-subtitle'), subtitle);
+    setText(byData('cta-btn-text'), btnText);
+
+    var btn = byData('cta-btn');
+    if (btn) btn.href = resolve(btnUrl);
+  }
+
+  /* ---------------- Footer ---------------- */
+  function renderFooter() {
+    var unionName = getSetting('app_identity.union_name', '');
+    var committeeName = getSetting('app_identity.committee_name', '');
+    var logoUrl = getSetting('app_identity.logo_url', '');
+    var presidentName = getSetting('app_identity.president_name', '');
+    var presidentLabel = getSetting('app_identity.president_label', 'النقيب العام');
+
+    // Logo
+    var logo = byData('footer-logo');
+    if (logo) {
+      if (logoUrl) {
+        logo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="logo">';
+      } else {
+        logo.textContent = (unionName || 'ن').trim().charAt(0);
+      }
+    }
+
+    setText(byData('footer-union'), unionName);
+    setText(byData('footer-committee'), committeeName);
+
+    // Contact
+    var email = getSetting('app_identity.contact_email', '');
+    var phone = getSetting('app_identity.contact_phone', '');
+    var website = getSetting('app_identity.website_url', '');
+
+    var emailEl = byData('footer-email');
+    if (email && emailEl) {
+      emailEl.href = 'mailto:' + email;
+      setText(byData('footer-email-text'), email);
+      show(emailEl);
+    } else if (emailEl) {
+      hide(emailEl);
+    }
+
+    var phoneEl = byData('footer-phone');
+    if (phone && phoneEl) {
+      phoneEl.href = 'tel:' + phone.replace(/[^0-9+]/g, '');
+      setText(byData('footer-phone-text'), phone);
+      show(phoneEl);
+    } else if (phoneEl) {
+      hide(phoneEl);
+    }
+
+    var websiteEl = byData('footer-website');
+    if (website && websiteEl) {
+      websiteEl.href = website;
+      setText(byData('footer-website-text'), website.replace(/^https?:\/\//, '').replace(/\/$/, ''));
+      show(websiteEl);
+    } else if (websiteEl) {
+      hide(websiteEl);
+    }
+
+    // Social
+    var showSocial = getBool('footer.show_social_links', false);
+    var socialWrap = byData('footer-social');
+    if (showSocial && socialWrap) {
+      var anyShown = false;
+      var socials = [
+        { key: 'footer.social_facebook', el: 'footer-facebook' },
+        { key: 'footer.social_twitter', el: 'footer-twitter' },
+        { key: 'footer.social_linkedin', el: 'footer-linkedin' },
+        { key: 'footer.social_youtube', el: 'footer-youtube' }
+      ];
+      socials.forEach(function (s) {
+        var el = byData(s.el);
+        var url = getSetting(s.key, '');
+        if (el) {
+          if (url) {
+            el.href = url;
+            show(el);
+            anyShown = true;
+          } else {
+            hide(el);
+          }
         }
+      });
+      if (anyShown) show(socialWrap); else hide(socialWrap);
+    } else if (socialWrap) {
+      hide(socialWrap);
+    }
+
+    // Footer Link
+    var flEnabled = getBool('app_identity.footer_link.enabled', false);
+    var flText = getSetting('app_identity.footer_link.text', '');
+    var flUrl = safe(getSetting('app_identity.footer_link.url', ''));
+    var flWrap = byData('footer-link-wrap');
+    if (flWrap) {
+      if (flEnabled && flText && flUrl) {
+        setText(byData('footer-link-text'), flText);
+        var fl = byData('footer-link');
+        if (fl) fl.href = resolve(flUrl);
+        show(flWrap);
+      } else {
+        hide(flWrap);
+      }
+    }
+
+    // Copyright
+    var showCopyright = getBool('footer.show_copyright', true);
+    var copyrightText = getSetting('footer.copyright_text', '');
+    if (!copyrightText) {
+      var year = new Date().getFullYear();
+      copyrightText = '© ' + year + ' ' + (unionName || '');
+    }
+    var copyrightEl = byData('footer-copyright');
+    if (copyrightEl) {
+      if (showCopyright) {
+        setText(copyrightEl, copyrightText);
+        show(copyrightEl);
+      } else {
+        hide(copyrightEl);
+      }
+    }
+
+    // President
+    var showPresident = getBool('footer.show_president', true);
+    var presidentWrap = byData('footer-president-wrap');
+    if (presidentWrap) {
+      if (showPresident && presidentName) {
+        setText(byData('footer-president-label'), presidentLabel + ': ');
+        setText(byData('footer-president-name'), presidentName);
+        show(presidentWrap);
+      } else {
+        hide(presidentWrap);
+      }
+    }
+  }
+
+  /* ---------------- Theme FAB ---------------- */
+  function getThemes() {
+    if (window.ITWS_THEMES && Array.isArray(window.ITWS_THEMES)) {
+      return window.ITWS_THEMES;
+    }
+    return [
+      { id: 'watanii_dark', name: 'وطني داكن', colors: { primary: '#CE1126', bg: '#0A0E14', surface: '#131820' } },
+      { id: 'watanii_light', name: 'وطني فاتح', colors: { primary: '#CE1126', bg: '#F8FAFC', surface: '#FFFFFF' } },
+      { id: 'tech_blue', name: 'تكنولوجي', colors: { primary: '#3B82F6', bg: '#0F172A', surface: '#1E293B' } },
+      { id: 'light_formal', name: 'رسمي فاتح', colors: { primary: '#1E40AF', bg: '#FFFFFF', surface: '#F3F4F6' } },
+      { id: 'emerald', name: 'زمردي', colors: { primary: '#10B981', bg: '#0B1917', surface: '#122320' } },
+      { id: 'midnight_gold', name: 'ليلي ذهبي', colors: { primary: '#D4AF37', bg: '#0B0B12', surface: '#161623' } }
+    ];
+  }
+
+  function getCurrentTheme() {
+    try {
+      if (window.ITWSTheme && typeof window.ITWSTheme.getCurrent === 'function') {
+        return window.ITWSTheme.getCurrent();
+      }
+    } catch (e) {}
+
+    try {
+      var stored = localStorage.getItem('itws_theme');
+      if (stored) return stored;
+    } catch (e) {}
+
+    return document.documentElement.getAttribute('data-theme') || '';
+  }
+
+  function buildThemePanel() {
+    var body = $('#themePanelBody');
+    if (!body) return;
+    body.innerHTML = '';
+
+    var themes = getThemes();
+    var current = getCurrentTheme();
+
+    themes.forEach(function (t) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'theme-option' + (t.id === current ? ' is-active' : '');
+      btn.setAttribute('data-theme-option', t.id);
+
+      var swatchColor = (t.colors && t.colors.primary) ? t.colors.primary : '#CE1126';
+      var swatchBg = (t.colors && t.colors.bg) ? t.colors.bg : '#0A0E14';
+
+      btn.innerHTML =
+        '<span class="theme-swatch" style="background:linear-gradient(135deg,' + escapeHtml(swatchColor) + ' 50%,' + escapeHtml(swatchBg) + ' 50%);"></span>' +
+        '<span class="theme-option-name">' + escapeHtml(t.name || t.id) + '</span>' +
+        '<svg class="theme-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+      btn.addEventListener('click', function () {
+        try {
+          if (window.ITWSTheme && typeof window.ITWSTheme.change === 'function') {
+            window.ITWSTheme.change(t.id);
+          } else if (window.theme && typeof window.theme.change === 'function') {
+            window.theme.change(t.id);
+          } else if (typeof window.changeTheme === 'function') {
+            window.changeTheme(t.id);
+          } else {
+            localStorage.setItem('itws_theme', t.id);
+            document.documentElement.setAttribute('data-theme', t.id);
+          }
+        } catch (err) {
+          console.warn('[Home] theme change failed:', err);
+        }
+        // Refresh active states
+        $all('.theme-option', body).forEach(function (b) {
+          b.classList.toggle('is-active', b.getAttribute('data-theme-option') === t.id);
+        });
+      });
+
+      body.appendChild(btn);
+    });
+  }
+
+  function initThemeFab() {
+    var enabled = getBool('behavior.enable_theme_picker_for_visitors', true);
+    var wrap = $('#themeFabWrap');
+    if (!wrap) return;
+    if (!enabled) { hide(wrap); return; }
+    show(wrap);
+
+    var fab = $('#themeFab');
+    var panel = $('#themePanel');
+    var close = $('#themePanelClose');
+    var reset = $('#themeResetBtn');
+
+    buildThemePanel();
+
+    if (fab && panel) {
+      fab.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = !panel.hasAttribute('hidden');
+        if (isOpen) {
+          panel.setAttribute('hidden', '');
+          fab.setAttribute('aria-expanded', 'false');
+        } else {
+          buildThemePanel();
+          panel.removeAttribute('hidden');
+          fab.setAttribute('aria-expanded', 'true');
+        }
+      });
+    }
+
+    if (close && panel) {
+      close.addEventListener('click', function () {
+        panel.setAttribute('hidden', '');
+        if (fab) fab.setAttribute('aria-expanded', 'false');
       });
     }
 
     document.addEventListener('click', function (e) {
-      if (panel.classList.contains('open') && !panel.contains(e.target) && !fab.contains(e.target)) {
-        panel.classList.remove('open');
+      if (!wrap.contains(e.target) && panel && !panel.hasAttribute('hidden')) {
+        panel.setAttribute('hidden', '');
+        if (fab) fab.setAttribute('aria-expanded', 'false');
       }
     });
 
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && panel.classList.contains('open')) {
-        panel.classList.remove('open');
-      }
-    });
-  }
-
-  // Fallback: event delegation على theme-list (يشتغل دايماً)
-  function bindThemeOptions() {
-    var listEl = $('themeList');
-    if (!listEl) return;
-    if (listEl.__themeBound) return;
-    listEl.__themeBound = true;
-
-    listEl.addEventListener('click', function (e) {
-      var btn = e.target.closest ? e.target.closest('[data-theme-option]') : null;
-      if (!btn) return;
-      var themeId = btn.getAttribute('data-theme-option');
-      if (!themeId) return;
-
-      if (window.ThemeManager && window.ThemeManager.change) {
-        window.ThemeManager.change(themeId);
-      } else if (window.ITWS_THEMES && window.ITWS_THEMES[themeId]) {
-        // fallback: تطبيق مباشر
-        var theme = window.ITWS_THEMES[themeId];
-        var root = document.documentElement;
-        Object.keys(theme.colors).forEach(function (k) {
-          root.style.setProperty('--' + k, theme.colors[k]);
-        });
+    if (reset) {
+      reset.addEventListener('click', function () {
         try {
-          localStorage.setItem('itws_theme', JSON.stringify({ id: themeId, colors: theme.colors }));
-        } catch (err) {}
-        // تحديث UI
-        listEl.querySelectorAll('[data-theme-option]').forEach(function (el) {
-          el.classList.toggle('active', el.getAttribute('data-theme-option') === themeId);
-        });
-      }
-    });
+          var defaultTheme = getSetting('theme.default_theme', 'watanii_dark');
+          if (window.ITWSTheme && typeof window.ITWSTheme.change === 'function') {
+            window.ITWSTheme.change(defaultTheme);
+          } else {
+            localStorage.setItem('itws_theme', defaultTheme);
+            document.documentElement.setAttribute('data-theme', defaultTheme);
+          }
+          $all('.theme-option').forEach(function (b) {
+            b.classList.toggle('is-active', b.getAttribute('data-theme-option') === defaultTheme);
+          });
+        } catch (err) {
+          console.warn('[Home] theme reset failed:', err);
+        }
+      });
+    }
   }
 
-  // ============================================
-  // 9. Init
-  // ============================================
+  /* ---------------- Apply all ---------------- */
+  function applyAll() {
+    renderHero();
+    renderCustomSection();
+    renderAboutSection();
+    renderCTA();
+    renderFooter();
+  }
+
+  /* ---------------- Init ---------------- */
   function init() {
     if (state.initialized) return;
     state.initialized = true;
 
-    applyDynamicContent();
-    bindTabs();
-    initThemePicker();
+    state.sb = getSb();
 
-    var searchForm = $('searchForm');
-    if (searchForm) searchForm.addEventListener('submit', handleSearch);
+    applyAll();
+    initSearch();
+    initThemeFab();
+    loadRecentAcademies();
 
-    var input = $('searchInput');
-    if (input) {
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); handleSearch(); }
-      });
+    // Re-apply on settings changes
+    if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+      try {
+        window.AppSettings.onChange(function () {
+          applyAll();
+        });
+      } catch (e) {}
     }
 
-    // الاستماع لتغييرات الإعدادات
-    if (window.AppSettings && window.AppSettings.onChange) {
-      window.AppSettings.onChange(function () {
-        applyDynamicContent();
-      });
-    }
-
-    // إعادة المحاولة للتأكد من تحديث القيم (بعد Supabase load)
-    var retryTimes = [500, 1500, 3000, 5000];
-    retryTimes.forEach(function (t) {
-      setTimeout(function () {
-        if (state.contentRetries < 10) {
-          state.contentRetries++;
-          applyDynamicContent();
-        }
-      }, t);
-    });
-
-    // تحميل الأكاديميات
-    waitForSupabase(function () {
-      loadRecentAcademies();
-    });
-  }
-
-  function waitForSupabase(cb) {
-    if (window.sb) { cb(); return; }
-    var w = 0;
-    var i = setInterval(function () {
-      w += 100;
-      if (window.sb || w >= 3000) {
-        clearInterval(i);
-        if (window.sb) cb();
-      }
-    }, 100);
+    // Fallback retries (in case AppSettings loads late)
+    setTimeout(applyAll, 600);
+    setTimeout(applyAll, 1800);
+    setTimeout(applyAll, 3500);
+    setTimeout(loadRecentAcademies, 1500);
   }
 
   window.HomePage = {
     initialized: true,
     init: init,
-    switchTab: switchTab,
-    refresh: function () { loadRecentAcademies(); }
+    refresh: applyAll,
+    reloadAcademies: loadRecentAcademies,
+    getState: function () { return state; }
   };
 
   if (document.readyState === 'loading') {
@@ -548,5 +725,4 @@
   } else {
     init();
   }
-
 })();
