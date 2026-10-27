@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعدادات العامة | لوحة التحكم</title>
+  <meta name="theme-color" content="#0A0E14">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script src="../../assets/js/settings-defaults.js"></script>
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/themes-data.js"></script>
+  <script src="../../assets/js/theme.js"></script>
+  <script src="../../assets/js/app-settings.js"></script>
+
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/loader.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+
+  <style>
+    .settings-header {
+      margin-bottom: 24px;
+    }
+    .settings-header h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 6px;
+      line-height: 1.3;
+    }
+    .settings-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .tabs-nav {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 18px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover:not(.active) {
+      color: var(--text);
+      background: var(--surface-hover);
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--primary-text);
+      box-shadow: 0 4px 12px var(--primary-soft);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .settings-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .settings-card:last-child { margin-bottom: 0; }
+    .settings-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    .settings-card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0 0 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.6;
+    }
+
+    .settings-card .form-group {
+      margin-bottom: 16px;
+    }
+    .settings-card .form-group:last-child { margin-bottom: 0; }
+
+    .settings-card .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .settings-card .form-group label.required::after {
+      content: " *";
+      color: var(--error);
+    }
+
+    .settings-card .form-control {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .settings-card .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+      background: var(--surface-elevated);
+    }
+    .settings-card .form-control::placeholder {
+      color: var(--text-muted);
+    }
+    .settings-card textarea.form-control {
+      resize: vertical;
+      min-height: 70px;
+    }
+    .settings-card select.form-control {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 14px center;
+      padding-left: 36px;
+    }
+    .settings-card select.form-control option {
+      background: var(--surface-elevated);
+      color: var(--text);
+    }
+
+    .settings-card .form-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .settings-card .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) {
+      .settings-card .form-row { grid-template-columns: 1fr; }
+    }
+
+    .settings-card .form-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .settings-card .form-check:hover {
+      border-color: var(--border-strong);
+    }
+    .settings-card .form-check:last-child { margin-bottom: 0; }
+    .settings-card .form-check input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      margin: 0;
+      flex-shrink: 0;
+    }
+    .settings-card .form-check label {
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      margin: 0;
+      flex: 1;
+    }
+
+    .upload-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .upload-preview {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 24px;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    .upload-preview.square {
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .upload-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .upload-preview.square img {
+      object-fit: contain;
+      padding: 6px;
+    }
+    .upload-info {
+      flex: 1;
+      min-width: 200px;
+    }
+    .upload-info .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .upload-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .settings-save-bar {
+      position: sticky;
+      bottom: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+      z-index: 5;
+    }
+    .settings-save-info {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .settings-save-info.success { color: var(--success); }
+    .settings-save-info.error { color: var(--error); }
+
+    @media (max-width: 640px) {
+      .settings-save-bar {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+      .settings-save-bar .btn { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body data-requires-auth data-required-roles="super_admin">
+
+  <div class="theme-boot-loader" id="themeBootLoader">
+    <div class="loader-logo">نت</div>
+    <div class="loader-spinner"></div>
+  </div>
+
+  <div class="app-layout">
+    <div id="sidebarContainer" data-mode="admin"></div>
+
+    <div class="app-main">
+      <div class="app-topbar">
+        <div class="app-topbar-left">
+          <button type="button" id="sidebarToggleBtn" class="sidebar-toggle-btn" aria-label="فتح القائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="app-topbar-title">الإعدادات العامة</h1>
+        </div>
+        <div class="app-topbar-right">
+          <a href="themes.html" class="btn btn-outline btn-sm" style="text-decoration:none;">إدارة الثيمات</a>
+          <a href="texts.html" class="btn btn-outline btn-sm" style="text-decoration:none;">إدارة النصوص</a>
+          <a href="../../home.html" class="btn btn-outline btn-sm" style="text-decoration:none;">الموقع</a>
+        </div>
+      </div>
+
+      <main class="app-content">
+        <div class="app-content-inner">
+
+          <div class="settings-header">
+            <h2>الإعدادات العامة</h2>
+            <p>تحكم كامل في هوية المنصة، بيانات التواصل، الشعارات، والأقسام الظاهرة</p>
+          </div>
+
+          <form id="settingsForm" novalidate onsubmit="return false;">
+
+            <div class="tabs-nav" id="tabsNav">
+              <button type="button" class="tab-btn active" data-tab="tabIdentity">الهوية</button>
+              <button type="button" class="tab-btn" data-tab="tabBranding">الشعارات</button>
+              <button type="button" class="tab-btn" data-tab="tabSections">الروابط والأقسام</button>
+              <button type="button" class="tab-btn" data-tab="tabBehavior">السلوك</button>
+              <button type="button" class="tab-btn" data-tab="tabSecurity">الأمان</button>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- TAB 1: IDENTITY                              -->
+            <!-- ============================================ -->
+            <div class="tab-panel active" id="tabIdentity">
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">البيانات الأساسية</h3>
+                <p class="settings-card-desc">تظهر في الهيدر، الفوتر، الشهادات، وتبويب المتصفح</p>
+
+                <div class="form-group">
+                  <label class="required" for="unionName">اسم النقابة (عربي)</label>
+                  <input type="text" id="unionName" class="form-control" placeholder="نقابة تكنولوجيا المعلومات والبرمجيات" required maxlength="150">
+                </div>
+                <div class="form-group">
+                  <label for="unionNameEn">اسم النقابة (إنجليزي)</label>
+                  <input type="text" id="unionNameEn" class="form-control" placeholder="ITWS" maxlength="50" dir="ltr">
+                </div>
+                <div class="form-group">
+                  <label class="required" for="committeeName">اسم اللجنة</label>
+                  <input type="text" id="committeeName" class="form-control" placeholder="لجنة التحول الرقمي والتدريب" required maxlength="150">
+                </div>
+                <div class="form-group">
+                  <label for="committeeHeadName">رئيس اللجنة</label>
+                  <input type="text" id="committeeHeadName" class="form-control" placeholder="د. أحمد محمد" maxlength="100">
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">النقيب العام</h3>
+                <p class="settings-card-desc">يظهر في الفوتر، الشهادات، وقرارات الاعتماد</p>
+
+                <div class="form-group">
+                  <label class="required" for="presidentName">اسم النقيب</label>
+                  <input type="text" id="presidentName" class="form-control" placeholder="المحاسب / محمود جميل" required maxlength="100">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="presidentLabel">لقب النقيب</label>
+                    <input type="text" id="presidentLabel" class="form-control" placeholder="النقيب العام:" maxlength="50">
+                  </div>
+                  <div class="form-group">
+                    <label for="footerText">نص الفوتر</label>
+                    <input type="text" id="footerText" class="form-control" placeholder="© 2026 نقابة تكنولوجيا المعلومات والبرمجيات" maxlength="200">
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">بيانات التواصل</h3>
+                <p class="settings-card-desc">تظهر في الفوتر وصفحات التواصل</p>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="contactEmail">البريد الإلكتروني</label>
+                    <input type="email" id="contactEmail" class="form-control" placeholder="info@itws.eg" maxlength="100" dir="ltr">
+                  </div>
+                  <div class="form-group">
+                    <label for="contactPhone">رقم الهاتف</label>
+                    <input type="tel" id="contactPhone" class="form-control" placeholder="01234567890" maxlength="20" dir="ltr">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="websiteUrl">الموقع الإلكتروني</label>
+                  <input type="url" id="websiteUrl" class="form-control" placeholder="https://itws.eg" maxlength="200" dir="ltr">
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ============================================ -->
+            <!-- TAB 2: BRANDING                              -->
+            <!-- ============================================ -->
+            <div class="tab-panel" id="tabBranding">
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">شعار النقابة</h3>
+                <p class="settings-card-desc">يظهر في تبويب المتصفح، الهيدر، والصفحة الرئيسية</p>
+
+                <div class="upload-row">
+                  <div class="upload-preview" id="logoPreview">نت</div>
+                  <div class="upload-info">
+                    <div class="form-hint">PNG, JPG, SVG, WebP — حد أقصى 2 MB — يُفضل 512×512</div>
+                    <div class="upload-actions">
+                      <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('logoFileInput').click()">اختيار صورة</button>
+                      <button type="button" class="btn btn-ghost btn-sm" id="logoRemoveBtn" style="display:none;color:var(--error);">حذف الشعار</button>
+                      <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml" style="display:none;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">ختم النقابة</h3>
+                <p class="settings-card-desc">يظهر على الشهادات المطبوعة وقرارات الاعتماد</p>
+
+                <div class="upload-row">
+                  <div class="upload-preview square" id="stampPreview">ختم</div>
+                  <div class="upload-info">
+                    <div class="form-hint">PNG شفاف — حد أقصى 2 MB — يُفضل 512×512</div>
+                    <div class="upload-actions">
+                      <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('stampFileInput').click()">اختيار صورة</button>
+                      <button type="button" class="btn btn-ghost btn-sm" id="stampRemoveBtn" style="display:none;color:var(--error);">حذف الختم</button>
+                      <input type="file" id="stampFileInput" accept="image/png,image/webp,image/svg+xml" style="display:none;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ============================================ -->
+            <!-- TAB 3: SECTIONS                              -->
+            <!-- ============================================ -->
+            <div class="tab-panel" id="tabSections">
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">زر الفوتر</h3>
+                <p class="settings-card-desc">زر إضافي يظهر في الفوتر تحت نص التعريف — مثال: "الموقع الرسمي للنقابة"</p>
+
+                <div class="form-check">
+                  <input type="checkbox" id="footerLinkEnabled">
+                  <label for="footerLinkEnabled">تفعيل الزر</label>
+                </div>
+
+                <div class="form-row" style="margin-top:16px;">
+                  <div class="form-group">
+                    <label for="footerLinkText">نص الزر</label>
+                    <input type="text" id="footerLinkText" class="form-control" placeholder="الموقع الرسمي للنقابة" maxlength="100">
+                  </div>
+                  <div class="form-group">
+                    <label for="footerLinkUrl">رابط الزر</label>
+                    <input type="url" id="footerLinkUrl" class="form-control" placeholder="https://itws.eg" maxlength="500" dir="ltr">
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">قسم "لماذا هذه المنصة"</h3>
+                <p class="settings-card-desc">يظهر في الصفحة الرئيسية لشرح فائدة المنصة</p>
+
+                <div class="form-check">
+                  <input type="checkbox" id="aboutEnabled">
+                  <label for="aboutEnabled">تفعيل القسم</label>
+                </div>
+
+                <div class="form-group" style="margin-top:16px;">
+                  <label for="aboutTitle">عنوان القسم</label>
+                  <input type="text" id="aboutTitle" class="form-control" placeholder="لماذا هذه المنصة؟" maxlength="150">
+                </div>
+                <div class="form-group">
+                  <label for="aboutSubtitle">الوصف المختصر</label>
+                  <input type="text" id="aboutSubtitle" class="form-control" placeholder="النظام الرسمي للتحقق من صحة الشهادات التدريبية" maxlength="300">
+                </div>
+
+                <div class="form-group">
+                  <label>الميزة الأولى</label>
+                  <input type="text" id="aboutFeature1Title" class="form-control" placeholder="التحقق الفوري" maxlength="100" style="margin-bottom:8px;">
+                  <textarea id="aboutFeature1Desc" class="form-control" rows="2" placeholder="تأكد من صحة أي شهادة في ثوانٍ" maxlength="300"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>الميزة الثانية</label>
+                  <input type="text" id="aboutFeature2Title" class="form-control" placeholder="موثوق 100%" maxlength="100" style="margin-bottom:8px;">
+                  <textarea id="aboutFeature2Desc" class="form-control" rows="2" placeholder="كل شهادة صادرة عن أكاديمية معتمدة" maxlength="300"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>الميزة الثالثة</label>
+                  <input type="text" id="aboutFeature3Title" class="form-control" placeholder="متاح 24/7" maxlength="100" style="margin-bottom:8px;">
+                  <textarea id="aboutFeature3Desc" class="form-control" rows="2" placeholder="خدمة التحقق متاحة على مدار الساعة" maxlength="300"></textarea>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">قسم مخصص</h3>
+                <p class="settings-card-desc">قسم إضافي في الصفحة الرئيسية بمحتوى قابل للتعديل الكامل</p>
+
+                <div class="form-check">
+                  <input type="checkbox" id="customEnabled">
+                  <label for="customEnabled">تفعيل القسم</label>
+                </div>
+
+                <div class="form-group" style="margin-top:16px;">
+                  <label for="customTitle">العنوان</label>
+                  <input type="text" id="customTitle" class="form-control" placeholder="قسم مخصص" maxlength="150">
+                </div>
+                <div class="form-group">
+                  <label for="customSubtitle">الوصف المختصر</label>
+                  <input type="text" id="customSubtitle" class="form-control" placeholder="يمكنك تعديل هذا القسم بالكامل" maxlength="300">
+                </div>
+                <div class="form-group">
+                  <label for="customContent">المحتوى</label>
+                  <textarea id="customContent" class="form-control" rows="4" placeholder="اكتب محتوى القسم هنا..." maxlength="2000"></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="customBtnText">نص الزر (اختياري)</label>
+                    <input type="text" id="customBtnText" class="form-control" placeholder="اعرف المزيد" maxlength="50">
+                  </div>
+                  <div class="form-group">
+                    <label for="customBtnUrl">رابط الزر</label>
+                    <input type="url" id="customBtnUrl" class="form-control" placeholder="https://itws.eg" maxlength="500" dir="ltr">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ============================================ -->
+            <!-- TAB 4: BEHAVIOR                              -->
+            <!-- ============================================ -->
+            <div class="tab-panel" id="tabBehavior">
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">الخط والثيم</h3>
+                <p class="settings-card-desc">تحكم في الخط الافتراضي وصلاحيات تغيير الثيم</p>
+
+                <div class="form-group">
+                  <label for="fontFamily">الخط الافتراضي</label>
+                  <select id="fontFamily" class="form-control">
+                    <option value="Cairo">Cairo (الافتراضي)</option>
+                    <option value="Tajawal">Tajawal</option>
+                    <option value="Almarai">Almarai</option>
+                    <option value="Noto Kufi Arabic">Noto Kufi Arabic</option>
+                  </select>
+                  <div class="form-hint">يُطبق على كل المنصة بعد إعادة تحميل الصفحة</div>
+                </div>
+
+                <div class="form-check">
+                  <input type="checkbox" id="enableThemePicker">
+                  <label for="enableThemePicker">السماح للزوار بتغيير الثيم من الصفحة الرئيسية</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" id="enableRegistration">
+                  <label for="enableRegistration">السماح بتسجيل الأكاديميات الجديدة (صفحة التقديم)</label>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">أقسام الصفحة الرئيسية</h3>
+                <p class="settings-card-desc">تحكم في الأقسام التي تظهر في الصفحة الرئيسية للزائر</p>
+
+                <div class="form-check">
+                  <input type="checkbox" id="homeShowAcademies">
+                  <label for="homeShowAcademies">عرض قسم "أحدث الأكاديميات"</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" id="homeShowAbout">
+                  <label for="homeShowAbout">عرض قسم "لماذا هذه المنصة"</label>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" id="homeShowCustom">
+                  <label for="homeShowCustom">عرض القسم المخصص</label>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ============================================ -->
+            <!-- TAB 5: SECURITY                              -->
+            <!-- ============================================ -->
+            <div class="tab-panel" id="tabSecurity">
+
+              <div class="settings-card">
+                <h3 class="settings-card-title">حماية الحسابات</h3>
+                <p class="settings-card-desc">إعدادات الأمان ومنع محاولات الاختراق</p>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="maxLoginAttempts">الحد الأقصى لمحاولات الدخول</label>
+                    <input type="number" id="maxLoginAttempts" class="form-control" min="3" max="10" value="5">
+                    <div class="form-hint">بعد تجاوزها يتم حظر الحساب مؤقتاً</div>
+                  </div>
+                  <div class="form-group">
+                    <label for="lockoutMinutes">مدة الحظر (دقائق)</label>
+                    <input type="number" id="lockoutMinutes" class="form-control" min="1" max="120" value="15">
+                    <div class="form-hint">بعد انتهائها يمكن المحاولة مجدداً</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="sessionTimeout">مدة الجلسة (دقائق)</label>
+                  <input type="number" id="sessionTimeout" class="form-control" min="5" max="240" value="30">
+                  <div class="form-hint">بعد انتهائها يُطلب من المستخدم تسجيل الدخول مجدداً</div>
+                </div>
+
+                <div class="form-check">
+                  <input type="checkbox" id="requireEmailVerification">
+                  <label for="requireEmailVerification">طلب تأكيد البريد الإلكتروني عند التسجيل</label>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SAVE BAR                                     -->
+            <!-- ============================================ -->
+            <div class="settings-save-bar">
+              <div class="settings-save-info" id="saveStatus"></div>
+              <button type="button" id="saveSettingsBtn" class="btn btn-primary">
+                حفظ التغييرات
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ Scripts ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../assets/js/supabase-client.js"></script>
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/session.js"></script>
+  <script src="../../assets/js/auth-guard.js"></script>
+  <script src="../../assets/js/app-title.js"></script>
+  <script src="../../assets/js/ui/sidebar.js"></script>
+  <script src="../../assets/js/ui/modal.js"></script>
+  <script src="../../assets/js/pages/admin/settings.js"></script>
+
+  <!-- Tabs switching — minimal inline (settings.js handles the rest) -->
+  <script>
+    (function () {
+      'use strict';
+      var tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          tabBtns.forEach(function (b) { b.classList.remove('active'); });
+          document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+          this.classList.add('active');
+          var target = document.getElementById(this.getAttribute('data-tab'));
+          if (target) target.classList.add('active');
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
