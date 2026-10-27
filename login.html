@@ -189,6 +189,94 @@
     .auth-alert.success { background: var(--success-soft, rgba(16,185,129,0.12)); border: 1px solid var(--success, #10B981); color: var(--success, #10B981); }
     .auth-alert.info { background: var(--info-soft, rgba(59,130,246,0.12)); border: 1px solid var(--info, #3B82F6); color: var(--info, #3B82F6); }
     
+    .auth-session-banner {
+      display: none;
+      padding: 16px;
+      margin-bottom: 20px;
+      background: var(--surface-elevated, #1C2430);
+      border: 1px solid var(--primary, #CE1126);
+      border-radius: 14px;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .auth-session-banner.show { display: block; }
+    
+    .auth-session-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    
+    .auth-session-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary, #CE1126);
+      color: var(--primary-text, #fff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .auth-session-icon svg { width: 20px; height: 20px; }
+    
+    .auth-session-info { flex: 1; min-width: 0; }
+    
+    .auth-session-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text, #F8FAFC);
+      margin: 0 0 2px;
+    }
+    
+    .auth-session-text {
+      font-size: 12px;
+      color: var(--text-muted, #64748B);
+      margin: 0;
+      word-break: break-word;
+    }
+    
+    .auth-session-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .auth-session-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid var(--border, rgba(255,255,255,0.08));
+      background: var(--bg, #0A0E14);
+      color: var(--text, #F8FAFC);
+    }
+    
+    .auth-session-btn:hover {
+      border-color: var(--primary, #CE1126);
+      color: var(--primary, #CE1126);
+      background: var(--primary-soft, rgba(206,17,38,0.14));
+    }
+    
+    .auth-session-btn.primary {
+      background: var(--primary, #CE1126);
+      border-color: var(--primary, #CE1126);
+      color: var(--primary-text, #fff);
+    }
+    
+    .auth-session-btn.primary:hover {
+      background: var(--primary-hover, #E63946);
+      border-color: var(--primary-hover, #E63946);
+      color: var(--primary-text, #fff);
+    }
+    
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-8px); }
       to { opacity: 1; transform: translateY(0); }
@@ -317,6 +405,7 @@
       .auth-subtitle { font-size: 13px; }
       .input-wrap input { padding: 13px 44px 13px 14px; font-size: 14px; }
       .form-submit { padding: 14px; font-size: 14px; }
+      .auth-session-btn { min-width: 100px; padding: 9px 12px; font-size: 12px; }
     }
     
     @media (prefers-reduced-motion: reduce) {
@@ -345,6 +434,25 @@
         
         <div class="auth-alert" id="authAlert" role="alert" aria-live="assertive"></div>
         
+        <div class="auth-session-banner" id="authSessionBanner" role="status" aria-live="polite">
+          <div class="auth-session-top">
+            <div class="auth-session-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="auth-session-info">
+              <p class="auth-session-title" id="authSessionTitle">لديك جلسة نشطة</p>
+              <p class="auth-session-text" id="authSessionText"></p>
+            </div>
+          </div>
+          <div class="auth-session-actions">
+            <button type="button" class="auth-session-btn primary" id="authSessionContinue">متابعة</button>
+            <button type="button" class="auth-session-btn" id="authSessionLogout">تسجيل الخروج</button>
+          </div>
+        </div>
+        
         <form class="auth-form" id="loginForm" novalidate>
           
           <div class="form-field">
@@ -361,7 +469,7 @@
           <div class="form-field">
             <label for="passwordInput">كلمة المرور</label>
             <div class="input-wrap">
-              <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" required>
+              <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" dir="ltr" required>
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -430,7 +538,598 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/pages/login.js"></script>
+  
+  <script>
+    (function () {
+      'use strict';
+      
+      if (window.LoginPage && window.LoginPage.initialized) return;
+      
+      var AUTH_TIMEOUT_MS = 25000;
+      var PROFILE_TIMEOUT_MS = 10000;
+      var SESSION_TIMEOUT_MS = 6000;
+      
+      var state = {
+        submitting: false,
+        attempts: 0,
+        maxAttempts: 5,
+        initialized: false,
+        sb: null,
+        existingUser: null,
+        existingProfile: null
+      };
+      
+      function $(id) { return document.getElementById(id); }
+      function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
+      
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+      
+      function getSetting(p, f) {
+        if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+          var v = window.AppSettings.get(p);
+          return (v === undefined || v === null) ? f : v;
+        }
+        return f;
+      }
+      
+      function resolve(path) {
+        if (!path) return '#';
+        if (window.resolveUrl) return window.resolveUrl(path);
+        var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
+        if (base && base.charAt(base.length - 1) !== '/') base += '/';
+        return base + String(path).replace(/^\.?\//, '');
+      }
+      
+      function withTimeout(promise, ms, label) {
+        return Promise.race([
+          promise,
+          new Promise(function (_, reject) {
+            setTimeout(function () {
+              reject(new Error('انتهت مهلة ' + (label || 'العملية') + ' — تحقق من الاتصال أو أعد تحميل الصفحة'));
+            }, ms);
+          })
+        ]);
+      }
+      
+      function safeInsert(client, table, data) {
+        if (!client || typeof client.from !== 'function') return;
+        Promise.resolve().then(function () {
+          return client.from(table).insert(data);
+        }).then(function () {
+          // ignore success
+        }, function (e) {
+          console.warn('[Login] insert ' + table + ' failed:', (e && e.message) || e);
+        });
+      }
+      
+      function showAlert(message, type) {
+        var el = $('authAlert');
+        if (!el) return;
+        el.textContent = message;
+        el.className = 'auth-alert show ' + (type || 'info');
+        el.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        el.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+        
+        var ms = type === 'error' ? 12000 : 8000;
+        setTimeout(function () {
+          if (el.textContent === message) el.className = 'auth-alert';
+        }, ms);
+      }
+      
+      function hideAlert() {
+        var el = $('authAlert');
+        if (el) el.className = 'auth-alert';
+      }
+      
+      function setLoading(isLoading) {
+        var btn = $('loginBtn');
+        var text = $('loginBtnText');
+        if (!btn || !text) return;
+        
+        if (isLoading) {
+          btn.disabled = true;
+          text.innerHTML = '<span class="spinner"></span> جاري التحقق...';
+        } else {
+          btn.disabled = false;
+          text.textContent = 'تسجيل الدخول';
+        }
+      }
+      
+      function validateForm() {
+        var emailEl = $('emailInput');
+        var pwEl = $('passwordInput');
+        if (!emailEl || !pwEl) return null;
+        
+        var email = emailEl.value.trim();
+        var password = pwEl.value;
+        
+        if (!email) { showAlert('الرجاء إدخال البريد الإلكتروني', 'error'); emailEl.focus(); return null; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAlert('البريد الإلكتروني غير صحيح', 'error'); emailEl.focus(); return null; }
+        if (!password) { showAlert('الرجاء إدخال كلمة المرور', 'error'); pwEl.focus(); return null; }
+        if (password.length < 6) { showAlert('كلمة المرور قصيرة جداً (6 أحرف على الأقل)', 'error'); pwEl.focus(); return null; }
+        
+        return { email: email, password: password };
+      }
+      
+      function initSupabase() {
+        if (state.sb) return state.sb;
+        
+        if (typeof supabase === 'undefined') {
+          showAlert('مكتبة Supabase لم يتم تحميلها. أعد تحميل الصفحة (Ctrl+Shift+R).', 'error');
+          return null;
+        }
+        
+        if (typeof supabase.createClient !== 'function') {
+          showAlert('مكتبة Supabase قديمة. جاري إعادة تحميل الصفحة...', 'error');
+          setTimeout(function () { window.location.reload(true); }, 2500);
+          return null;
+        }
+        
+        var cfg = window.ITWS_CONFIG || {};
+        if (!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) {
+          showAlert('إعدادات Supabase غير مكتملة. تحقق من config.js.', 'error');
+          return null;
+        }
+        
+        try {
+          state.sb = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+            auth: {
+              persistSession: true,
+              autoRefreshToken: true,
+              detectSessionInUrl: true,
+              storageKey: 'itws_auth',
+              flowType: 'pkce'
+            },
+            realtime: { params: { eventsPerSecond: 5 } }
+          });
+          
+          var has1 = typeof state.sb.auth.signInWithEmailAndPassword === 'function';
+          var has2 = typeof state.sb.auth.signInWithPassword === 'function';
+          
+          if (!has1 && !has2) {
+            showAlert('مكتبة Supabase غير متوافقة. أعد تحميل الصفحة.', 'error');
+            return null;
+          }
+          
+          return state.sb;
+        } catch (err) {
+          showAlert('تعذر الاتصال بالخادم: ' + err.message, 'error');
+          return null;
+        }
+      }
+      
+      function getRedirectDest(role) {
+        var dest;
+        if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
+          dest = resolve(getSetting('behavior.redirect_admin_to', 'admin/index.html'));
+        } else {
+          dest = resolve(getSetting('behavior.redirect_user_to', 'home.html'));
+        }
+        
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var next = params.get('next');
+          if (next) {
+            var decoded = decodeURIComponent(next);
+            if (
+              decoded.indexOf('//') === -1 &&
+              decoded.indexOf(':') === -1 &&
+              decoded.indexOf('..') === -1
+            ) {
+              dest = resolve(decoded.replace(/^\//, ''));
+            }
+          }
+        } catch (e) {}
+        
+        return dest;
+      }
+      
+      /* ============================================
+         Session banner (instead of auto-redirect)
+         ============================================ */
+      function showSessionBanner(user, profile) {
+        state.existingUser = user;
+        state.existingProfile = profile;
+        
+        var banner = $('authSessionBanner');
+        if (!banner) return;
+        
+        var name = (profile && profile.full_name) || (user && user.email) || '';
+        var textEl = $('authSessionText');
+        if (textEl) {
+          textEl.textContent = name ? ('مسجل الدخول كـ ' + name) : 'لديك جلسة نشطة على هذا الجهاز';
+        }
+        
+        banner.classList.add('show');
+      }
+      
+      function hideSessionBanner() {
+        var banner = $('authSessionBanner');
+        if (banner) banner.classList.remove('show');
+        state.existingUser = null;
+        state.existingProfile = null;
+      }
+      
+      function checkExistingSession() {
+        if (!state.sb || !state.sb.auth) return;
+        
+        try {
+          withTimeout(state.sb.auth.getSession(), SESSION_TIMEOUT_MS, 'فحص الجلسة')
+            .then(function (res) {
+              var session = res && res.data && res.data.session;
+              if (!session || !session.user) return;
+              var user = session.user;
+              
+              var profileP = state.sb.from('profiles')
+                .select('id, email, full_name, role, is_active')
+                .eq('id', user.id)
+                .maybeSingle();
+              
+              return withTimeout(profileP, SESSION_TIMEOUT_MS, 'جلب الصلاحيات')
+                .then(function (profileRes) {
+                  if (!profileRes || !profileRes.data) return;
+                  if (profileRes.data.is_active === false) return;
+                  showSessionBanner(user, profileRes.data);
+                });
+            })
+            .catch(function () { /* silent — show form */ });
+        } catch (e) {}
+      }
+      
+      function clearAllAuthStorage() {
+        try {
+          var toRemove = [];
+          for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (!k) continue;
+            if (
+              k.indexOf('itws_') === 0 ||
+              k.indexOf('supabase') === 0 ||
+              k.indexOf('sb-') === 0 ||
+              k === 'itws_auth'
+            ) {
+              toRemove.push(k);
+            }
+          }
+          toRemove.forEach(function (k) {
+            try { localStorage.removeItem(k); } catch (e) {}
+          });
+        } catch (e) {}
+        
+        try { sessionStorage.clear(); } catch (e) {}
+      }
+      
+      function doLogout() {
+        if (!state.sb || !state.sb.auth) {
+          clearAllAuthStorage();
+          return Promise.resolve();
+        }
+        
+        var timeoutPromise = new Promise(function (res) { setTimeout(res, 5000); });
+        
+        return Promise.race([state.sb.auth.signOut(), timeoutPromise])
+          .catch(function (err) {
+            console.warn('[Login] signOut failed, clearing locally:', (err && err.message) || err);
+          })
+          .then(function () {
+            clearAllAuthStorage();
+          });
+      }
+      
+      function handleSessionLogout() {
+        var banner = $('authSessionBanner');
+        if (banner) banner.classList.add('show');
+        
+        var btn = $('authSessionLogout');
+        if (btn) { btn.disabled = true; btn.textContent = 'جاري الخروج...'; }
+        
+        doLogout().then(function () {
+          hideSessionBanner();
+          hideAlert();
+          showAlert('تم تسجيل الخروج بنجاح', 'success');
+          if (btn) { btn.disabled = false; btn.textContent = 'تسجيل الخروج'; }
+          
+          var pwEl = $('passwordInput');
+          if (pwEl) pwEl.value = '';
+          var emailEl = $('emailInput');
+          if (emailEl) emailEl.focus();
+        });
+      }
+      
+      function handleSessionContinue() {
+        if (!state.existingProfile) {
+          // No profile — reload
+          window.location.reload();
+          return;
+        }
+        var dest = getRedirectDest(state.existingProfile.role);
+        showAlert('جاري التحويل...', 'info');
+        setTimeout(function () { window.location.href = dest; }, 400);
+      }
+      
+      /* ============================================
+         Login
+         ============================================ */
+      function handleLogin(e) {
+        if (e) e.preventDefault();
+        if (state.submitting) return;
+        
+        hideAlert();
+        
+        var data = validateForm();
+        if (!data) return;
+        
+        if (state.attempts >= state.maxAttempts) {
+          showAlert('تم تجاوز الحد الأقصى للمحاولات. حاول مرة أخرى بعد قليل.', 'error');
+          return;
+        }
+        
+        var sb = initSupabase();
+        if (!sb) return;
+        
+        state.submitting = true;
+        setLoading(true);
+        
+        var signInPromise;
+        if (typeof sb.auth.signInWithEmailAndPassword === 'function') {
+          signInPromise = sb.auth.signInWithEmailAndPassword(data.email, data.password);
+        } else if (typeof sb.auth.signInWithPassword === 'function') {
+          signInPromise = sb.auth.signInWithPassword({ email: data.email, password: data.password });
+        } else {
+          showAlert('مكتبة Supabase غير متوافقة. أعد تحميل الصفحة.', 'error');
+          state.submitting = false;
+          setLoading(false);
+          return;
+        }
+        
+        withTimeout(signInPromise, AUTH_TIMEOUT_MS, 'تسجيل الدخول')
+          .then(function (cred) {
+            var user = cred && cred.user ? cred.user
+                     : (cred && cred.data && cred.data.user ? cred.data.user : null);
+            if (!user) throw new Error('لم يتم استلام بيانات المستخدم');
+            
+            var profileP = sb.from('profiles')
+              .select('id, email, full_name, role, is_active')
+              .eq('id', user.id)
+              .maybeSingle();
+            
+            return withTimeout(profileP, PROFILE_TIMEOUT_MS, 'جلب بيانات الحساب')
+              .then(function (profileRes) {
+                if (profileRes.error || !profileRes.data) {
+                  return sb.auth.signOut().then(function () {
+                    throw new Error('الحساب غير مكتمل (لا يوجد profile). تواصل مع الدعم الفني.');
+                  });
+                }
+                
+                if (profileRes.data.is_active === false) {
+                  return sb.auth.signOut().then(function () {
+                    throw new Error('هذا الحساب معطل. تواصل مع الإدارة.');
+                  });
+                }
+                
+                safeInsert(sb, 'activities', {
+                  user_id: user.id,
+                  user_name: profileRes.data.full_name || user.email,
+                  user_role: profileRes.data.role,
+                  action_type: 'login',
+                  description: 'تسجيل دخول'
+                });
+                
+                return { user: user, profile: profileRes.data };
+              });
+          })
+          .then(function (result) {
+            showAlert('تم تسجيل الدخول بنجاح. جاري التحويل...', 'success');
+            var dest = getRedirectDest(result.profile.role);
+            setTimeout(function () { window.location.href = dest; }, 700);
+          })
+          .catch(function (error) {
+            state.attempts++;
+            state.submitting = false;
+            setLoading(false);
+            
+            var msg = 'فشل تسجيل الدخول';
+            var code = (error && error.code) || '';
+            var message = (error && error.message) || '';
+            var lower = message.toLowerCase();
+            
+            if (code === 'invalid_credentials' || lower.indexOf('invalid login credentials') !== -1 || lower.indexOf('invalid_credentials') !== -1) {
+              msg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+            } else if (code === 'email_not_confirmed' || lower.indexOf('email not confirmed') !== -1) {
+              msg = 'البريد الإلكتروني لم يتم تأكيده. تواصل مع الإدارة.';
+            } else if (lower.indexOf('rate limit') !== -1 || lower.indexOf('too many') !== -1) {
+              msg = 'محاولات كثيرة. حاول بعد دقيقة.';
+            } else if (lower.indexOf('timeout') !== -1 || message.indexOf('مهلة') !== -1) {
+              msg = message;
+            } else if (message) {
+              msg = message;
+            }
+            
+            showAlert(msg, 'error');
+            logAttempt(data.email, false, msg);
+            
+            var pwEl = $('passwordInput');
+            if (pwEl) { pwEl.value = ''; pwEl.focus(); }
+          });
+      }
+      
+      function logAttempt(email, success, errorMsg) {
+        if (!state.sb) return;
+        safeInsert(state.sb, 'login_logs', {
+          email: email,
+          success: success,
+          error_message: errorMsg || null,
+          user_agent: navigator.userAgent.substring(0, 200)
+        });
+      }
+      
+      function handleForgot(e) {
+        if (e) e.preventDefault();
+        
+        var emailEl = $('emailInput');
+        if (!emailEl) return;
+        
+        var email = emailEl.value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showAlert('أدخل بريدك الإلكتروني أولاً ثم اضغط "نسيت كلمة المرور"', 'error');
+          emailEl.focus();
+          return;
+        }
+        
+        var sb = initSupabase();
+        if (!sb) return;
+        
+        showAlert('جاري إرسال رابط استعادة كلمة المرور...', 'info');
+        
+        var resetPromise = sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + window.location.pathname.replace(/login\.html.*/, 'reset-password.html')
+        });
+        
+        withTimeout(resetPromise, AUTH_TIMEOUT_MS, 'إرسال رابط الاستعادة')
+          .then(function () {
+            showAlert('تم إرسال رابط الاستعادة إلى بريدك. تحقق من صندوق الوارد.', 'success');
+          })
+          .catch(function (err) {
+            var msg = err.message || 'تعذر إرسال رابط الاستعادة';
+            if (err.code === 'user_not_found' || msg.toLowerCase().indexOf('user not found') !== -1) {
+              msg = 'هذا البريد غير مسجل في النظام';
+            }
+            showAlert(msg, 'error');
+          });
+      }
+      
+      /* ============================================
+         UI helpers
+         ============================================ */
+      function initPasswordToggle() {
+        var toggle = $('passwordToggle');
+        var input = $('passwordInput');
+        if (!toggle || !input) return;
+        
+        var EYE_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        var EYE_CLOSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+        
+        toggle.addEventListener('click', function () {
+          var type = input.type === 'password' ? 'text' : 'password';
+          input.type = type;
+          toggle.innerHTML = (type === 'text') ? EYE_CLOSED : EYE_OPEN;
+          toggle.setAttribute('aria-label', type === 'text' ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
+        });
+      }
+      
+      function initRememberMe() {
+        try {
+          var saved = localStorage.getItem('itws_saved_email');
+          if (saved) {
+            var emailEl = $('emailInput');
+            var rememberEl = $('rememberMe');
+            if (emailEl) emailEl.value = saved;
+            if (rememberEl) rememberEl.checked = true;
+          }
+        } catch (e) {}
+      }
+      
+      function saveRememberMe() {
+        var emailEl = $('emailInput');
+        var rememberEl = $('rememberMe');
+        if (!emailEl || !rememberEl) return;
+        
+        var email = emailEl.value.trim();
+        var remember = rememberEl.checked;
+        try {
+          if (remember && email) localStorage.setItem('itws_saved_email', email);
+          else localStorage.removeItem('itws_saved_email');
+        } catch (e) {}
+      }
+      
+      function applyDynamicContent() {
+        var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+        var committeeName = getSetting('app_identity.committee_name', 'لجنة التحول الرقمي والتدريب');
+        var logoUrl = getSetting('app_identity.logo_url', null);
+        
+        setText('brandTitle', unionName);
+        setText('brandSubtitle', committeeName);
+        
+        if (logoUrl) {
+          var brandLogo = $('brandLogo');
+          if (brandLogo) brandLogo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="logo">';
+          var headerLogo = $('authHeaderLogo');
+          if (headerLogo) headerLogo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="logo">';
+        }
+        
+        if (unionName) document.title = 'تسجيل الدخول | ' + unionName;
+      }
+      
+      /* ============================================
+         Init
+         ============================================ */
+      function init() {
+        if (state.initialized) return;
+        state.initialized = true;
+        
+        applyDynamicContent();
+        initPasswordToggle();
+        initRememberMe();
+        
+        var sb = initSupabase();
+        if (sb) checkExistingSession();
+        
+        var form = $('loginForm');
+        if (form) {
+          form.addEventListener('submit', function (e) {
+            saveRememberMe();
+            handleLogin(e);
+          });
+        }
+        
+        var forgotLink = $('forgotLink');
+        if (forgotLink) forgotLink.addEventListener('click', handleForgot);
+        
+        var continueBtn = $('authSessionContinue');
+        if (continueBtn) continueBtn.addEventListener('click', handleSessionContinue);
+        
+        var logoutBtn = $('authSessionLogout');
+        if (logoutBtn) logoutBtn.addEventListener('click', handleSessionLogout);
+        
+        if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+          window.AppSettings.onChange(function () {
+            applyDynamicContent();
+          });
+        }
+        
+        setTimeout(function () {
+          var emailEl = $('emailInput');
+          var pwEl = $('passwordInput');
+          if (emailEl && !emailEl.value) emailEl.focus();
+          else if (pwEl) pwEl.focus();
+        }, 300);
+      }
+      
+      window.LoginPage = {
+        initialized: true,
+        init: init,
+        handleLogin: handleLogin,
+        logout: doLogout,
+        refresh: applyDynamicContent,
+        getState: function () { return state; }
+      };
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+      
+    })();
+  </script>
 
 </body>
 </html>
