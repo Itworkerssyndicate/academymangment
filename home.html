@@ -3,199 +3,187 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>الرئيسية | نقابة تكنولوجيا المعلومات</title>
-  <meta name="description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية">
+
+  <title>الرئيسية</title>
+  <meta name="description" content="المنصة الرسمية لنقابة تكنولوجيا المعلومات والبرمجيات — التحقق من الشهادات، دليل الأكاديميات المعتمدة، وصفحة المتدرب">
   <meta name="theme-color" content="#0A0E14">
-  
-  <meta property="og:title" content="نقابة تكنولوجيا المعلومات والبرمجيات">
-  <meta property="og:description" content="النظام الرسمي للتحقق من صحة الشهادات التدريبية">
   <meta property="og:type" content="website">
-  <meta property="og:locale" content="ar_EG">
-  
+  <meta property="og:image" content="assets/images/logo.svg">
+
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
+
   <script src="assets/js/settings-defaults.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
+
+  <script>
+    (function () {
+      function syncThemeColor() {
+        try {
+          var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+          if (bg) {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', bg);
+          }
+        } catch (e) {}
+      }
+      document.addEventListener('DOMContentLoaded', syncThemeColor);
+      window.addEventListener('load', syncThemeColor);
+      try {
+        new MutationObserver(syncThemeColor).observe(document.documentElement, {
+          attributes: true, attributeFilter: ['data-theme', 'class', 'style']
+        });
+      } catch (e) {}
+    })();
+  </script>
+
   <script src="assets/js/app-settings.js"></script>
-  
+
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/loader.css">
   <link rel="stylesheet" href="assets/css/layout.css">
-  
+
   <style>
+    /* ============================================
+       HOME PAGE — All content driven from settings
+       ============================================ */
+
+    .home-page { overflow-x: hidden; }
+
+    /* ============ HERO ============ */
     .home-hero {
-      position: relative;
-      padding: 72px 20px 88px;
+      padding: 72px 20px 64px;
       text-align: center;
       background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
       border-bottom: 1px solid var(--border);
+      position: relative;
       overflow: hidden;
     }
-    
     .home-hero::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 60% 50% at 50% 30%, var(--primary-soft) 0%, transparent 60%);
+      background: radial-gradient(ellipse 60% 55% at 50% 25%, var(--primary-soft) 0%, transparent 60%);
       pointer-events: none;
     }
-    
     .home-hero-inner {
       position: relative;
       z-index: 1;
-      max-width: 900px;
+      max-width: 880px;
       margin: 0 auto;
     }
-    
-    .hero-badge {
+    .home-hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 20px;
+      gap: 8px;
+      padding: 6px 18px;
       background: var(--primary-soft);
       border: 1px solid var(--primary);
       border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
       color: var(--primary);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      letter-spacing: 0.3px;
     }
-    
-    .hero-badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--primary);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.3); }
-    }
-    
-    .hero-title {
+    .home-hero-badge[hidden] { display: none; }
+    .home-hero-title {
       font-size: clamp(30px, 5vw, 48px);
       font-weight: 800;
-      line-height: 1.25;
       color: var(--text);
-      margin: 0 0 16px 0;
-      letter-spacing: -0.5px;
+      line-height: 1.25;
+      margin: 0 0 16px;
+      letter-spacing: 0;
     }
-    
-    .hero-title-accent {
-      color: var(--primary);
-      display: inline-block;
-    }
-    
-    .hero-subtitle {
-      font-size: clamp(15px, 2vw, 18px);
+    .home-hero-subtitle {
+      font-size: clamp(15px, 2.2vw, 18px);
       color: var(--text-secondary);
-      line-height: 1.7;
+      line-height: 1.75;
       max-width: 640px;
-      margin: 0 auto 40px;
+      margin: 0 auto 36px;
     }
-    
-    .search-card {
-      max-width: 720px;
-      margin: 0 auto;
+
+    /* ============ SEARCH ============ */
+    .home-search {
       background: var(--surface-elevated);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 10px;
+      padding: 20px;
+      max-width: 680px;
+      margin: 0 auto;
       box-shadow: var(--shadow-lg);
     }
-    
-    .search-tabs {
+    .home-search[hidden] { display: none; }
+
+    .home-search-tabs {
       display: flex;
       gap: 4px;
-      margin-bottom: 10px;
       background: var(--bg);
       border-radius: 12px;
       padding: 4px;
+      margin-bottom: 14px;
     }
-    
-    .search-tab {
+    .home-search-tab {
       flex: 1;
-      padding: 12px 16px;
+      padding: 10px 16px;
       background: transparent;
       border: none;
-      border-radius: 10px;
-      color: var(--text-muted);
+      border-radius: 9px;
       font-family: inherit;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      white-space: nowrap;
+      transition: all 0.2s;
     }
-    
-    .search-tab:hover:not(.active) {
-      color: var(--text);
-      background: var(--surface-hover);
+    .home-search-tab:hover { color: var(--text); }
+    .home-search-tab.is-active {
+      background: var(--surface-elevated);
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
-    
-    .search-tab.active {
-      background: var(--primary);
-      color: var(--primary-text);
-      box-shadow: 0 4px 14px var(--primary-soft);
-      transform: scale(1.02);
-    }
-    
-    .search-form-wrapper {
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .search-form {
+
+    .home-search-form {
       display: flex;
-      gap: 8px;
-      padding: 4px;
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      gap: 10px;
     }
-    
-    .search-form.switching-out {
-      opacity: 0;
-      transform: translateX(-16px);
-    }
-    
-    .search-form.switching-in {
-      opacity: 0;
-      transform: translateX(16px);
-    }
-    
-    .search-input {
+    .home-search-input {
       flex: 1;
-      padding: 16px 20px;
+      padding: 14px 18px;
       background: var(--bg);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       border-radius: 12px;
       color: var(--text);
       font-family: inherit;
       font-size: 15px;
+      font-weight: 500;
       transition: all 0.2s;
       min-width: 0;
     }
-    
-    .search-input:focus {
+    .home-search-input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-soft);
+      box-shadow: 0 0 0 4px var(--primary-soft);
     }
-    
-    .search-input::placeholder {
+    .home-search-input[dir="ltr"] {
+      text-align: left;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+    }
+    .home-search-input::placeholder {
       color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 0;
     }
-    
-    .search-btn {
-      padding: 16px 32px;
+    .home-search-btn {
+      padding: 14px 28px;
       background: var(--primary);
       color: var(--primary-text);
       border: none;
@@ -206,873 +194,828 @@
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    
-    .search-btn:hover:not(:disabled) {
+    .home-search-btn:hover:not(:disabled) {
       background: var(--primary-hover);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px var(--primary-soft);
+      box-shadow: 0 8px 24px var(--primary-soft);
     }
-    
-    .search-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .search-hint {
+    .home-search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .home-search-hint {
       font-size: 12px;
       color: var(--text-muted);
       text-align: center;
-      margin-top: 14px;
-      padding: 0 8px;
-      transition: opacity 0.25s;
+      margin-top: 10px;
+      line-height: 1.6;
+      min-height: 18px;
     }
-    
-    /* CUSTOM SECTION - الآن أولاً */
-    .home-custom {
-      padding: 80px 20px;
-      background: var(--bg-alt);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
+
+    /* ============ SECTION COMMON ============ */
+    .home-section {
+      padding: 64px 20px;
     }
-    
-    .home-custom::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 60% 100% at 50% 50%, var(--primary-soft) 0%, transparent 70%);
-      pointer-events: none;
-      opacity: 0.5;
-    }
-    
-    .home-custom-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    
-    .custom-title {
-      font-size: clamp(26px, 4vw, 36px);
-      font-weight: 800;
-      color: var(--text);
-      margin: 0 0 16px;
-      line-height: 1.3;
-    }
-    
-    .custom-subtitle {
-      font-size: 16px;
-      color: var(--text-secondary);
-      margin: 0 0 24px;
-      line-height: 1.7;
-    }
-    
-    .custom-content {
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.8;
-      margin: 0 0 32px;
-      max-width: 720px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 28px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-    }
-    
-    .custom-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 32px;
-      background: var(--primary);
-      color: var(--primary-text);
-      border: 1px solid var(--primary);
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-    }
-    
-    .custom-btn:hover {
-      background: var(--primary-hover);
-      border-color: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px var(--primary-soft);
-    }
-    
-    /* ABOUT */
-    .home-about {
-      padding: 80px 20px;
-      background: var(--bg);
-    }
-    
-    .home-about-inner {
+    .home-section[hidden] { display: none; }
+    .home-section--alt { background: var(--bg-alt, var(--surface)); }
+    .home-section-inner {
       max-width: 1100px;
       margin: 0 auto;
     }
-    
-    .about-header {
+    .home-section-head {
       text-align: center;
-      margin-bottom: 56px;
+      margin-bottom: 40px;
     }
-    
-    .about-title {
-      font-size: clamp(26px, 4vw, 36px);
+    .home-section-title {
+      font-size: clamp(24px, 3.5vw, 32px);
       font-weight: 800;
       color: var(--text);
-      margin: 0 0 14px;
-      line-height: 1.3;
+      margin: 0 0 12px;
+      line-height: 1.35;
     }
-    
-    .about-subtitle {
+    .home-section-subtitle {
       font-size: 15px;
-      color: var(--text-muted);
-      margin: 0;
-      max-width: 620px;
-      margin-left: auto;
-      margin-right: auto;
+      color: var(--text-secondary);
       line-height: 1.7;
+      max-width: 640px;
+      margin: 0 auto;
     }
-    
-    .about-features {
+
+    /* ============ CUSTOM SECTION ============ */
+    .home-custom-content {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-top: 24px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .home-custom-content:empty { display: none; }
+    .home-custom-content p { margin: 0 0 12px; }
+    .home-custom-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      margin-top: 24px;
+      transition: all 0.2s;
+    }
+    .home-custom-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px var(--primary-soft);
+      color: var(--primary-text);
+    }
+    .home-custom-btn[hidden] { display: none; }
+
+    /* ============ ABOUT FEATURES ============ */
+    .home-about-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
+      gap: 20px;
+      margin-top: 32px;
     }
-    
-    .about-feature {
-      padding: 32px 28px;
+    .home-about-card {
+      padding: 28px 24px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      text-align: center;
+      transition: all 0.2s;
     }
-    
-    .about-feature::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    
-    .about-feature:hover {
+    .home-about-card:hover {
       border-color: var(--primary);
-      transform: translateY(-6px);
-      box-shadow: var(--shadow);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
     }
-    
-    .about-feature:hover::before {
-      opacity: 1;
+    .home-about-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
     }
-    
-    .about-feature-title {
-      font-size: 18px;
+    .home-about-icon svg { width: 24px; height: 24px; }
+    .home-about-title {
+      font-size: 17px;
       font-weight: 700;
       color: var(--text);
-      margin: 0 0 12px;
+      margin: 0 0 8px;
       line-height: 1.4;
     }
-    
-    .about-feature-desc {
-      font-size: 14px;
-      color: var(--text-muted);
+    .home-about-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
       line-height: 1.7;
       margin: 0;
     }
-    
-    /* ACADEMIES */
-    .home-academies {
-      padding: 80px 20px;
-      background: var(--bg-alt);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+
+    /* ============ ACADEMIES ============ */
+    .home-academies-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
     }
-    
-    .home-academies-inner {
-      max-width: 1200px;
-      margin: 0 auto;
+    .home-see-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
     }
-    
-    .section-header {
-      text-align: center;
-      margin-bottom: 48px;
+    .home-see-all:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
     }
-    
-    .section-title {
-      font-size: clamp(24px, 3.5vw, 34px);
-      font-weight: 800;
-      color: var(--text);
-      margin: 0 0 10px;
-      line-height: 1.3;
-    }
-    
-    .section-subtitle {
-      font-size: 15px;
-      color: var(--text-muted);
-      margin: 0;
-    }
-    
-    .academies-grid {
+    .home-see-all svg { width: 14px; height: 14px; }
+
+    .home-academies-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
-    
     .academy-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      cursor: pointer;
-      transition: all 0.3s ease;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s;
     }
-    
     .academy-card:hover {
       border-color: var(--primary);
       transform: translateY(-4px);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-lg);
+      color: inherit;
     }
-    
-    .academy-card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    
-    .academy-logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 12px;
+    .academy-card-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
       background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--primary-text);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      color: var(--primary-text);
-      font-size: 20px;
-      flex-shrink: 0;
+      font-size: 22px;
       overflow: hidden;
+      flex-shrink: 0;
     }
-    
-    .academy-logo img {
+    .academy-card-logo img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      padding: 6px;
+      background: var(--bg);
     }
-    
-    .academy-badge {
-      padding: 5px 12px;
-      background: var(--success-soft);
-      color: var(--success);
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      border: 1px solid rgba(16, 185, 129, 0.2);
-    }
-    
-    .academy-body {
-      flex: 1;
-    }
-    
-    .academy-name {
+    .academy-card-body { flex: 1; min-width: 0; }
+    .academy-card-title {
       font-size: 16px;
       font-weight: 700;
       color: var(--text);
+      margin: 0 0 8px;
       line-height: 1.4;
-      margin-bottom: 6px;
+      word-break: break-word;
     }
-    
-    .academy-category {
-      font-size: 12px;
-      color: var(--primary);
-      font-weight: 600;
-    }
-    
-    .academy-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-      font-size: 12px;
+    .academy-card-desc {
+      font-size: 13px;
       color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
-    
-    .academy-license {
-      font-family: 'Courier New', monospace;
-      letter-spacing: 0.5px;
-      font-weight: 600;
-    }
-    
-    .academy-arrow {
-      color: var(--primary);
-      font-weight: 700;
-      transition: transform 0.2s;
-    }
-    
-    .academy-card:hover .academy-arrow {
-      transform: translateX(-4px);
-    }
-    
-    .empty-section {
+    .home-academies-empty {
       text-align: center;
-      padding: 48px 20px;
+      padding: 40px 20px;
       color: var(--text-muted);
       font-size: 14px;
-      grid-column: 1 / -1;
     }
-    
-    /* CTA */
+    .home-academies-loading {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .home-academies-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: homeSpin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes homeSpin { to { transform: rotate(360deg); } }
+
+    /* ============ CTA ============ */
     .home-cta {
-      padding: 80px 20px;
-      background: var(--surface);
+      padding: 72px 20px;
+      background: linear-gradient(135deg, var(--surface), var(--surface-elevated));
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       text-align: center;
       position: relative;
       overflow: hidden;
-      border-top: 1px solid var(--border);
     }
-    
     .home-cta::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 50% 100% at 50% 50%, var(--primary-soft) 0%, transparent 70%);
+      background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--primary-soft) 0%, transparent 60%);
       pointer-events: none;
     }
-    
     .home-cta-inner {
       position: relative;
       z-index: 1;
       max-width: 640px;
       margin: 0 auto;
     }
-    
-    .cta-title {
-      font-size: clamp(24px, 3.5vw, 32px);
+    .home-cta-title {
+      font-size: clamp(24px, 4vw, 32px);
       font-weight: 800;
       color: var(--text);
-      margin: 0 0 14px;
+      margin: 0 0 12px;
       line-height: 1.3;
     }
-    
-    .cta-text {
-      font-size: 16px;
+    .home-cta-subtitle {
+      font-size: 15px;
       color: var(--text-secondary);
       line-height: 1.7;
-      margin: 0 0 32px;
+      margin: 0 0 28px;
     }
-    
-    .cta-btn {
+    .home-cta-btn {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 16px 36px;
+      padding: 16px 40px;
       background: var(--primary);
       color: var(--primary-text);
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
+      border-radius: 14px;
       text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.2s;
     }
-    
-    .cta-btn:hover {
+    .home-cta-btn:hover {
       background: var(--primary-hover);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px var(--primary-soft);
+      box-shadow: 0 12px 32px var(--primary-soft);
+      color: var(--primary-text);
     }
-    
-    /* FOOTER */
+    .home-cta-btn svg { width: 18px; height: 18px; }
+
+    /* ============ FOOTER ============ */
     .home-footer {
-      background: var(--surface);
+      background: var(--bg-alt, var(--surface));
       border-top: 1px solid var(--border);
-      padding: 56px 20px 28px;
+      padding: 56px 20px 24px;
     }
-    
     .home-footer-inner {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
     }
-    
-    .footer-grid {
+    .home-footer-top {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 48px;
-      margin-bottom: 40px;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
     }
-    
-    .footer-brand {
+    .home-footer-brand {
       display: flex;
-      flex-direction: column;
+      align-items: flex-start;
       gap: 16px;
     }
-    
-    .footer-brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    
-    .footer-brand-mark {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
+    .home-footer-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
       background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--primary-text);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      color: var(--primary-text);
-      font-size: 16px;
-      overflow: hidden;
+      font-size: 20px;
       flex-shrink: 0;
+      overflow: hidden;
     }
-    
-    .footer-brand-mark img {
+    .home-footer-logo img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       padding: 6px;
+      background: var(--bg);
     }
-    
-    .footer-brand-name {
-      font-size: 16px;
+    .home-footer-union {
+      font-size: 15px;
       font-weight: 700;
       color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.4;
     }
-    
-    .footer-brand-tagline {
+    .home-footer-committee {
       font-size: 12px;
       color: var(--text-muted);
+      line-height: 1.6;
     }
-    
-    .footer-brand-text {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.7;
-    }
-    
-    .footer-brand-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 22px;
-      background: var(--primary);
-      color: var(--primary-text);
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      align-self: flex-start;
-      border: 1px solid var(--primary);
-    }
-    
-    .footer-brand-link:hover {
-      background: var(--primary-hover);
-      border-color: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px var(--primary-soft);
-    }
-    
-    .footer-brand-link .arrow {
-      transition: transform 0.2s;
-    }
-    
-    .footer-brand-link:hover .arrow {
-      transform: translateX(-4px);
-    }
-    
-    .footer-col-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin: 0 0 16px;
-    }
-    
-    .footer-links {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    .home-footer-contact {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    
-    .footer-links a {
+    .home-footer-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-size: 13px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       text-decoration: none;
       transition: color 0.2s;
+      word-break: break-word;
     }
-    
-    .footer-links a:hover {
+    .home-footer-contact-item:hover { color: var(--primary); }
+    .home-footer-contact-item svg {
+      width: 16px;
+      height: 16px;
       color: var(--primary);
+      flex-shrink: 0;
     }
-    
-    .footer-bottom {
-      padding-top: 28px;
-      border-top: 1px solid var(--border);
+    .home-footer-contact-item[hidden] { display: none; }
+
+    .home-footer-social {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px 0;
+      flex-wrap: wrap;
+    }
+    .home-footer-social[hidden] { display: none; }
+    .home-footer-social a {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .home-footer-social a:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+      transform: translateY(-2px);
+    }
+    .home-footer-social a svg { width: 16px; height: 16px; }
+    .home-footer-social a[hidden] { display: none; }
+
+    .home-footer-link-wrap {
+      text-align: center;
+      padding: 16px 0;
+    }
+    .home-footer-link-wrap[hidden] { display: none; }
+    .home-footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      background: var(--primary-soft);
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .home-footer-link:hover {
+      background: var(--primary);
+      color: var(--primary-text);
+    }
+
+    .home-footer-bottom {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      flex-wrap: wrap;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
       font-size: 12px;
       color: var(--text-muted);
+      flex-wrap: wrap;
     }
-    
-    .footer-president {
-      color: var(--primary);
-      font-weight: 600;
-    }
-    
-    /* THEME FAB */
-    .theme-fab {
+    .home-footer-bottom span[hidden] { display: none; }
+    .home-footer-president { color: var(--primary); font-weight: 600; }
+
+    /* ============ THEME FAB ============ */
+    .theme-fab-wrap {
       position: fixed;
-      bottom: 24px;
-      left: 24px;
+      left: 20px;
+      bottom: 20px;
+      z-index: 900;
+    }
+    .theme-fab-wrap[hidden] { display: none; }
+    .theme-fab {
       width: 52px;
       height: 52px;
       border-radius: 50%;
-      background: var(--surface-elevated);
-      border: 2px solid var(--border);
-      color: var(--primary);
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-lg);
-      z-index: 100;
-      transition: all 0.3s;
+      box-shadow: 0 8px 24px var(--primary-soft), 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.2s;
     }
-    
     .theme-fab:hover {
-      border-color: var(--primary);
-      transform: scale(1.1);
-      background: var(--primary-soft);
+      background: var(--primary-hover);
+      transform: scale(1.05);
     }
-    
-    .theme-fab svg {
-      width: 22px;
-      height: 22px;
-      pointer-events: none;
-    }
-    
+    .theme-fab svg { width: 22px; height: 22px; }
     .theme-panel {
-      position: fixed;
-      bottom: 88px;
-      left: 24px;
-      width: 300px;
+      position: absolute;
+      left: 0;
+      bottom: 64px;
+      width: 260px;
       background: var(--surface-elevated);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow-lg);
-      z-index: 100;
-      display: none;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+      animation: homeSlideUp 0.2s ease;
     }
-    
-    .theme-panel.open {
-      display: block;
-      animation: slideUp 0.25s ease;
-    }
-    
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(10px); }
+    .theme-panel[hidden] { display: none; }
+    @keyframes homeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
     .theme-panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
-      padding-bottom: 14px;
+      padding: 14px 16px;
       border-bottom: 1px solid var(--border);
     }
-    
     .theme-panel-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text);
     }
-    
     .theme-panel-close {
-      background: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 22px;
       cursor: pointer;
+      font-size: 18px;
       line-height: 1;
-      padding: 0;
-      width: 24px;
-      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 4px;
       transition: all 0.2s;
     }
-    
-    .theme-panel-close:hover {
-      background: var(--surface-hover);
-      color: var(--text);
+    .theme-panel-close:hover { background: var(--bg); color: var(--text); }
+    .theme-panel-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 320px;
+      overflow-y: auto;
     }
-    
-    .theme-list {
-      display: grid;
-      gap: 8px;
-    }
-    
     .theme-option {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 10px 12px;
       background: transparent;
-      border: 2px solid var(--border);
+      border: 1px solid transparent;
       border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
+      color: var(--text);
       font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
       text-align: right;
+      transition: all 0.2s;
       width: 100%;
     }
-    
     .theme-option:hover {
-      border-color: var(--primary);
-      background: var(--surface-hover);
+      background: var(--bg);
+      border-color: var(--border);
     }
-    
-    .theme-option.active {
-      border-color: var(--primary);
+    .theme-option.is-active {
       background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary);
     }
-    
-    .theme-swatches {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-      pointer-events: none;
-    }
-    
     .theme-swatch {
-      width: 18px;
-      height: 18px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 2px solid var(--border);
+      flex-shrink: 0;
     }
-    
-    .theme-name {
-      flex: 1;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      pointer-events: none;
+    .theme-option-name { flex: 1; }
+    .theme-option-check {
+      width: 14px;
+      height: 14px;
+      color: var(--primary);
+      display: none;
     }
-    
-    .theme-reset {
+    .theme-option.is-active .theme-option-check { display: block; }
+    .theme-panel-footer {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .theme-reset-btn {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
-      background: transparent;
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-muted);
+      border-radius: 10px;
+      color: var(--text-secondary);
       font-family: inherit;
       font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
-    
-    .theme-reset:hover {
-      border-color: var(--error);
-      color: var(--error);
-      background: var(--error-soft);
+    .theme-reset-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
     }
-    
+
+    /* ============ NOSCRIPT ============ */
+    .noscript-banner {
+      padding: 16px 20px;
+      background: var(--error-soft, #fef2f2);
+      color: var(--error, #991b1b);
+      border-bottom: 2px solid var(--error, #991b1b);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ============ RESPONSIVE ============ */
     @media (max-width: 768px) {
-      .home-hero { padding: 56px 16px 64px; }
-      .search-form { flex-direction: column; }
-      .search-btn { width: 100%; }
-      .search-tab { padding: 10px 12px; font-size: 13px; }
-      .home-about, .home-academies, .home-cta, .home-custom { padding: 56px 16px; }
-      .about-features { grid-template-columns: 1fr; }
-      .academies-grid { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-      .footer-bottom { flex-direction: column; text-align: center; gap: 8px; }
-      .home-footer { padding: 40px 16px 24px; }
-      .theme-panel { left: 16px; right: 16px; width: auto; }
-      .theme-fab { bottom: 16px; left: 16px; }
-      .custom-content { padding: 20px; }
+      .home-hero { padding: 48px 16px 40px; }
+      .home-section { padding: 48px 16px; }
+      .home-cta { padding: 48px 16px; }
+      .home-footer { padding: 40px 16px 20px; }
+      .home-footer-top {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+      .home-search-form { flex-direction: column; }
+      .home-search-btn { width: 100%; }
+      .home-academies-head { flex-direction: column; align-items: stretch; }
+      .home-see-all { justify-content: center; }
+      .home-footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
     }
-    
+    @media (max-width: 480px) {
+      .home-search-tabs { gap: 2px; padding: 3px; }
+      .home-search-tab { padding: 8px 10px; font-size: 12px; }
+      .home-academies-grid { grid-template-columns: 1fr; }
+      .home-about-grid { grid-template-columns: 1fr; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
       }
     }
+    @media print {
+      .home-hero, .home-cta, .home-footer,
+      .theme-fab-wrap, .home-search,
+      #headerContainer { display: none !important; }
+      .home-section { padding: 20px !important; page-break-inside: avoid; }
+      body { background: #fff !important; }
+    }
   </style>
 </head>
 <body>
+
+  <noscript>
+    <div class="noscript-banner">
+      هذه الصفحة تحتاج تفعيل JavaScript في المتصفح للعمل بشكل صحيح.
+    </div>
+  </noscript>
 
   <div class="theme-boot-loader" id="themeBootLoader">
     <div class="loader-logo">نت</div>
     <div class="loader-spinner"></div>
   </div>
 
-  <div class="page-wrapper">
+  <div class="page-wrapper home-page">
 
     <div id="headerContainer"></div>
 
-    <!-- HERO -->
+    <!-- ============ HERO ============ -->
     <section class="home-hero">
       <div class="home-hero-inner">
-        <div class="hero-badge">
-          <span class="hero-badge-dot"></span>
-          <span>النظام الرسمي المعتمد</span>
-        </div>
-        <h1 class="hero-title" id="heroTitle">
-          تحقق من <span class="hero-title-accent">شهاداتك</span> بثقة
-        </h1>
-        <p class="hero-subtitle" id="heroSubtitle">
-          النظام الرسمي للتحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة من النقابة
-        </p>
-        
-        <div class="search-card">
-          <div class="search-tabs" id="searchTabs">
-            <button class="search-tab active" data-tab="certificate" type="button">شهادة</button>
-            <button class="search-tab" data-tab="student" type="button">متدرب</button>
-            <button class="search-tab" data-tab="academy" type="button">أكاديمية</button>
+        <div class="home-hero-badge" data-home="hero-badge" hidden></div>
+        <h1 class="home-hero-title" data-home="hero-title"></h1>
+        <p class="home-hero-subtitle" data-home="hero-subtitle"></p>
+
+        <div class="home-search" data-home="search">
+          <div class="home-search-tabs" role="tablist">
+            <button type="button" role="tab" class="home-search-tab is-active" data-search-tab="certificate" aria-selected="true">شهادة</button>
+            <button type="button" role="tab" class="home-search-tab" data-search-tab="trainee" aria-selected="false">متدرب</button>
+            <button type="button" role="tab" class="home-search-tab" data-search-tab="academy" aria-selected="false">أكاديمية</button>
           </div>
-          
-          <div class="search-form-wrapper">
-            <form class="search-form" id="searchForm" onsubmit="return false;">
-              <input type="text" class="search-input" id="searchInput" placeholder="أدخل كود الشهادة..." autocomplete="off" required>
-              <button type="submit" class="search-btn" id="searchBtn">بحث</button>
-            </form>
-          </div>
-          
-          <p class="search-hint" id="searchHint">أدخل كود الشهادة المطبوع عليها</p>
+          <form class="home-search-form" id="homeSearchForm" novalidate>
+            <input
+              type="text"
+              class="home-search-input"
+              id="homeSearchInput"
+              autocomplete="off"
+              autocapitalize="characters"
+              autocorrect="off"
+              spellcheck="false"
+              dir="ltr"
+            >
+            <button type="submit" class="home-search-btn" id="homeSearchBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span data-home="search-btn-text">بحث</span>
+            </button>
+          </form>
+          <div class="home-search-hint" data-home="search-hint"></div>
         </div>
       </div>
     </section>
 
-    <!-- CUSTOM SECTION (قسم مخصص - الآن أولاً) -->
-    <section class="home-custom" id="customSection">
-      <div class="home-custom-inner">
-        <h2 class="custom-title" id="customTitle">قسم مخصص</h2>
-        <p class="custom-subtitle" id="customSubtitle"></p>
-        <div class="custom-content" id="customContent"></div>
-        <a href="#" class="custom-btn" id="customBtn" style="display:none;" target="_blank" rel="noopener noreferrer">
-          <span id="customBtnText">اعرف المزيد</span>
-          <span>&#8592;</span>
+    <!-- ============ CUSTOM SECTION ============ -->
+    <section class="home-section" data-home="custom-section" hidden>
+      <div class="home-section-inner">
+        <div class="home-section-head">
+          <h2 class="home-section-title" data-home="custom-title"></h2>
+          <p class="home-section-subtitle" data-home="custom-subtitle"></p>
+        </div>
+        <div class="home-custom-content" data-home="custom-content"></div>
+        <div style="text-align:center;">
+          <a href="#" class="home-custom-btn" data-home="custom-btn" hidden></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT SECTION ============ -->
+    <section class="home-section home-section--alt" data-home="about-section" hidden>
+      <div class="home-section-inner">
+        <div class="home-section-head">
+          <h2 class="home-section-title" data-home="about-title"></h2>
+          <p class="home-section-subtitle" data-home="about-subtitle"></p>
+        </div>
+        <div class="home-about-grid" data-home="about-features"></div>
+      </div>
+    </section>
+
+    <!-- ============ RECENT ACADEMIES ============ -->
+    <section class="home-section" data-home="recent-academies" hidden>
+      <div class="home-section-inner">
+        <div class="home-academies-head">
+          <h2 class="home-section-title" style="margin:0;" data-home="academies-title">أحدث الأكاديميات المعتمدة</h2>
+          <a href="academies.html" class="home-see-all">
+            <span>عرض الكل</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </a>
+        </div>
+        <div class="home-academies-grid" id="homeAcademiesGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="home-cta">
+      <div class="home-cta-inner">
+        <h2 class="home-cta-title" data-home="cta-title"></h2>
+        <p class="home-cta-subtitle" data-home="cta-subtitle"></p>
+        <a href="academy-apply.html" class="home-cta-btn" data-home="cta-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span data-home="cta-btn-text"></span>
         </a>
       </div>
     </section>
 
-    <!-- ABOUT SECTION (لماذا هذه المنصة - الآن ثانياً) -->
-    <section class="home-about" id="aboutSection">
-      <div class="home-about-inner">
-        <div class="about-header">
-          <h2 class="about-title" id="aboutTitle">لماذا هذه المنصة؟</h2>
-          <p class="about-subtitle" id="aboutSubtitle">النظام الرسمي للتحقق من صحة الشهادات التدريبية</p>
-        </div>
-        <div class="about-features" id="aboutFeatures"></div>
-      </div>
-    </section>
-
-    <!-- ACADEMIES -->
-    <section class="home-academies" id="academiesSection">
-      <div class="home-academies-inner">
-        <div class="section-header">
-          <h2 class="section-title">أحدث الأكاديميات المعتمدة</h2>
-          <p class="section-subtitle">أكاديميات حصلت على اعتماد رسمي من النقابة</p>
-        </div>
-        <div class="academies-grid" id="academiesGrid">
-          <div class="empty-section">جاري التحميل...</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="home-cta">
-      <div class="home-cta-inner">
-        <h2 class="cta-title">هل تمتلك أكاديمية تدريبية؟</h2>
-        <p class="cta-text">احصل على اعتماد رسمي من النقابة وكن جزءاً من المنظومة المعتمدة</p>
-        <a href="academymangment/academy-apply.html" class="cta-btn">قدم طلب اعتماد</a>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
+    <!-- ============ FOOTER ============ -->
     <footer class="home-footer">
       <div class="home-footer-inner">
-        <div class="footer-grid">
-          <div class="footer-brand">
-            <div class="footer-brand-logo">
-              <div class="footer-brand-mark" id="footerLogo">نت</div>
-              <div>
-                <div class="footer-brand-name" id="footerUnionName">نقابة تكنولوجيا المعلومات</div>
-                <div class="footer-brand-tagline" id="footerCommitteeName">لجنة التحول الرقمي والتدريب</div>
-              </div>
+        <div class="home-footer-top">
+          <div class="home-footer-brand">
+            <div class="home-footer-logo" data-home="footer-logo"></div>
+            <div>
+              <div class="home-footer-union" data-home="footer-union"></div>
+              <div class="home-footer-committee" data-home="footer-committee"></div>
             </div>
-            <p class="footer-brand-text" id="footerBrandText">
-              النظام الرسمي للتحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة
-            </p>
-            <a href="#" class="footer-brand-link" id="footerLink" style="display:none;" target="_blank" rel="noopener noreferrer">
-              <span id="footerLinkText">الموقع الرسمي للنقابة</span>
-              <span class="arrow">&#8592;</span>
+          </div>
+          <div class="home-footer-contact" data-home="footer-contact">
+            <a class="home-footer-contact-item" data-home="footer-email" href="#" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <span data-home="footer-email-text"></span>
+            </a>
+            <a class="home-footer-contact-item" data-home="footer-phone" href="#" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              <span data-home="footer-phone-text"></span>
+            </a>
+            <a class="home-footer-contact-item" data-home="footer-website" href="#" target="_blank" rel="noopener" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span data-home="footer-website-text"></span>
             </a>
           </div>
-          <div>
-            <h3 class="footer-col-title">روابط سريعة</h3>
-            <ul class="footer-links">
-              <li><a href="/academymangment/home.html">الرئيسية</a></li>
-              <li><a href="/academymangment/verify.html">التحقق من شهادة</a></li>
-              <li><a href="/academymangment/academies.html">الأكاديميات</a></li>
-              <li><a href="/academymangment/track.html">متابعة طلب</a></li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="footer-col-title">تواصل معنا</h3>
-            <ul class="footer-links">
-              <li><a href="#" id="footerEmail">itws.eg@gmail.com</a></li>
-              <li><a href="#" id="footerPhone">01234567890</a></li>
-              <li><a href="#" id="footerWebsite">itws.eg</a></li>
-            </ul>
-          </div>
         </div>
-        <div class="footer-bottom">
-          <span id="footerCopyright">© 2026 نقابة تكنولوجيا المعلومات والبرمجيات</span>
-          <span>
-            <span id="footerPresidentLabel">النقيب العام :</span>
-            <span class="footer-president" id="footerPresidentName">المهندس / محمود جميل</span>
+
+        <div class="home-footer-social" data-home="footer-social" hidden>
+          <a data-home="footer-facebook" href="#" target="_blank" rel="noopener" aria-label="فيسبوك" hidden>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M22 12a10 10 0 1 0-11.56 9.87v-6.98H7.9V12h2.54V9.8c0-2.5 1.5-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.98A10 10 0 0 0 22 12z"/>
+            </svg>
+          </a>
+          <a data-home="footer-twitter" href="#" target="_blank" rel="noopener" aria-label="تويتر" hidden>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.9 2H22l-7.06 8.07L23.3 22h-6.51l-5.1-6.67L5.83 22H2.7l7.55-8.63L1 2h6.68l4.61 6.09L18.9 2zm-1.14 18.02h1.81L6.4 3.87H4.46l13.3 16.15z"/>
+            </svg>
+          </a>
+          <a data-home="footer-linkedin" href="#" target="_blank" rel="noopener" aria-label="لينكدإن" hidden>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/>
+            </svg>
+          </a>
+          <a data-home="footer-youtube" href="#" target="_blank" rel="noopener" aria-label="يوتيوب" hidden>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.7 31.7 0 0 0 0 12a31.7 31.7 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.7 31.7 0 0 0 24 12a31.7 31.7 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="home-footer-link-wrap" data-home="footer-link-wrap" hidden>
+          <a href="#" class="home-footer-link" data-home="footer-link">
+            <span data-home="footer-link-text"></span>
+          </a>
+        </div>
+
+        <div class="home-footer-bottom">
+          <span data-home="footer-copyright"></span>
+          <span data-home="footer-president-wrap" hidden>
+            <span data-home="footer-president-label"></span>
+            <span class="home-footer-president" data-home="footer-president-name"></span>
           </span>
         </div>
       </div>
@@ -1080,29 +1023,27 @@
 
   </div>
 
-  <button class="theme-fab" id="themeFab" title="تغيير الثيم" aria-label="تغيير الثيم" type="button">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="5"></circle>
-      <line x1="12" y1="1" x2="12" y2="3"></line>
-      <line x1="12" y1="21" x2="12" y2="23"></line>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-      <line x1="1" y1="12" x2="3" y2="12"></line>
-      <line x1="21" y1="12" x2="23" y2="12"></line>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    </svg>
-  </button>
-  
-  <div class="theme-panel" id="themePanel">
-    <div class="theme-panel-header">
-      <span class="theme-panel-title">اختر الثيم</span>
-      <button class="theme-panel-close" id="themePanelClose" aria-label="إغلاق" type="button">&times;</button>
+  <!-- ============ THEME FAB ============ -->
+  <div class="theme-fab-wrap" id="themeFabWrap" hidden>
+    <button type="button" class="theme-fab" id="themeFab" aria-label="تغيير الثيم" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"></circle>
+      </svg>
+    </button>
+    <div class="theme-panel" id="themePanel" hidden>
+      <div class="theme-panel-header">
+        <span class="theme-panel-title">اختر الثيم</span>
+        <button type="button" class="theme-panel-close" id="themePanelClose" aria-label="إغلاق">×</button>
+      </div>
+      <div class="theme-panel-body" id="themePanelBody"></div>
+      <div class="theme-panel-footer">
+        <button type="button" class="theme-reset-btn" id="themeResetBtn">إعادة تعيين الثيم الافتراضي</button>
+      </div>
     </div>
-    <div class="theme-list" id="themeList"></div>
-    <button class="theme-reset" id="themeReset" type="button">استعادة الافتراضي</button>
   </div>
 
+  <!-- ============ SCRIPTS ============ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/utils.js"></script>
@@ -1110,8 +1051,747 @@
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/app-title.js"></script>
   <script src="assets/js/ui/header.js"></script>
+  <script src="assets/js/ui/sidebar.js"></script>
   <script src="assets/js/ui/modal.js"></script>
-  <script src="assets/js/pages/home.js"></script>
+
+  <script>
+    /* ============================================================
+       ITWS Platform — Home Page Logic
+       Inline script replaces assets/js/pages/home.js
+       All content is pulled from Supabase.settings via AppSettings.get
+       ============================================================ */
+    (function () {
+      'use strict';
+
+      if (window.HomePage && window.HomePage.initialized) return;
+
+      var state = {
+        initialized: false,
+        currentTab: 'certificate',
+        academiesLoaded: false,
+        sb: null
+      };
+
+      /* ---------------- Helpers ---------------- */
+      function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+      function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
+      function byData(name, ctx) { return $('[data-home="' + name + '"]', ctx); }
+
+      function setText(el, v) {
+        if (!el) return;
+        el.textContent = (v == null ? '' : String(v));
+      }
+
+      function setHTML(el, v) {
+        if (!el) return;
+        el.innerHTML = v == null ? '' : String(v);
+      }
+
+      function setLink(el, url) {
+        if (!el) return;
+        if (url) {
+          el.href = url;
+          el.removeAttribute('hidden');
+        } else {
+          el.setAttribute('hidden', '');
+        }
+      }
+
+      function show(el) { if (el) el.removeAttribute('hidden'); }
+      function hide(el) { if (el) el.setAttribute('hidden', ''); }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function getSetting(path, fallback) {
+        try {
+          if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+            var v = window.AppSettings.get(path);
+            return (v === undefined || v === null) ? fallback : v;
+          }
+        } catch (e) {}
+        return fallback;
+      }
+
+      function getBool(path, fallback) {
+        var v = getSetting(path, fallback);
+        if (typeof v === 'boolean') return v;
+        if (v === 'true' || v === 1 || v === '1') return true;
+        if (v === 'false' || v === 0 || v === '0') return false;
+        return !!v;
+      }
+
+      function resolve(path) {
+        if (!path) return '#';
+        if (window.resolveUrl) return window.resolveUrl(path);
+        var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
+        if (base && base.charAt(base.length - 1) !== '/') base += '/';
+        return base + String(path).replace(/^\.?\//, '');
+      }
+
+      function getSb() {
+        return window.sb || window.supabaseClient || window.ITWS_SUPABASE || null;
+      }
+
+      function safe(url) {
+        if (!url) return '';
+        var u = String(url).trim();
+        if (u.indexOf('javascript:') === 0) return '';
+        if (u.indexOf('data:text/html') === 0) return '';
+        return u;
+      }
+
+      /* ---------------- Hero ---------------- */
+      function renderHero() {
+        var badge = byData('hero-badge');
+        var title = byData('hero-title');
+        var subtitle = byData('hero-subtitle');
+
+        var badgeText = getSetting('app_identity.hero_badge', '');
+        if (badge) {
+          if (badgeText) { setText(badge, badgeText); show(badge); }
+          else hide(badge);
+        }
+
+        var titleText = getSetting('app_identity.hero_title', '');
+        if (!titleText) {
+          var union = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+          titleText = 'مرحباً بك في ' + union;
+        }
+        setText(title, titleText);
+
+        var subtitleText = getSetting('app_identity.hero_subtitle', '');
+        if (!subtitleText) {
+          subtitleText = 'منصة رسمية للتحقق من الشهادات التدريبية واكتشاف الأكاديميات المعتمدة';
+        }
+        setText(subtitle, subtitleText);
+      }
+
+      /* ---------------- Search ---------------- */
+      var SEARCH_CONFIG = {
+        certificate: {
+          id: 'certificate',
+          placeholderKey: 'behavior.search_certificate_placeholder',
+          placeholderDefault: 'NTI-2026-XXXXXX',
+          hintKey: 'behavior.search_certificate_hint',
+          hintDefault: 'أدخل كود الشهادة المطبوع عليها',
+          minChars: 3,
+          target: 'verify.html',
+          param: 'code',
+          dir: 'ltr'
+        },
+        trainee: {
+          id: 'trainee',
+          placeholderKey: 'behavior.search_trainee_placeholder',
+          placeholderDefault: 'الرقم القومي (14 رقم)',
+          hintKey: 'behavior.search_trainee_hint',
+          hintDefault: 'أدخل الرقم القومي المكون من 14 رقماً',
+          minChars: 14,
+          target: 'student.html',
+          param: 'q',
+          dir: 'ltr'
+        },
+        academy: {
+          id: 'academy',
+          placeholderKey: 'behavior.search_academy_placeholder',
+          placeholderDefault: 'اسم الأكاديمية أو التخصص',
+          hintKey: 'behavior.search_academy_hint',
+          hintDefault: 'ابحث عن أكاديمية معتمدة من النقابة',
+          minChars: 2,
+          target: 'academies.html',
+          param: 'q',
+          dir: 'rtl'
+        }
+      };
+
+      function applySearchTab(tabId) {
+        var cfg = SEARCH_CONFIG[tabId];
+        if (!cfg) return;
+
+        state.currentTab = tabId;
+
+        var tabs = $all('[data-search-tab]');
+        tabs.forEach(function (btn) {
+          var isActive = btn.getAttribute('data-search-tab') === tabId;
+          btn.classList.toggle('is-active', isActive);
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        var input = $('#homeSearchInput');
+        if (input) {
+          input.value = '';
+          input.setAttribute('dir', cfg.dir);
+          input.setAttribute('placeholder', getSetting(cfg.placeholderKey, cfg.placeholderDefault));
+          if (tabId === 'trainee') {
+            input.setAttribute('inputmode', 'numeric');
+            input.setAttribute('maxlength', '14');
+          } else {
+            input.removeAttribute('inputmode');
+            input.setAttribute('maxlength', '40');
+          }
+        }
+
+        var hint = byData('search-hint');
+        setText(hint, getSetting(cfg.hintKey, cfg.hintDefault));
+      }
+
+      function handleSearchSubmit(e) {
+        if (e) e.preventDefault();
+
+        var input = $('#homeSearchInput');
+        if (!input) return;
+
+        var value = (input.value || '').trim();
+        var cfg = SEARCH_CONFIG[state.currentTab];
+        if (!cfg) return;
+
+        if (value.length < cfg.minChars) {
+          var hint = byData('search-hint');
+          setText(hint, 'أدخل ' + (cfg.minChars === 14 ? '14 رقماً' : cfg.minChars + ' أحرف على الأقل'));
+          input.focus();
+          return;
+        }
+
+        var url;
+        if (cfg.id === 'trainee') {
+          url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value);
+        } else if (cfg.id === 'certificate') {
+          url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value.toUpperCase());
+        } else {
+          url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value);
+        }
+
+        window.location.href = url;
+      }
+
+      function initSearch() {
+        var enabled = getBool('behavior.enable_search', true);
+        var searchEl = byData('search');
+        if (!enabled) {
+          if (searchEl) hide(searchEl);
+          return;
+        }
+        if (searchEl) show(searchEl);
+
+        $all('[data-search-tab]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            applySearchTab(btn.getAttribute('data-search-tab'));
+          });
+        });
+
+        var form = $('#homeSearchForm');
+        if (form) form.addEventListener('submit', handleSearchSubmit);
+
+        var submitBtn = $('#homeSearchBtn');
+        if (submitBtn) {
+          var btnText = getSetting('behavior.search_button_text', 'بحث');
+          var span = $('[data-home="search-btn-text"]', submitBtn);
+          setText(span, btnText);
+        }
+
+        applySearchTab('certificate');
+      }
+
+      /* ---------------- Custom Section ---------------- */
+      function renderCustomSection() {
+        var enabled = getBool('app_identity.custom_section.enabled', false) &&
+                      getBool('behavior.home_show_custom_section', true);
+        var section = byData('custom-section');
+        if (!section) return;
+        if (!enabled) { hide(section); return; }
+
+        var title = getSetting('app_identity.custom_section.title', '');
+        var subtitle = getSetting('app_identity.custom_section.subtitle', '');
+        var content = getSetting('app_identity.custom_section.content', '');
+        var btnText = getSetting('app_identity.custom_section.button_text', '');
+        var btnUrl = safe(getSetting('app_identity.custom_section.button_url', ''));
+
+        if (!title && !subtitle && !content && !btnText) { hide(section); return; }
+
+        setText(byData('custom-title'), title);
+        setText(byData('custom-subtitle'), subtitle);
+        setText(byData('custom-content'), content);
+
+        var btn = byData('custom-btn');
+        if (btn) {
+          if (btnText && btnUrl) {
+            btn.href = resolve(btnUrl);
+            btn.textContent = btnText;
+            show(btn);
+          } else {
+            hide(btn);
+          }
+        }
+
+        show(section);
+      }
+
+      /* ---------------- About Section ---------------- */
+      var ABOUT_ICONS = [
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>'
+      ];
+
+      function renderAboutSection() {
+        var enabled = getBool('app_identity.about_section.enabled', false) &&
+                      getBool('behavior.home_show_about_section', true);
+        var section = byData('about-section');
+        if (!section) return;
+        if (!enabled) { hide(section); return; }
+
+        var title = getSetting('app_identity.about_section.title', '');
+        var subtitle = getSetting('app_identity.about_section.subtitle', '');
+        var features = getSetting('app_identity.about_section.features', []) || [];
+
+        if (!title && !subtitle && (!features || !features.length)) { hide(section); return; }
+
+        setText(byData('about-title'), title);
+        setText(byData('about-subtitle'), subtitle);
+
+        var grid = byData('about-features');
+        if (grid) {
+          grid.innerHTML = '';
+          (features || []).forEach(function (f, idx) {
+            if (!f || (!f.title && !f.description)) return;
+            var card = document.createElement('div');
+            card.className = 'home-about-card';
+            var icon = ABOUT_ICONS[idx % ABOUT_ICONS.length];
+            card.innerHTML =
+              '<div class="home-about-icon">' + icon + '</div>' +
+              '<h3 class="home-about-title">' + escapeHtml(f.title || '') + '</h3>' +
+              '<p class="home-about-desc">' + escapeHtml(f.description || '') + '</p>';
+            grid.appendChild(card);
+          });
+        }
+
+        show(section);
+      }
+
+      /* ---------------- Recent Academies ---------------- */
+      function renderAcademyCard(academy) {
+        var card = document.createElement('a');
+        card.className = 'academy-card';
+        card.href = resolve('academy-details.html?id=' + encodeURIComponent(academy.id || ''));
+
+        var logoHtml;
+        if (academy.logo_url) {
+          logoHtml = '<div class="academy-card-logo"><img src="' + escapeHtml(academy.logo_url) + '" alt="' + escapeHtml(academy.name || '') + '" loading="lazy" onerror="this.parentNode.textContent=\'أ\';"></div>';
+        } else {
+          var initial = (academy.name || 'أ').trim().charAt(0);
+          logoHtml = '<div class="academy-card-logo">' + escapeHtml(initial) + '</div>';
+        }
+
+        var desc = academy.description || academy.short_description || '';
+        card.innerHTML =
+          logoHtml +
+          '<div class="academy-card-body">' +
+            '<h3 class="academy-card-title">' + escapeHtml(academy.name || 'أكاديمية') + '</h3>' +
+            '<p class="academy-card-desc">' + escapeHtml(desc) + '</p>' +
+          '</div>';
+
+        return card;
+      }
+
+      function loadRecentAcademies() {
+        var enabled = getBool('behavior.home_show_recent_academies', true);
+        var section = byData('recent-academies');
+        if (!section) return;
+        if (!enabled) { hide(section); return; }
+
+        var grid = $('#homeAcademiesGrid');
+        if (!grid) return;
+
+        // Loading
+        grid.innerHTML = '<div class="home-academies-loading" style="grid-column:1/-1;"><div class="home-academies-spinner"></div></div>';
+        show(section);
+
+        var sb = getSb();
+        if (!sb || typeof sb.from !== 'function') {
+          grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">تعذر الاتصال بالخادم</div>';
+          return;
+        }
+
+        var limit = parseInt(getSetting('behavior.home_stats_academies_count', 6), 10) || 6;
+
+        try {
+          sb.from('academies')
+            .select('id, name, description, logo_url, status, created_at')
+            .eq('status', 'approved')
+            .order('created_at', { ascending: false })
+            .limit(limit)
+            .then(function (res) {
+              if (res && res.error) throw res.error;
+              var list = (res && res.data) || [];
+
+              if (!list.length) {
+                grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">لا توجد أكاديميات معتمدة بعد</div>';
+                return;
+              }
+
+              grid.innerHTML = '';
+              list.forEach(function (a) {
+                grid.appendChild(renderAcademyCard(a));
+              });
+              state.academiesLoaded = true;
+            })
+            .catch(function (err) {
+              console.warn('[Home] load academies failed:', err && err.message);
+              grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">تعذر تحميل الأكاديميات</div>';
+            });
+        } catch (e) {
+          console.warn('[Home] academies query error:', e);
+          grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">خطأ في تحميل البيانات</div>';
+        }
+      }
+
+      /* ---------------- CTA ---------------- */
+      function renderCTA() {
+        var title = getSetting('app_identity.cta_title', '') ||
+                    'هل تدير أكاديمية تدريبية؟';
+        var subtitle = getSetting('app_identity.cta_subtitle', '') ||
+                       'قدم طلب الاعتماد وانضم إلى قائمة الأكاديميات المعتمدة من النقابة';
+        var btnText = getSetting('app_identity.cta_button_text', '') ||
+                      'قدم أكاديميتك';
+        var btnUrl = getSetting('app_identity.cta_button_url', '') ||
+                     'academy-apply.html';
+
+        setText(byData('cta-title'), title);
+        setText(byData('cta-subtitle'), subtitle);
+        setText(byData('cta-btn-text'), btnText);
+
+        var btn = byData('cta-btn');
+        if (btn) btn.href = resolve(btnUrl);
+      }
+
+      /* ---------------- Footer ---------------- */
+      function renderFooter() {
+        var unionName = getSetting('app_identity.union_name', '');
+        var committeeName = getSetting('app_identity.committee_name', '');
+        var logoUrl = getSetting('app_identity.logo_url', '');
+        var presidentName = getSetting('app_identity.president_name', '');
+        var presidentLabel = getSetting('app_identity.president_label', 'النقيب العام');
+
+        // Logo
+        var logo = byData('footer-logo');
+        if (logo) {
+          if (logoUrl) {
+            logo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="logo">';
+          } else {
+            logo.textContent = (unionName || 'ن').trim().charAt(0);
+          }
+        }
+
+        setText(byData('footer-union'), unionName);
+        setText(byData('footer-committee'), committeeName);
+
+        // Contact
+        var email = getSetting('app_identity.contact_email', '');
+        var phone = getSetting('app_identity.contact_phone', '');
+        var website = getSetting('app_identity.website_url', '');
+
+        var emailEl = byData('footer-email');
+        if (email && emailEl) {
+          emailEl.href = 'mailto:' + email;
+          setText(byData('footer-email-text'), email);
+          show(emailEl);
+        } else if (emailEl) {
+          hide(emailEl);
+        }
+
+        var phoneEl = byData('footer-phone');
+        if (phone && phoneEl) {
+          phoneEl.href = 'tel:' + phone.replace(/[^0-9+]/g, '');
+          setText(byData('footer-phone-text'), phone);
+          show(phoneEl);
+        } else if (phoneEl) {
+          hide(phoneEl);
+        }
+
+        var websiteEl = byData('footer-website');
+        if (website && websiteEl) {
+          websiteEl.href = website;
+          setText(byData('footer-website-text'), website.replace(/^https?:\/\//, '').replace(/\/$/, ''));
+          show(websiteEl);
+        } else if (websiteEl) {
+          hide(websiteEl);
+        }
+
+        // Social
+        var showSocial = getBool('footer.show_social_links', false);
+        var socialWrap = byData('footer-social');
+        if (showSocial && socialWrap) {
+          var anyShown = false;
+          var socials = [
+            { key: 'footer.social_facebook', el: 'footer-facebook' },
+            { key: 'footer.social_twitter', el: 'footer-twitter' },
+            { key: 'footer.social_linkedin', el: 'footer-linkedin' },
+            { key: 'footer.social_youtube', el: 'footer-youtube' }
+          ];
+          socials.forEach(function (s) {
+            var el = byData(s.el);
+            var url = getSetting(s.key, '');
+            if (el) {
+              if (url) {
+                el.href = url;
+                show(el);
+                anyShown = true;
+              } else {
+                hide(el);
+              }
+            }
+          });
+          if (anyShown) show(socialWrap); else hide(socialWrap);
+        } else if (socialWrap) {
+          hide(socialWrap);
+        }
+
+        // Footer Link
+        var flEnabled = getBool('app_identity.footer_link.enabled', false);
+        var flText = getSetting('app_identity.footer_link.text', '');
+        var flUrl = safe(getSetting('app_identity.footer_link.url', ''));
+        var flWrap = byData('footer-link-wrap');
+        if (flWrap) {
+          if (flEnabled && flText && flUrl) {
+            setText(byData('footer-link-text'), flText);
+            var fl = byData('footer-link');
+            if (fl) fl.href = resolve(flUrl);
+            show(flWrap);
+          } else {
+            hide(flWrap);
+          }
+        }
+
+        // Copyright
+        var showCopyright = getBool('footer.show_copyright', true);
+        var copyrightText = getSetting('footer.copyright_text', '');
+        if (!copyrightText) {
+          var year = new Date().getFullYear();
+          copyrightText = '© ' + year + ' ' + (unionName || '');
+        }
+        var copyrightEl = byData('footer-copyright');
+        if (copyrightEl) {
+          if (showCopyright) {
+            setText(copyrightEl, copyrightText);
+            show(copyrightEl);
+          } else {
+            hide(copyrightEl);
+          }
+        }
+
+        // President
+        var showPresident = getBool('footer.show_president', true);
+        var presidentWrap = byData('footer-president-wrap');
+        if (presidentWrap) {
+          if (showPresident && presidentName) {
+            setText(byData('footer-president-label'), presidentLabel + ': ');
+            setText(byData('footer-president-name'), presidentName);
+            show(presidentWrap);
+          } else {
+            hide(presidentWrap);
+          }
+        }
+      }
+
+      /* ---------------- Theme FAB ---------------- */
+      function getThemes() {
+        if (window.ITWS_THEMES && Array.isArray(window.ITWS_THEMES)) {
+          return window.ITWS_THEMES;
+        }
+        return [
+          { id: 'watanii_dark', name: 'وطني داكن', colors: { primary: '#CE1126', bg: '#0A0E14', surface: '#131820' } },
+          { id: 'watanii_light', name: 'وطني فاتح', colors: { primary: '#CE1126', bg: '#F8FAFC', surface: '#FFFFFF' } },
+          { id: 'tech_blue', name: 'تكنولوجي', colors: { primary: '#3B82F6', bg: '#0F172A', surface: '#1E293B' } },
+          { id: 'light_formal', name: 'رسمي فاتح', colors: { primary: '#1E40AF', bg: '#FFFFFF', surface: '#F3F4F6' } },
+          { id: 'emerald', name: 'زمردي', colors: { primary: '#10B981', bg: '#0B1917', surface: '#122320' } },
+          { id: 'midnight_gold', name: 'ليلي ذهبي', colors: { primary: '#D4AF37', bg: '#0B0B12', surface: '#161623' } }
+        ];
+      }
+
+      function getCurrentTheme() {
+        try {
+          if (window.ITWSTheme && typeof window.ITWSTheme.getCurrent === 'function') {
+            return window.ITWSTheme.getCurrent();
+          }
+        } catch (e) {}
+
+        try {
+          var stored = localStorage.getItem('itws_theme');
+          if (stored) return stored;
+        } catch (e) {}
+
+        return document.documentElement.getAttribute('data-theme') || '';
+      }
+
+      function buildThemePanel() {
+        var body = $('#themePanelBody');
+        if (!body) return;
+        body.innerHTML = '';
+
+        var themes = getThemes();
+        var current = getCurrentTheme();
+
+        themes.forEach(function (t) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'theme-option' + (t.id === current ? ' is-active' : '');
+          btn.setAttribute('data-theme-option', t.id);
+
+          var swatchColor = (t.colors && t.colors.primary) ? t.colors.primary : '#CE1126';
+          var swatchBg = (t.colors && t.colors.bg) ? t.colors.bg : '#0A0E14';
+
+          btn.innerHTML =
+            '<span class="theme-swatch" style="background:linear-gradient(135deg,' + escapeHtml(swatchColor) + ' 50%,' + escapeHtml(swatchBg) + ' 50%);"></span>' +
+            '<span class="theme-option-name">' + escapeHtml(t.name || t.id) + '</span>' +
+            '<svg class="theme-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+          btn.addEventListener('click', function () {
+            try {
+              if (window.ITWSTheme && typeof window.ITWSTheme.change === 'function') {
+                window.ITWSTheme.change(t.id);
+              } else if (window.theme && typeof window.theme.change === 'function') {
+                window.theme.change(t.id);
+              } else if (typeof window.changeTheme === 'function') {
+                window.changeTheme(t.id);
+              } else {
+                localStorage.setItem('itws_theme', t.id);
+                document.documentElement.setAttribute('data-theme', t.id);
+              }
+            } catch (err) {
+              console.warn('[Home] theme change failed:', err);
+            }
+            // Refresh active states
+            $all('.theme-option', body).forEach(function (b) {
+              b.classList.toggle('is-active', b.getAttribute('data-theme-option') === t.id);
+            });
+          });
+
+          body.appendChild(btn);
+        });
+      }
+
+      function initThemeFab() {
+        var enabled = getBool('behavior.enable_theme_picker_for_visitors', true);
+        var wrap = $('#themeFabWrap');
+        if (!wrap) return;
+        if (!enabled) { hide(wrap); return; }
+        show(wrap);
+
+        var fab = $('#themeFab');
+        var panel = $('#themePanel');
+        var close = $('#themePanelClose');
+        var reset = $('#themeResetBtn');
+
+        buildThemePanel();
+
+        if (fab && panel) {
+          fab.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = !panel.hasAttribute('hidden');
+            if (isOpen) {
+              panel.setAttribute('hidden', '');
+              fab.setAttribute('aria-expanded', 'false');
+            } else {
+              buildThemePanel();
+              panel.removeAttribute('hidden');
+              fab.setAttribute('aria-expanded', 'true');
+            }
+          });
+        }
+
+        if (close && panel) {
+          close.addEventListener('click', function () {
+            panel.setAttribute('hidden', '');
+            if (fab) fab.setAttribute('aria-expanded', 'false');
+          });
+        }
+
+        document.addEventListener('click', function (e) {
+          if (!wrap.contains(e.target) && panel && !panel.hasAttribute('hidden')) {
+            panel.setAttribute('hidden', '');
+            if (fab) fab.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        if (reset) {
+          reset.addEventListener('click', function () {
+            try {
+              var defaultTheme = getSetting('theme.default_theme', 'watanii_dark');
+              if (window.ITWSTheme && typeof window.ITWSTheme.change === 'function') {
+                window.ITWSTheme.change(defaultTheme);
+              } else {
+                localStorage.setItem('itws_theme', defaultTheme);
+                document.documentElement.setAttribute('data-theme', defaultTheme);
+              }
+              $all('.theme-option').forEach(function (b) {
+                b.classList.toggle('is-active', b.getAttribute('data-theme-option') === defaultTheme);
+              });
+            } catch (err) {
+              console.warn('[Home] theme reset failed:', err);
+            }
+          });
+        }
+      }
+
+      /* ---------------- Apply all ---------------- */
+      function applyAll() {
+        renderHero();
+        renderCustomSection();
+        renderAboutSection();
+        renderCTA();
+        renderFooter();
+      }
+
+      /* ---------------- Init ---------------- */
+      function init() {
+        if (state.initialized) return;
+        state.initialized = true;
+
+        state.sb = getSb();
+
+        applyAll();
+        initSearch();
+        initThemeFab();
+        loadRecentAcademies();
+
+        // Re-apply on settings changes
+        if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+          try {
+            window.AppSettings.onChange(function () {
+              applyAll();
+            });
+          } catch (e) {}
+        }
+
+        // Fallback retries (in case AppSettings loads late)
+        setTimeout(applyAll, 600);
+        setTimeout(applyAll, 1800);
+        setTimeout(applyAll, 3500);
+        setTimeout(loadRecentAcademies, 1500);
+      }
+
+      window.HomePage = {
+        initialized: true,
+        init: init,
+        refresh: applyAll,
+        reloadAcademies: loadRecentAcademies,
+        getState: function () { return state; }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
 
 </body>
 </html>
