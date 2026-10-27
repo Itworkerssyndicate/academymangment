@@ -4,13 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>التحقق من شهادة | نقابة تكنولوجيا المعلومات</title>
+  <title>التحقق من الشهادة</title>
   <meta name="description" content="تحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة">
   <meta name="theme-color" content="#0A0E14">
   
-  <meta property="og:title" content="التحقق من شهادة">
+  <meta property="og:title" content="التحقق من الشهادة">
   <meta property="og:description" content="تحقق من صحة الشهادات التدريبية المعتمدة">
   <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/images/logo.svg">
+  
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +23,28 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
+  
+  <script>
+    (function () {
+      function syncThemeColor() {
+        try {
+          var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+          if (bg) {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', bg);
+          }
+        } catch (e) {}
+      }
+      document.addEventListener('DOMContentLoaded', syncThemeColor);
+      window.addEventListener('load', syncThemeColor);
+      try {
+        new MutationObserver(syncThemeColor).observe(document.documentElement, {
+          attributes: true, attributeFilter: ['data-theme', 'class', 'style']
+        });
+      } catch (e) {}
+    })();
+  </script>
+  
   <script src="assets/js/app-settings.js"></script>
   
   <link rel="stylesheet" href="assets/css/theme.css">
@@ -73,7 +98,6 @@
       color: var(--text);
       line-height: 1.3;
       margin: 0 0 12px;
-      letter-spacing: -0.5px;
     }
     
     .verify-title-accent { color: var(--primary); }
@@ -130,6 +154,9 @@
       letter-spacing: 1px;
       transition: all 0.2s;
       min-width: 0;
+      direction: ltr;
+      text-align: left;
+      font-variant-numeric: tabular-nums;
     }
     
     .verify-search-input:focus {
@@ -260,12 +287,12 @@
       border: 2px solid var(--success);
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(16, 185, 129, 0.15);
+      box-shadow: 0 20px 60px var(--success-shadow-lg, rgba(16, 185, 129, 0.15));
     }
     
     .cert-card.invalid {
       border-color: var(--error);
-      box-shadow: 0 20px 60px rgba(239, 68, 68, 0.15);
+      box-shadow: 0 20px 60px var(--error-shadow-lg, rgba(239, 68, 68, 0.15));
     }
     
     .cert-header {
@@ -301,13 +328,15 @@
       font-size: 28px;
       font-weight: 700;
       flex-shrink: 0;
-      box-shadow: 0 0 0 6px var(--success-soft), 0 8px 24px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 0 6px var(--success-soft),
+                  0 8px 24px var(--success-shadow, rgba(16, 185, 129, 0.3));
       animation: sealPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
     .cert-header.invalid .cert-seal {
       background: var(--error);
-      box-shadow: 0 0 0 6px var(--error-soft), 0 8px 24px rgba(239, 68, 68, 0.3);
+      box-shadow: 0 0 0 6px var(--error-soft),
+                  0 8px 24px var(--error-shadow, rgba(239, 68, 68, 0.3));
     }
     
     @keyframes sealPop {
@@ -326,7 +355,8 @@
     .cert-header-subtitle {
       font-size: 13px;
       color: var(--text-muted);
-      font-family: 'Courier New', monospace;
+      font-family: inherit;
+      font-variant-numeric: tabular-nums;
       letter-spacing: 1px;
     }
     
@@ -353,7 +383,6 @@
       font-size: 12px;
       font-weight: 700;
       color: var(--text-muted);
-      text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 12px;
     }
@@ -389,7 +418,8 @@
     }
     
     .cert-item-value.mono {
-      font-family: 'Courier New', monospace;
+      font-family: inherit;
+      font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
       font-size: 13px;
     }
@@ -404,11 +434,26 @@
       font-size: 14px;
     }
     
-    .cert-grade.excellent { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-    .cert-grade.very-good { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
-    .cert-grade.good { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-    .cert-grade.pass { background: rgba(249, 115, 22, 0.15); color: #F97316; }
-    .cert-grade.fail { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+    .cert-grade.excellent {
+      background: var(--grade-excellent-bg, rgba(16, 185, 129, 0.15));
+      color: var(--grade-excellent-text, #10B981);
+    }
+    .cert-grade.very-good {
+      background: var(--grade-very-good-bg, rgba(59, 130, 246, 0.15));
+      color: var(--grade-very-good-text, #3B82F6);
+    }
+    .cert-grade.good {
+      background: var(--grade-good-bg, rgba(245, 158, 11, 0.15));
+      color: var(--grade-good-text, #F59E0B);
+    }
+    .cert-grade.pass {
+      background: var(--grade-pass-bg, rgba(249, 115, 22, 0.15));
+      color: var(--grade-pass-text, #F97316);
+    }
+    .cert-grade.fail {
+      background: var(--grade-fail-bg, rgba(239, 68, 68, 0.15));
+      color: var(--grade-fail-text, #EF4444);
+    }
     
     .cert-actions {
       padding: 20px 28px 24px;
@@ -463,8 +508,8 @@
     }
     
     .cert-action-btn.success:hover {
-      background: #059669;
-      border-color: #059669;
+      background: var(--success-hover, #059669);
+      border-color: var(--success-hover, #059669);
       color: #fff;
     }
     
@@ -515,6 +560,17 @@
       margin: 0;
     }
     
+    .noscript-banner {
+      padding: 16px 20px;
+      background: var(--error-soft, #fef2f2);
+      color: var(--error, #991b1b);
+      border-bottom: 2px solid var(--error, #991b1b);
+      text-align: center;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
     @media (max-width: 640px) {
       .verify-search-form { flex-direction: column; }
       .verify-search-btn { width: 100%; justify-content: center; }
@@ -536,13 +592,23 @@
     }
     
     @media print {
+      body { background: #fff !important; }
       .verify-hero, .verify-search-card, .verify-info, .cert-actions,
-      #headerContainer, .theme-fab, .theme-panel { display: none !important; }
+      #headerContainer, .theme-fab, .theme-panel,
+      .home-footer, #verifyLoader, #verifyInfo { display: none !important; }
       .cert-card { border-width: 2px; box-shadow: none; page-break-inside: avoid; }
+      .cert-header { background: transparent !important; }
+      .cert-footer { background: transparent !important; }
     }
   </style>
 </head>
 <body>
+
+  <noscript>
+    <div class="noscript-banner">
+      هذه الصفحة تحتاج تفعيل JavaScript في المتصفح للعمل بشكل صحيح.
+    </div>
+  </noscript>
 
   <div class="theme-boot-loader" id="themeBootLoader">
     <div class="loader-logo">نت</div>
@@ -555,11 +621,11 @@
 
     <section class="verify-hero">
       <div class="verify-hero-inner">
-        <div class="verify-badge">التحقق الرسمي من الشهادات</div>
-        <h1 class="verify-title">
+        <div class="verify-badge" data-dynamic="verify_badge">التحقق الرسمي من الشهادات</div>
+        <h1 class="verify-title" data-dynamic="verify_title">
           تحقق من <span class="verify-title-accent">صحة الشهادة</span>
         </h1>
-        <p class="verify-subtitle">
+        <p class="verify-subtitle" data-dynamic="verify_subtitle">
           أدخل كود الشهادة المطبوع عليها للتحقق من صحتها بشكل فوري
         </p>
       </div>
@@ -568,7 +634,7 @@
     <main class="verify-main">
 
       <div class="verify-search-card">
-        <div class="verify-search-label">كود الشهادة</div>
+        <div class="verify-search-label" data-dynamic="verify_search_label">كود الشهادة</div>
         
         <form class="verify-search-form" id="verifyForm" onsubmit="return false;">
           <input
@@ -576,34 +642,39 @@
             class="verify-search-input"
             id="certCodeInput"
             placeholder="NTI-2026-XXXXXX"
+            data-dynamic-placeholder="certificates.code_pattern"
             autocomplete="off"
             autocapitalize="characters"
+            autocorrect="off"
             spellcheck="false"
-            maxlength="30"
+            maxlength="40"
+            inputmode="text"
+            dir="ltr"
+            style="text-align: left;"
             required
           >
-          <button type="submit" class="verify-search-btn" id="verifyBtn">تحقق</button>
+          <button type="submit" class="verify-search-btn" id="verifyBtn" data-dynamic="verify_btn">تحقق</button>
         </form>
         
-        <div class="verify-search-hint">
+        <div class="verify-search-hint" data-dynamic="verify_hint">
           أدخل الكود المطبوع على الشهادة (مثال: NTI-2026-A7B3C9)
         </div>
       </div>
 
-      <div class="verify-loader" id="verifyLoader">
-        <div class="verify-loader-spinner"></div>
+      <div class="verify-loader" id="verifyLoader" role="status" aria-live="polite" aria-busy="true">
+        <div class="verify-loader-spinner" aria-hidden="true"></div>
         <div class="verify-loader-text">جاري التحقق من الشهادة...</div>
       </div>
 
-      <div class="verify-message" id="verifyError">
-        <div class="verify-message-icon">&#10005;</div>
+      <div class="verify-message error" id="verifyError" role="alert" aria-live="assertive">
+        <div class="verify-message-icon" aria-hidden="true">&#10005;</div>
         <h2 class="verify-message-title" id="errorTitle">لم يتم العثور على الشهادة</h2>
         <p class="verify-message-text" id="errorText">
           تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الأكاديمية المسؤولة
         </p>
       </div>
 
-      <div class="verify-result" id="verifyResult"></div>
+      <div class="verify-result" id="verifyResult" role="region" aria-live="polite" aria-label="نتيجة التحقق"></div>
 
       <div class="verify-info" id="verifyInfo">
         <div class="verify-info-card">
@@ -625,10 +696,10 @@
     <footer class="home-footer">
       <div class="home-footer-inner">
         <div class="footer-bottom">
-          <span id="footerCopyright">© 2026 نقابة تكنولوجيا المعلومات والبرمجيات</span>
+          <span id="footerCopyright" data-dynamic="footer_copyright"></span>
           <span>
-            <span id="footerPresidentLabel">النقيب العام:</span>
-            <span class="footer-president" id="footerPresidentName">المحاسب / محمود جميل</span>
+            <span id="footerPresidentLabel" data-dynamic="president_label"></span>
+            <span class="footer-president" id="footerPresidentName" data-dynamic="president_name"></span>
           </span>
         </div>
       </div>
@@ -645,6 +716,35 @@
   <script src="assets/js/ui/header.js"></script>
   <script src="assets/js/ui/modal.js"></script>
   <script src="assets/js/pages/verify.js"></script>
+
+  <script>
+    (function () {
+      function populateFooter() {
+        try {
+          if (!window.AppSettings || typeof AppSettings.get !== 'function') return;
+          var c = document.getElementById('footerCopyright');
+          if (c && !c.textContent.trim()) {
+            var un = AppSettings.get('app_identity.union_name');
+            if (un) c.textContent = '© ' + new Date().getFullYear() + ' ' + un;
+          }
+          var l = document.getElementById('footerPresidentLabel');
+          if (l && !l.textContent.trim()) {
+            var pl = AppSettings.get('app_identity.president_label');
+            if (pl) l.textContent = pl;
+          }
+          var n = document.getElementById('footerPresidentName');
+          if (n && !n.textContent.trim()) {
+            var pn = AppSettings.get('app_identity.president_name');
+            if (pn) n.textContent = pn;
+          }
+        } catch (e) {}
+      }
+      populateFooter();
+      setTimeout(populateFooter, 600);
+      setTimeout(populateFooter, 1800);
+      setTimeout(populateFooter, 3500);
+    })();
+  </script>
 
 </body>
 </html>
