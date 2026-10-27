@@ -1,44 +1,50 @@
-// ============================================
-// ITWS Platform - Track Request Logic
-// Path: assets/js/pages/track.js
-// ============================================
-// متابعة طلب الاعتماد - بالرقم
-// Timeline + Documents + SLA + Status
-// بدون إيموجي
-// ============================================
-
+/* ============================================================
+   ITWS Platform — Track Accreditation Request Page Logic
+   File: assets/js/pages/track.js
+   Role: Search by request number, render timeline + stages + SLA
+   Rules: No emoji, all from settings, no sensitive data leaks
+   ============================================================ */
 (function () {
   'use strict';
 
   if (window.TrackPage && window.TrackPage.initialized) return;
 
-  var STAGES_ORDER = [
-    { key: 'submitted', label: 'تم التقديم', desc: 'تم استلام طلب الاعتماد بنجاح' },
-    { key: 'documents_review', label: 'مراجعة المستندات', desc: 'يقوم فريق النقابة بمراجعة المستندات المرفوعة' },
-    { key: 'site_visit', label: 'زيارة الموقع', desc: 'زيارة ميدانية للتحقق من مقر الأكاديمية' },
-    { key: 'committee_review', label: 'لجنة المراجعة', desc: 'عرض الطلب على لجنة المراجعة للتصويت' },
-    { key: 'final_approval', label: 'الموافقة النهائية', desc: 'المراجعة النهائية من النقيب العام' },
-    { key: 'approved', label: 'تم الاعتماد', desc: 'تم اعتماد الأكاديمية رسمياً' }
-  ];
-
   var state = {
-    requestNumber: null,
-    request: null,
-    academy: null,
-    history: [],
-    loading: false,
-    initialized: false
+    initialized: false,
+    searching: false,
+    lastRequest: null,
+    lastStages: [],
+    lastAcademy: null,
+    lastQuery: '',
+    sb: null
   };
 
-  // ============================================
-  // 1. Helpers
-  // ============================================
-  function $(id) { return document.getElementById(id); }
+  // Fixed stage order — mirrors DB schema
+  var STAGE_ORDER = ['submitted', 'documents_review', 'site_visit', 'committee_review', 'final_approval'];
 
-  function setText(id, t) {
-    var el = $(id);
-    if (el) el.textContent = t;
-  }
+  // Default stage labels — overridden by accreditation.stages from settings
+  var DEFAULT_STAGE_LABELS = {
+    submitted: 'تم التقديم',
+    documents_review: 'مراجعة المستندات',
+    site_visit: 'زيارة الموقع',
+    committee_review: 'لجنة المراجعة',
+    final_approval: 'الموافقة النهائية',
+    approved: 'معتمدة',
+    rejected: 'مرفوضة'
+  };
+
+  // Default SLA — overridden by accreditation.sla_days from settings
+  var DEFAULT_SLA_DAYS = {
+    submitted: 3,
+    documents_review: 3,
+    site_visit: 14,
+    committee_review: 7,
+    final_approval: 5
+  };
+
+  /* ---------------- Helpers ---------------- */
+  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
 
   function escapeHtml(s) {
     if (s == null) return '';
@@ -50,114 +56,133 @@
       .replace(/'/g, '&#039;');
   }
 
-  function formatDate(date, opts) {
-    if (!date) return '—';
+  function getSetting(path, fallback) {
     try {
-      var d = date instanceof Date ? date : (date.toDate ? date.toDate() : new Date(date));
-      if (isNaN(d.getTime())) return '—';
-      return d.toLocaleDateString('ar-EG', opts || {
-        year: 'numeric', month: 'long', day: 'numeric'
-      });
-    } catch (e) { return '—'; }
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        var v = window.AppSettings.get(path);
+        return (v === undefined || v === null) ? fallback : v;
+      }
+    } catch (e) {}
+    return fallback;
   }
 
-  function formatDateTime(date) {
-    if (!date) return '—';
-    try {
-      var d = date instanceof Date ? date : (date.toDate ? date.toDate() : new Date(date));
-      if (isNaN(d.getTime())) return '—';
-      return d.toLocaleDateString('ar-EG', {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      });
-    } catch (e) { return '—'; }
+  function getSb() {
+    return window.sb || window.supabaseClient || window.ITWS_SUPABASE || null;
   }
 
   function toast(msg, type) {
-    if (window.Utils && window.Utils.showToast) {
+    if (window.Utils && typeof window.Utils.showToast === 'function') {
       window.Utils.showToast(msg, type || 'info');
-    } else if (type === 'error') {
-      alert(msg);
+    } else if (typeof window.showToast === 'function') {
+      window.showToast(msg, type || 'info');
     }
   }
 
-  function logDebug() {
-    if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-      console.log.apply(console, ['[TrackPage]'].concat(Array.prototype.slice.call(arguments)));
+  function show(el) { if (el) el.classList.add('show'); }
+  function hide(el) { if (el) el.classList.remove('show'); }
+
+  // Tries multiple field names — schema-tolerant
+  function pickField(obj, keys) {
+    if (!obj) return null;
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') {
+        return obj[k];
+      }
     }
+    return null;
   }
 
-  function getSetting(p, f) {
-    if (window.AppSettings && window.AppSettings.get) {
-      return window.AppSettings.get(p, f);
-    }
-    return f;
-  }
-
-  function resolve(path) {
-    if (!path) return '#';
-    if (window.resolveUrl) return window.resolveUrl(path);
-    var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
-    return base + String(path).replace(/^\.?\//, '');
-  }
-
-  // ============================================
-  // 2. SLA Calculation
-  // ============================================
-  function getSlaDays(stage) {
-    var slaDays = getSetting('accreditation.sla_days', {
-      submitted: 3,
-      documents_review: 3,
-      site_visit: 14,
-      committee_review: 7,
-      final_approval: 5
-    });
-    return slaDays[stage] || 7;
-  }
-
-  function calculateSLA(request) {
-    var stage = request.current_stage;
-    if (!stage || stage === 'approved' || stage === 'rejected') {
-      return { status: 'done', daysRemaining: null };
-    }
-
-    var slaDays = getSlaDays(stage);
-    var enteredAt = request.updated_at || request.submitted_at;
-    if (!enteredAt) return { status: 'on-time', daysRemaining: slaDays };
-
+  function formatDate(d) {
+    if (!d) return '';
     try {
-      var entered = enteredAt instanceof Date ? enteredAt : (enteredAt.toDate ? enteredAt.toDate() : new Date(enteredAt));
-      if (isNaN(entered.getTime())) return { status: 'on-time', daysRemaining: slaDays };
-
-      var elapsedMs = Date.now() - entered.getTime();
-      var elapsedDays = elapsedMs / (1000 * 60 * 60 * 24);
-      var remaining = slaDays - elapsedDays;
-
-      var status;
-      if (remaining < 0) status = 'overdue';
-      else if (remaining < slaDays * 0.3) status = 'warning';
-      else status = 'on-time';
-
-      return {
-        status: status,
-        daysRemaining: Math.ceil(remaining),
-        percent: Math.min(100, (elapsedDays / slaDays) * 100)
-      };
+      var dt = new Date(d);
+      if (isNaN(dt.getTime())) return String(d);
+      var y = dt.getFullYear();
+      var m = String(dt.getMonth() + 1).padStart(2, '0');
+      var day = String(dt.getDate()).padStart(2, '0');
+      var hh = String(dt.getHours()).padStart(2, '0');
+      var mm = String(dt.getMinutes()).padStart(2, '0');
+      return day + '/' + m + '/' + y + ' — ' + hh + ':' + mm;
     } catch (e) {
-      return { status: 'on-time', daysRemaining: slaDays };
+      return String(d);
     }
   }
 
-  // ============================================
-  // 3. Load Request
-  // ============================================
-  function loadRequest(requestNumber) {
-    if (!window.sb) return Promise.reject(new Error('Supabase not available'));
+  function daysBetween(a, b) {
+    if (!a || !b) return 0;
+    var d1 = new Date(a);
+    var d2 = new Date(b);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0;
+    return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+  }
 
-    return window.sb
-      .from('accreditation_requests')
+  function getStageLabel(stage) {
+    var stages = getSetting('accreditation.stages', {}) || {};
+    if (stages && stages[stage]) return stages[stage];
+    return DEFAULT_STAGE_LABELS[stage] || stage;
+  }
+
+  function getSlaDays(stage) {
+    var sla = getSetting('accreditation.sla_days', {}) || {};
+    if (sla && typeof sla[stage] === 'number') return sla[stage];
+    return DEFAULT_SLA_DAYS[stage] || 5;
+  }
+
+  /* ---------------- Icons ---------------- */
+  var ICONS = {
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+    timeline: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+    academy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+    doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>',
+    download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+    badgeCheck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
+  };
+
+  /* ---------------- Dynamic texts ---------------- */
+  function applyDynamicTexts() {
+    var badge = $('[data-dynamic="track_badge"]');
+    if (badge) {
+      var b = getSetting('app_identity.track_badge', '');
+      if (b) badge.textContent = b;
+    }
+
+    var label = $('[data-dynamic="track_search_label"]');
+    if (label) {
+      var l = getSetting('app_identity.track_search_label', '');
+      if (l) label.textContent = l;
+    }
+
+    var btn = $('[data-dynamic="track_btn"]');
+    if (btn) {
+      var bt = getSetting('app_identity.track_button_text', '');
+      if (bt) btn.textContent = bt;
+    }
+
+    var hint = $('[data-dynamic="track_hint"]');
+    if (hint) {
+      var h = getSetting('app_identity.track_hint', '');
+      if (h) hint.textContent = h;
+    }
+
+    var input = $('#requestNumberInput');
+    if (input) {
+      var pattern = getSetting('accreditation.request_code_pattern', '');
+      if (pattern) input.setAttribute('placeholder', pattern);
+    }
+  }
+
+  /* ---------------- Fetch helpers ---------------- */
+  function fetchRequest(code) {
+    var sb = getSb();
+    if (!sb) return Promise.reject(new Error('تعذر الاتصال بالخادم'));
+
+    return sb.from('accreditation_requests')
       .select('*')
-      .eq('request_number', requestNumber)
+      .eq('request_number', code)
       .maybeSingle()
       .then(function (res) {
         if (res.error) throw new Error(res.error.message);
@@ -165,548 +190,578 @@
       });
   }
 
-  function loadAcademy(academyId) {
-    if (!academyId || !window.sb) return Promise.resolve(null);
+  function fetchStages(requestId) {
+    var sb = getSb();
+    if (!sb) return Promise.resolve([]);
 
-    return window.sb
-      .from('academies')
-      .select('id, name, owner_name, license_number, tax_number, commercial_registry, email, phone, founded_year, description, category_id, created_at, approved_at, expires_at')
+    return sb.from('request_stage_history')
+      .select('*')
+      .eq('request_id', requestId)
+      .order('created_at', { ascending: true })
+      .then(function (res) {
+        if (res.error) {
+          console.warn('[Track] stages fetch failed:', res.error.message);
+          return [];
+        }
+        return res.data || [];
+      })
+      .catch(function (e) {
+        console.warn('[Track] stages fetch error:', e && e.message);
+        return [];
+      });
+  }
+
+  function fetchAcademy(academyId) {
+    if (!academyId) return Promise.resolve(null);
+    var sb = getSb();
+    if (!sb) return Promise.resolve(null);
+
+    return sb.from('academies')
+      .select('id, name, logo_url, contact_email, contact_phone, city, address, status')
       .eq('id', academyId)
       .maybeSingle()
       .then(function (res) {
-        if (res.error || !res.data) return null;
-        return res.data;
+        if (res.error) return null;
+        return res.data || null;
       })
       .catch(function () { return null; });
   }
 
-  function loadHistory(requestId) {
-    if (!requestId || !window.sb) return Promise.resolve([]);
+  /* ---------------- Log search ---------------- */
+  function logSearch(code, found) {
+    var sb = getSb();
+    if (!sb) return;
 
-    return window.sb
-      .from('request_stage_history')
-      .select('id, from_stage, to_stage, notes, moved_at')
-      .eq('request_id', requestId)
-      .order('moved_at', { ascending: true })
-      .then(function (res) {
-        if (res.error || !res.data) return [];
-        return res.data;
-      })
-      .catch(function () { return []; });
-  }
+    var safeCode = code ? String(code).slice(0, 5) + '***' : null;
 
-  // ============================================
-  // 4. Log Search
-  // ============================================
-  function logSearch(requestNumber, resultCount) {
-    if (!window.sb) return;
-
-    window.sb.from('search_logs').insert({
-      search_type: 'request',
-      search_value: requestNumber,
-      result_count: resultCount,
-      user_agent: navigator.userAgent.substring(0, 200)
-    }).catch(function () {});
-  }
-
-  // ============================================
-  // 5. Status Info
-  // ============================================
-  function getStatusInfo(stage) {
-    var map = {
-      'submitted': { label: 'تم التقديم', cls: 'submitted' },
-      'documents_review': { label: 'مراجعة المستندات', cls: 'documents_review' },
-      'site_visit': { label: 'زيارة الموقع', cls: 'site_visit' },
-      'committee_review': { label: 'لجنة المراجعة', cls: 'committee_review' },
-      'final_approval': { label: 'الموافقة النهائية', cls: 'final_approval' },
-      'approved': { label: 'معتمدة', cls: 'approved' },
-      'rejected': { label: 'مرفوضة', cls: 'rejected' }
-    };
-    return map[stage] || { label: stage || '—', cls: 'submitted' };
-  }
-
-  // ============================================
-  // 6. Render Result
-  // ============================================
-  function renderResult() {
-    var container = $('trackResult');
-    if (!container) return;
-
-    var request = state.request;
-    var academy = state.academy;
-    var history = state.history;
-
-    var isApproved = request.current_stage === 'approved';
-    var isRejected = request.current_stage === 'rejected';
-    var statusInfo = getStatusInfo(request.current_stage);
-    var sla = calculateSLA(request);
-
-    // ===== Banner (Approved/Rejected) =====
-    var bannerHtml = '';
-    if (isApproved) {
-      bannerHtml = '' +
-        '<div class="approved-banner">' +
-          '<div class="approved-banner-icon">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<polyline points="20 6 9 17 4 12"></polyline>' +
-            '</svg>' +
-          '</div>' +
-          '<div class="approved-banner-content">' +
-            '<h3 class="approved-banner-title">تم اعتماد الأكاديمية بنجاح</h3>' +
-            '<p class="approved-banner-text">' +
-              'أصبحت أكاديميتك معتمدة رسمياً من ' + escapeHtml(getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات')) +
-              (academy && academy.license_number ? ' - رقم الاعتماد: ' + escapeHtml(academy.license_number) : '') +
-              (academy && academy.expires_at ? ' - تاريخ الانتهاء: ' + formatDate(academy.expires_at) : '') +
-            '</p>' +
-          '</div>' +
-        '</div>';
-    } else if (isRejected) {
-      bannerHtml = '' +
-        '<div class="rejected-banner">' +
-          '<div class="rejected-banner-icon">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<circle cx="12" cy="12" r="10"></circle>' +
-              '<line x1="15" y1="9" x2="9" y2="15"></line>' +
-              '<line x1="9" y1="9" x2="15" y2="15"></line>' +
-            '</svg>' +
-          '</div>' +
-          '<div class="rejected-banner-content">' +
-            '<h3 class="rejected-banner-title">تم رفض طلب الاعتماد</h3>' +
-            '<p class="rejected-banner-text">' +
-              (request.rejection_reason ? 'السبب: ' + escapeHtml(request.rejection_reason) : 'يرجى التواصل مع النقابة للمزيد من التفاصيل.') +
-            '</p>' +
-          '</div>' +
-        '</div>';
-    }
-
-    // ===== Header =====
-    var slaBadgeHtml = '';
-    if (!isApproved && !isRejected) {
-      var slaText = sla.status === 'overdue'
-        ? 'متأخر ' + Math.abs(sla.daysRemaining) + ' يوم'
-        : 'متبقي ' + sla.daysRemaining + ' يوم';
-      var slaCls = sla.status === 'overdue' ? 'overdue' : sla.status;
-      slaBadgeHtml = '<span class="request-sla-badge ' + slaCls + '">' + slaText + '</span>';
-    }
-
-    var headerHtml = '' +
-      '<div class="request-header-card">' +
-        '<div class="request-header-top">' +
-          '<div class="request-title-box">' +
-            '<div class="request-number">' + escapeHtml(request.request_number) + '</div>' +
-            '<h2 class="request-academy-name">' + escapeHtml(academy ? academy.name : 'أكاديمية') + '</h2>' +
-          '</div>' +
-          '<span class="request-status-badge ' + statusInfo.cls + '">' +
-            '<span class="request-status-dot"></span>' +
-            escapeHtml(statusInfo.label) +
-          '</span>' +
-        '</div>' +
-        '<div class="request-meta-grid">' +
-          '<div class="request-meta-item">' +
-            '<div class="request-meta-label">تاريخ التقديم</div>' +
-            '<div class="request-meta-value">' + formatDate(request.submitted_at) + '</div>' +
-          '</div>' +
-          '<div class="request-meta-item">' +
-            '<div class="request-meta-label">آخر تحديث</div>' +
-            '<div class="request-meta-value">' + formatDate(request.updated_at) + '</div>' +
-          '</div>' +
-          (slaBadgeHtml ? '<div class="request-meta-item">' +
-            '<div class="request-meta-label">حالة SLA</div>' +
-            '<div>' + slaBadgeHtml + '</div>' +
-          '</div>' : '') +
-        '</div>' +
-      '</div>';
-
-    // ===== Timeline =====
-    var timelineHtml = renderTimeline(history);
-
-    // ===== Info Cards =====
-    var academyInfoHtml = academy ? renderAcademyInfo(academy) : '';
-    var documentsHtml = renderDocuments(request);
-
-    // Assemble
-    container.innerHTML = '' +
-      bannerHtml +
-      headerHtml +
-      '<div class="timeline-card">' +
-        '<h3 class="timeline-title">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-            '<circle cx="12" cy="12" r="10"></circle>' +
-            '<polyline points="12 6 12 12 16 14"></polyline>' +
-          '</svg>' +
-          'مراحل الطلب' +
-        '</h3>' +
-        timelineHtml +
-      '</div>' +
-      academyInfoHtml +
-      documentsHtml;
-
-    container.classList.add('show');
-
-    // Hide error, scroll
-    var errorEl = $('trackError');
-    if (errorEl) errorEl.classList.remove('show');
-
-    setTimeout(function () {
-      var searchCard = $('searchCard');
-      if (searchCard) {
-        var offset = searchCard.getBoundingClientRect().top + window.pageYOffset - 20;
-        window.scrollTo({ top: offset, behavior: 'smooth' });
-      }
-    }, 100);
-  }
-
-  // ============================================
-  // 7. Render Timeline
-  // ============================================
-  function renderTimeline(history) {
-    var request = state.request;
-    var currentStage = request.current_stage;
-    var isRejected = currentStage === 'rejected';
-
-    // تحديد الـ stage الحالي (index)
-    var currentIndex = STAGES_ORDER.findIndex(function (s) { return s.key === currentStage; });
-    if (isRejected) currentIndex = STAGES_ORDER.length; // بعد كل المراحل
-
-    var itemsHtml = '';
-
-    STAGES_ORDER.forEach(function (stage, index) {
-      var isCompleted = index < currentIndex;
-      var isCurrent = index === currentIndex;
-      var isFinal = stage.key === 'approved' && currentStage === 'approved';
-
-      // في حالة rejected → كل المراحل اللي عدت تبقى completed
-      if (isRejected && index <= currentIndex - 1) {
-        isCompleted = true;
-        isCurrent = false;
-      }
-
-      if (isFinal) {
-        isCompleted = true;
-        isCurrent = false;
-      }
-
-      // البحث عن تاريخ المرحلة في history
-      var historyEntry = history.find(function (h) {
-        return h.to_stage === stage.key;
+    Promise.resolve().then(function () {
+      return sb.from('search_logs').insert({
+        search_type: 'request_track',
+        search_query: safeCode,
+        found: !!found,
+        user_agent: navigator.userAgent.substring(0, 200)
       });
+    }).catch(function (e) {
+      console.warn('[Track] log search failed:', (e && e.message) || e);
+    });
+  }
 
-      var dateText = historyEntry ? formatDateTime(historyEntry.moved_at) : (isCompleted ? 'تم' : '—');
-      var notes = historyEntry && historyEntry.notes ? historyEntry.notes : null;
+  /* ---------------- SLA calculation ---------------- */
+  function getSlaInfo(stage, stageEnteredAt, currentStage) {
+    if (!stageEnteredAt) return null;
 
-      var itemCls = 'timeline-item';
-      if (isCompleted) itemCls += ' completed';
-      if (isCurrent) itemCls += ' current';
-      if (isRejected && index === currentIndex) itemCls += ' rejected';
+    var slaDays = getSlaDays(stage);
+    if (!slaDays) return null;
 
-      itemsHtml += '' +
-        '<div class="' + itemCls + '">' +
-          '<div class="timeline-header">' +
-            '<div class="timeline-stage">' + escapeHtml(stage.label) + '</div>' +
-            '<div class="timeline-date">' + dateText + '</div>' +
-          '</div>' +
-          '<p class="timeline-desc">' + escapeHtml(stage.desc) + '</p>' +
-          (notes ? '<div class="timeline-notes">' + escapeHtml(notes) + '</div>' : '') +
-        '</div>';
+    // If stage is finished (we've moved past it), SLA doesn't matter anymore
+    var isCurrent = (stage === currentStage);
+    if (!isCurrent) return null;
+
+    var elapsed = daysBetween(stageEnteredAt, new Date());
+    var remaining = slaDays - elapsed;
+
+    if (remaining < 0) {
+      return {
+        class: 'overdue',
+        text: 'متأخر ' + Math.abs(remaining) + ' يوم'
+      };
+    }
+    if (remaining <= 2) {
+      return {
+        class: 'warning',
+        text: 'متبقي ' + remaining + ' يوم'
+      };
+    }
+    return {
+      class: 'on-time',
+      text: 'في الموعد'
+    };
+  }
+
+  /* ---------------- Status badge ---------------- */
+  function renderStatusBadge(status) {
+    var label = getStageLabel(status) || status || '—';
+    return '<span class="request-status-badge ' + escapeHtml(status) + '">' +
+      '<span class="request-status-dot" aria-hidden="true"></span>' +
+      '<span>' + escapeHtml(label) + '</span>' +
+    '</span>';
+  }
+
+  /* ---------------- Request Header Card ---------------- */
+  function renderRequestHeader(request, academy) {
+    var requestNumber = pickField(request, ['request_number', 'tracking_code', 'code']) || '—';
+    var academyName = (academy && academy.name)
+      || pickField(request, ['academy_name', 'academy'])
+      || '—';
+    var status = pickField(request, ['status', 'current_status']) || 'submitted';
+    var currentStage = pickField(request, ['current_stage', 'stage']) || status;
+    var submittedAt = pickField(request, ['submitted_at', 'created_at']);
+    var updatedAt = pickField(request, ['updated_at']);
+
+    var slaInfo = getSlaInfo(currentStage, updatedAt || submittedAt, currentStage);
+
+    return '<div class="request-header-card">' +
+      '<div class="request-header-top">' +
+        '<div class="request-title-box">' +
+          '<div class="request-number">' + escapeHtml(requestNumber) + '</div>' +
+          '<h1 class="request-academy-name">' + escapeHtml(academyName) + '</h1>' +
+        '</div>' +
+        renderStatusBadge(status) +
+      '</div>' +
+      '<div class="request-meta-grid">' +
+        renderMetaItem('رقم الطلب', requestNumber, 'mono') +
+        renderMetaItem('تاريخ التقديم', formatDate(submittedAt)) +
+        (updatedAt ? renderMetaItem('آخر تحديث', formatDate(updatedAt)) : '') +
+        renderMetaItemWithSla('المرحلة الحالية', getStageLabel(currentStage), slaInfo) +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderMetaItem(label, value, valueClass) {
+    return '<div class="request-meta-item">' +
+      '<div class="request-meta-label">' + escapeHtml(label) + '</div>' +
+      '<div class="request-meta-value' + (valueClass ? ' ' + valueClass : '') + '">' +
+        escapeHtml(value || '—') +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderMetaItemWithSla(label, value, slaInfo) {
+    var slaHtml = slaInfo
+      ? '<div class="request-sla-badge ' + slaInfo.class + '">' + escapeHtml(slaInfo.text) + '</div>'
+      : '';
+    return '<div class="request-meta-item">' +
+      '<div class="request-meta-label">' + escapeHtml(label) + '</div>' +
+      '<div class="request-meta-value">' + escapeHtml(value || '—') + '</div>' +
+      slaHtml +
+    '</div>';
+  }
+
+  /* ---------------- Timeline ---------------- */
+  function buildTimeline(request, stageHistory) {
+    var currentStage = pickField(request, ['current_stage', 'stage']) || pickField(request, ['status']);
+    var finalStatus = pickField(request, ['status']);
+
+    // Build a map of stage → history entry
+    var historyMap = {};
+    (stageHistory || []).forEach(function (h) {
+      var stage = pickField(h, ['stage', 'stage_name', 'to_stage']);
+      if (stage) historyMap[stage] = h;
     });
 
-    // إضافة rejected في النهاية لو الطلب مرفوض
-    if (isRejected) {
-      var rejectedEntry = history.find(function (h) { return h.to_stage === 'rejected'; });
-      var rejectedDate = rejectedEntry ? formatDateTime(rejectedEntry.moved_at) : formatDate(request.decided_at);
-      var rejectedNotes = request.rejection_reason || (rejectedEntry && rejectedEntry.notes);
+    var items = [];
 
-      itemsHtml += '' +
+    // Render fixed stages in order
+    STAGE_ORDER.forEach(function (stage, idx) {
+      var history = historyMap[stage];
+      var isCompleted = false;
+      var isCurrent = false;
+      var isRejected = false;
+      var date = null;
+      var notes = null;
+
+      // Check status field
+      if (history) {
+        var histStatus = pickField(history, ['status']) || '';
+        if (histStatus === 'completed' || histStatus === 'done') isCompleted = true;
+        else if (histStatus === 'rejected') isRejected = true;
+        else if (histStatus === 'current' || histStatus === 'in_progress') isCurrent = true;
+        date = pickField(history, ['completed_at', 'created_at', 'updated_at']);
+        notes = pickField(history, ['notes', 'comment', 'reason']);
+      }
+
+      // Compare against current stage if not from history
+      if (!history && currentStage) {
+        var currentIdx = STAGE_ORDER.indexOf(currentStage);
+        if (currentIdx > idx) isCompleted = true;
+        else if (currentIdx === idx) isCurrent = true;
+      }
+
+      // If final status is rejected, mark rejected stage
+      if (finalStatus === 'rejected' && (currentStage === stage || isRejected)) {
+        isRejected = true;
+        isCurrent = false;
+      }
+
+      var cls = 'timeline-item';
+      if (isCompleted) cls += ' completed';
+      if (isCurrent) cls += ' current';
+      if (isRejected) cls += ' rejected';
+
+      items.push(
+        '<div class="' + cls + '">' +
+          '<div class="timeline-header">' +
+            '<span class="timeline-stage">' + escapeHtml(getStageLabel(stage)) + '</span>' +
+            (date ? '<span class="timeline-date">' + escapeHtml(formatDate(date)) + '</span>' : '') +
+          '</div>' +
+          (isRejected
+            ? '<p class="timeline-desc">تم رفض الطلب في هذه المرحلة</p>'
+            : isCurrent
+              ? '<p class="timeline-desc">المرحلة الحالية — جاري المراجعة</p>'
+              : isCompleted
+                ? '<p class="timeline-desc">تم اجتياز هذه المرحلة</p>'
+                : '<p class="timeline-desc">لم تبدأ بعد</p>') +
+          (notes ? '<div class="timeline-notes' + (isRejected ? ' rejected' : '') + '">' + escapeHtml(notes) + '</div>' : '') +
+        '</div>'
+      );
+    });
+
+    // Add approval/rejection terminal stage if applicable
+    if (finalStatus === 'approved') {
+      var approvalDate = pickField(request, ['approved_at', 'updated_at']);
+      items.push(
+        '<div class="timeline-item completed">' +
+          '<div class="timeline-header">' +
+            '<span class="timeline-stage">' + escapeHtml(getStageLabel('approved')) + '</span>' +
+            (approvalDate ? '<span class="timeline-date">' + escapeHtml(formatDate(approvalDate)) + '</span>' : '') +
+          '</div>' +
+          '<p class="timeline-desc">تم اعتماد الأكاديمية رسمياً</p>' +
+        '</div>'
+      );
+    } else if (finalStatus === 'rejected') {
+      var rejectDate = pickField(request, ['rejected_at', 'updated_at']);
+      var rejectReason = pickField(request, ['rejection_reason', 'reject_reason']);
+      items.push(
         '<div class="timeline-item rejected">' +
           '<div class="timeline-header">' +
-            '<div class="timeline-stage">مرفوض</div>' +
-            '<div class="timeline-date">' + rejectedDate + '</div>' +
+            '<span class="timeline-stage">' + escapeHtml(getStageLabel('rejected')) + '</span>' +
+            (rejectDate ? '<span class="timeline-date">' + escapeHtml(formatDate(rejectDate)) + '</span>' : '') +
           '</div>' +
-          '<p class="timeline-desc">تم رفض طلب الاعتماد</p>' +
-          (rejectedNotes ? '<div class="timeline-notes rejected">' + escapeHtml(rejectedNotes) + '</div>' : '') +
-        '</div>';
+          '<p class="timeline-desc">تم رفض الطلب</p>' +
+          (rejectReason ? '<div class="timeline-notes rejected">' + escapeHtml(rejectReason) + '</div>' : '') +
+        '</div>'
+      );
     }
 
-    return '<div class="timeline">' + itemsHtml + '</div>';
+    return '<div class="timeline-card">' +
+      '<h2 class="timeline-title">' + ICONS.timeline + '<span>مراحل الطلب</span></h2>' +
+      '<div class="timeline">' + items.join('') + '</div>' +
+    '</div>';
   }
 
-  // ============================================
-  // 8. Render Academy Info
-  // ============================================
-  function renderAcademyInfo(academy) {
-    return '' +
-      '<div class="info-grid">' +
-        '<div class="info-card">' +
-          '<div class="info-card-header">' +
-            '<div class="info-card-icon">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>' +
-              '</svg>' +
-            '</div>' +
-            '<h3 class="info-card-title">بيانات الأكاديمية</h3>' +
-          '</div>' +
-          '<div class="info-list">' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">الاسم</span>' +
-              '<span class="info-item-value">' + escapeHtml(academy.name || '—') + '</span>' +
-            '</div>' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">المالك</span>' +
-              '<span class="info-item-value">' + escapeHtml(academy.owner_name || '—') + '</span>' +
-            '</div>' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">سنة التأسيس</span>' +
-              '<span class="info-item-value">' + escapeHtml(String(academy.founded_year || '—')) + '</span>' +
-            '</div>' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">البطاقة الضريبية</span>' +
-              '<span class="info-item-value mono">' + escapeHtml(academy.tax_number || '—') + '</span>' +
-            '</div>' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">السجل التجاري</span>' +
-              '<span class="info-item-value mono">' + escapeHtml(academy.commercial_registry || '—') + '</span>' +
-            '</div>' +
-            (academy.license_number ? '<div class="info-item">' +
-              '<span class="info-item-label">رقم الاعتماد</span>' +
-              '<span class="info-item-value mono">' + escapeHtml(academy.license_number) + '</span>' +
-            '</div>' : '') +
-          '</div>' +
-        '</div>' +
-        '<div class="info-card">' +
-          '<div class="info-card-header">' +
-            '<div class="info-card-icon">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>' +
-              '</svg>' +
-            '</div>' +
-            '<h3 class="info-card-title">بيانات الاتصال</h3>' +
-          '</div>' +
-          '<div class="info-list">' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">البريد الإلكتروني</span>' +
-              '<span class="info-item-value" style="font-size:11px;">' + escapeHtml(academy.email || '—') + '</span>' +
-            '</div>' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">الهاتف</span>' +
-              '<span class="info-item-value mono">' + escapeHtml(academy.phone || '—') + '</span>' +
-            '</div>' +
-            '<div class="info-item">' +
-              '<span class="info-item-label">تاريخ التقديم</span>' +
-              '<span class="info-item-value">' + formatDate(academy.created_at) + '</span>' +
-            '</div>' +
-          '</div>' +
+  /* ---------------- Approved/Rejected Banners ---------------- */
+  function renderBanners(request) {
+    var status = pickField(request, ['status']);
+    var out = '';
+
+    if (status === 'approved') {
+      var approvedAt = pickField(request, ['approved_at', 'updated_at']);
+      out += '<div class="approved-banner">' +
+        '<div class="approved-banner-icon" aria-hidden="true">' + ICONS.badgeCheck + '</div>' +
+        '<div class="approved-banner-content">' +
+          '<h2 class="approved-banner-title">تم اعتماد أكاديميتك</h2>' +
+          '<p class="approved-banner-text">' +
+            'تهانينا! تم اعتماد الأكاديمية رسمياً من النقابة' +
+            (approvedAt ? ' بتاريخ ' + escapeHtml(formatDate(approvedAt)) : '') +
+            '. يمكنك الآن إصدار الشهادات والاستفادة من خدمات النقابة.' +
+          '</p>' +
         '</div>' +
       '</div>';
+    } else if (status === 'rejected') {
+      var reason = pickField(request, ['rejection_reason', 'reject_reason']);
+      out += '<div class="rejected-banner">' +
+        '<div class="rejected-banner-icon" aria-hidden="true">' + ICONS.x + '</div>' +
+        '<div class="rejected-banner-content">' +
+          '<h2 class="rejected-banner-title">تم رفض الطلب</h2>' +
+          '<p class="rejected-banner-text">' +
+            (reason ? escapeHtml(reason) : 'يرجى التواصل مع النقابة لمعرفة أسباب الرفض وإمكانية إعادة التقديم.') +
+          '</p>' +
+        '</div>' +
+      '</div>';
+    }
+
+    return out;
   }
 
-  // ============================================
-  // 9. Render Documents
-  // ============================================
+  /* ---------------- Info Cards ---------------- */
+  function renderInfoCards(request, academy) {
+    var academyName = (academy && academy.name)
+      || pickField(request, ['academy_name'])
+      || '—';
+    var contactEmail = (academy && academy.contact_email)
+      || pickField(request, ['contact_email'])
+      || '';
+    var contactPhone = (academy && academy.contact_phone)
+      || pickField(request, ['contact_phone'])
+      || '';
+    var city = (academy && academy.city)
+      || pickField(request, ['city'])
+      || '';
+    var address = (academy && academy.address)
+      || pickField(request, ['address'])
+      || '';
+
+    var academyCard = '<div class="info-card">' +
+      '<div class="info-card-header">' +
+        '<div class="info-card-icon" aria-hidden="true">' + ICONS.academy + '</div>' +
+        '<h3 class="info-card-title">بيانات الأكاديمية</h3>' +
+      '</div>' +
+      '<div class="info-list">' +
+        renderInfoItem('الاسم', academyName) +
+        (city ? renderInfoItem('المدينة', city) : '') +
+        (address ? renderInfoItem('العنوان', address) : '') +
+        (contactEmail ? renderInfoItem('البريد', contactEmail, 'mono') : '') +
+        (contactPhone ? renderInfoItem('الهاتف', contactPhone, 'mono') : '') +
+      '</div>' +
+    '</div>';
+
+    return '<div class="info-grid">' + academyCard + '</div>';
+  }
+
+  function renderInfoItem(label, value, valueClass) {
+    return '<div class="info-item">' +
+      '<span class="info-item-label">' + escapeHtml(label) + '</span>' +
+      '<span class="info-item-value' + (valueClass ? ' ' + valueClass : '') + '">' +
+        escapeHtml(value || '—') +
+      '</span>' +
+    '</div>';
+  }
+
+  /* ---------------- Documents (optional) ---------------- */
   function renderDocuments(request) {
-    var docs = [
-      { name: 'السجل التجاري', key: 'commercial_registry_url', required: true },
-      { name: 'البطاقة الضريبية', key: 'tax_card_url', required: true },
-      { name: 'صورة المكان', key: 'place_photo_url', required: true },
-      { name: 'إيصال التحويل', key: 'payment_receipt_url', required: false }
-    ];
+    // Try to read documents list — field name varies
+    var docs = pickField(request, ['documents', 'attachments', 'files']);
+    if (!docs) return '';
 
-    var itemsHtml = docs.map(function (doc) {
-      var url = request[doc.key];
-      var isUploaded = !!url;
-      var statusText = isUploaded ? 'تم الرفع' : (doc.required ? 'مفقود' : 'اختياري');
-      var statusCls = isUploaded ? 'uploaded' : (doc.required ? 'missing' : '');
+    var arr = [];
+    if (Array.isArray(docs)) arr = docs;
+    else if (typeof docs === 'object') {
+      Object.keys(docs).forEach(function (k) {
+        arr.push({ name: k, url: docs[k], uploaded: !!docs[k] });
+      });
+    }
 
-      return '' +
-        '<div class="document-item">' +
-          '<div class="document-icon">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' +
-              '<polyline points="14 2 14 8 20 8"></polyline>' +
-            '</svg>' +
-          '</div>' +
-          '<div class="document-info">' +
-            '<div class="document-name">' + escapeHtml(doc.name) + '</div>' +
-            '<div class="document-status ' + statusCls + '">' + statusText + '</div>' +
-          '</div>' +
-          (isUploaded ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" class="document-action" title="عرض">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>' +
-              '<circle cx="12" cy="12" r="3"></circle>' +
-            '</svg>' +
-          '</a>' : '') +
-        '</div>';
+    if (!arr.length) return '';
+
+    var itemsHtml = arr.map(function (d) {
+      var name = d.name || d.label || 'مستند';
+      var url = d.url || d.link || '';
+      var uploaded = !!url;
+      var statusText = uploaded ? 'مرفوع' : 'مفقود';
+      var statusClass = uploaded ? 'uploaded' : 'missing';
+
+      return '<div class="document-item">' +
+        '<div class="document-icon" aria-hidden="true">' + ICONS.doc + '</div>' +
+        '<div class="document-info">' +
+          '<div class="document-name">' + escapeHtml(name) + '</div>' +
+          '<div class="document-status ' + statusClass + '">' + statusText + '</div>' +
+        '</div>' +
+        (uploaded
+          ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="document-action" aria-label="تحميل">' + ICONS.download + '</a>'
+          : '') +
+      '</div>';
     }).join('');
 
-    return '' +
-      '<div class="info-card" style="margin-bottom:24px;">' +
-        '<div class="info-card-header">' +
-          '<div class="info-card-icon">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
-              '<polyline points="17 8 12 3 7 8"></polyline>' +
-              '<line x1="12" y1="3" x2="12" y2="15"></line>' +
-            '</svg>' +
-          '</div>' +
-          '<h3 class="info-card-title">المستندات المرفوعة</h3>' +
-        '</div>' +
-        '<div class="documents-grid">' + itemsHtml + '</div>' +
-      '</div>';
+    return '<div class="timeline-card">' +
+      '<h2 class="timeline-title">' + ICONS.doc + '<span>المستندات</span></h2>' +
+      '<div class="documents-grid">' + itemsHtml + '</div>' +
+    '</div>';
   }
 
-  // ============================================
-  // 10. Show Error
-  // ============================================
+  /* ---------------- Main render ---------------- */
+  function renderRequest(request, stages, academy) {
+    var container = $('#trackResult');
+    if (!container) return;
+
+    var status = pickField(request, ['status']);
+    var html = '';
+
+    // Banners first (approved/rejected)
+    html += renderBanners(request);
+
+    // Header card
+    html += renderRequestHeader(request, academy);
+
+    // Info cards
+    html += renderInfoCards(request, academy);
+
+    // Timeline
+    html += buildTimeline(request, stages || []);
+
+    // Documents (optional)
+    html += renderDocuments(request);
+
+    container.innerHTML = html;
+  }
+
+  /* ---------------- Error / State ---------------- */
   function showError(title, text) {
-    var loader = $('trackLoader');
-    var error = $('trackError');
-    var result = $('trackResult');
-
-    if (loader) loader.classList.remove('show');
-    if (result) result.classList.remove('show');
-    if (error) {
-      error.classList.add('show');
-      setText('errorTitle', title);
-      setText('errorText', text);
-    }
+    var errEl = $('#trackError');
+    var titleEl = $('#errorTitle');
+    var textEl = $('#errorText');
+    if (titleEl) titleEl.textContent = title || 'لم يتم العثور على الطلب';
+    if (textEl) textEl.textContent = text || 'تأكد من رقم الطلب أو تواصل مع النقابة';
+    if (errEl) errEl.classList.add('show');
+    hide($('#trackLoader'));
+    hide($('#trackResult'));
   }
 
-  // ============================================
-  // 11. Perform Search
-  // ============================================
-  function performSearch(requestNumber) {
-    if (!requestNumber) {
-      toast('أدخل رقم الطلب', 'error');
+  function hideAllStates() {
+    hide($('#trackError'));
+    hide($('#trackLoader'));
+    hide($('#trackResult'));
+  }
+
+  /* ---------------- Main search ---------------- */
+  function searchRequest(rawCode) {
+    if (state.searching) return;
+
+    var code = String(rawCode || '').trim().toUpperCase();
+    if (!code) {
+      showError('الرجاء إدخال رقم الطلب', 'رقم الطلب مطلوب للمتابعة');
       return;
     }
 
-    if (state.loading) return;
-    state.loading = true;
+    if (code.length < 4) {
+      showError('رقم غير صحيح', 'رقم الطلب يجب أن يكون 4 أحرف على الأقل');
+      return;
+    }
 
-    var loader = $('trackLoader');
-    var error = $('trackError');
-    var result = $('trackResult');
-    var btn = $('trackBtn');
+    state.searching = true;
+    state.lastQuery = code;
 
+    hideAllStates();
+    var loader = $('#trackLoader');
     if (loader) loader.classList.add('show');
-    if (error) error.classList.remove('show');
-    if (result) result.classList.remove('show');
-    if (btn) { btn.disabled = true; btn.textContent = 'جاري البحث...'; }
 
-    state.requestNumber = requestNumber;
-    state.request = null;
-    state.academy = null;
-    state.history = [];
+    var trackBtn = $('#trackBtn');
+    if (trackBtn) {
+      trackBtn.disabled = true;
+      trackBtn.textContent = 'جاري البحث...';
+    }
 
-    loadRequest(requestNumber)
+    // Update URL
+    try {
+      var url = new URL(window.location.href);
+      url.searchParams.set('req', code);
+      window.history.replaceState({}, '', url.toString());
+    } catch (e) {}
+
+    fetchRequest(code)
       .then(function (request) {
         if (!request) {
-          if (loader) loader.classList.remove('show');
-          if (btn) { btn.disabled = false; btn.textContent = 'متابعة'; }
-          showError('لم يتم العثور على الطلب', 'تأكد من رقم الطلب أو تواصل مع النقابة.');
-          logSearch(requestNumber, 0);
-          state.loading = false;
+          showError('لم يتم العثور على الطلب', 'تأكد من رقم الطلب أو تواصل مع النقابة');
+          logSearch(code, false);
           return;
         }
 
-        state.request = request;
+        state.lastRequest = request;
 
-        // Load academy + history in parallel
+        var academyId = pickField(request, ['academy_id']);
+        var requestId = pickField(request, ['id', 'request_id']);
+
         return Promise.all([
-          loadAcademy(request.academy_id),
-          loadHistory(request.id)
+          fetchStages(requestId),
+          fetchAcademy(academyId)
         ]).then(function (results) {
-          state.academy = results[0];
-          state.history = results[1] || [];
+          var stages = results[0] || [];
+          var academy = results[1] || null;
 
-          if (loader) loader.classList.remove('show');
-          if (btn) { btn.disabled = false; btn.textContent = 'متابعة'; }
+          state.lastStages = stages;
+          state.lastAcademy = academy;
 
-          renderResult();
-          logSearch(requestNumber, 1);
-          state.loading = false;
+          hide($('#trackError'));
+          hide($('#trackLoader'));
+
+          renderRequest(request, stages, academy);
+
+          var resultEl = $('#trackResult');
+          if (resultEl) resultEl.classList.add('show');
+
+          logSearch(code, true);
         });
       })
       .catch(function (err) {
-        if (loader) loader.classList.remove('show');
-        if (btn) { btn.disabled = false; btn.textContent = 'متابعة'; }
-        showError('حدث خطأ', err.message || 'يرجى المحاولة مرة أخرى.');
-        logDebug('Search error:', err.message);
-        state.loading = false;
+        var msg = (err && err.message) || 'حدث خطأ أثناء البحث';
+        showError('تعذر البحث', msg);
+        logSearch(code, false);
+      })
+      .then(function () {
+        state.searching = false;
+        if (trackBtn) {
+          trackBtn.disabled = false;
+          trackBtn.textContent = getSetting('app_identity.track_button_text', 'متابعة');
+        }
       });
   }
 
-  // ============================================
-  // 12. Handle Submit
-  // ============================================
-  function handleSubmit(e) {
-    if (e) e.preventDefault();
-    var input = $('requestNumberInput');
-    var value = input ? input.value.trim().toUpperCase() : '';
-    if (!value) {
-      toast('أدخل رقم الطلب', 'error');
-      if (input) input.focus();
-      return false;
+  /* ---------------- Events ---------------- */
+  function bindEvents() {
+    var form = $('#trackForm');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var input = $('#requestNumberInput');
+        searchRequest(input ? input.value : '');
+      });
     }
-    performSearch(value);
+
+    var input = $('#requestNumberInput');
+    if (input) {
+      input.addEventListener('input', function () {
+        var pos = input.selectionStart;
+        var upper = input.value.toUpperCase();
+        if (input.value !== upper) {
+          input.value = upper;
+          try { input.setSelectionRange(pos, pos); } catch (e) {}
+        }
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          searchRequest(input.value);
+        }
+      });
+    }
+  }
+
+  /* ---------------- URL auto-search ---------------- */
+  function readFromUrl() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get('req') || params.get('code');
+      if (code) {
+        var input = $('#requestNumberInput');
+        if (input) input.value = code.toUpperCase();
+        searchRequest(code);
+        return true;
+      }
+    } catch (e) {}
     return false;
   }
 
-  // ============================================
-  // 13. Init
-  // ============================================
+  /* ---------------- Init ---------------- */
   function init() {
     if (state.initialized) return;
     state.initialized = true;
 
-    // Footer
-    setText('footerCopyright', getSetting('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات'));
-    setText('footerPresidentLabel', getSetting('app_identity.president_label', 'النقيب العام:'));
-    setText('footerPresidentName', getSetting('app_identity.president_name', 'المحاسب / محمود جميل'));
+    state.sb = getSb();
 
-    // Form
-    var form = $('trackForm');
-    if (form) form.addEventListener('submit', handleSubmit);
+    applyDynamicTexts();
+    bindEvents();
 
-    // Input formatting
-    var input = $('requestNumberInput');
-    if (input) {
-      input.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();
-      });
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); }
-      });
+    if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+      try {
+        window.AppSettings.onChange(function () {
+          applyDynamicTexts();
+        });
+      } catch (e) {}
     }
 
-    // AppSettings changes
-    if (window.AppSettings && window.AppSettings.onChange) {
-      window.AppSettings.onChange(function (cache, key) {
-        if (!key || key === 'app_identity') {
-          setText('footerCopyright', getSetting('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات'));
-          setText('footerPresidentLabel', getSetting('app_identity.president_label', 'النقيب العام:'));
-          setText('footerPresidentName', getSetting('app_identity.president_name', 'المحاسب / محمود جميل'));
-        }
-      });
-    }
+    setTimeout(applyDynamicTexts, 600);
+    setTimeout(applyDynamicTexts, 1800);
 
-    // Auto-load from URL: ?request=REQ-2026-XXXX
-    var params = new URLSearchParams(window.location.search);
-    var reqNum = params.get('request') || params.get('number');
-    if (reqNum) {
-      if (input) input.value = reqNum.toUpperCase();
-      setTimeout(function () { performSearch(reqNum.toUpperCase()); }, 400);
-    }
-
-    logDebug('Track page initialized');
+    setTimeout(function () {
+      readFromUrl();
+    }, 400);
   }
 
-  // ============================================
-  // 14. Public API
-  // ============================================
   window.TrackPage = {
     initialized: true,
     init: init,
-    search: performSearch,
+    search: searchRequest,
+    refresh: applyDynamicTexts,
     getState: function () { return state; }
   };
 
@@ -715,5 +770,4 @@
   } else {
     init();
   }
-
 })();
