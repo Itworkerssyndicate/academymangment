@@ -1,303 +1,543 @@
-// ============================================
-// [BONUS] ITWS Platform - Dynamic Title & Favicon
-// Path: assets/js/app-title.js
-// ============================================
-// إصلاح: يقرأ من app_identity (بدل general)
-// إصلاح: يستخدم AppSettings كأولوية
-// يعمل على كل الصفحات
-// بدون إيموجي
-// ============================================
+/* ============================================================
+   ITWS Platform — App Title Manager V2
+   File: assets/js/app-title.js
+   Description: Sync <title>, favicon, meta tags, OG tags
+                from settings + realtime updates
+
+   Load order: AFTER labels.js
+
+   Features:
+   - Updates document.title from settings + page context
+   - Updates favicon (from logo_url)
+   - Updates meta description
+   - Updates OG tags (og:title, og:description, og:image, og:site_name)
+   - Updates Twitter Card tags
+   - Updates theme-color meta (from active theme)
+   - Updates apple-mobile-web-app-title
+   - Page-specific titles via [data-page-title] or meta name="page-name"
+   - Dynamic updates when settings change (realtime)
+   - Events: itws:app-title-changed
+
+   Rules:
+   - No emoji
+   - ES5-style IIFE
+   - No hardcoded strings (all from settings/labels)
+   - Never breaks if settings not loaded (uses fallbacks)
+   ============================================================ */
 
 (function () {
   'use strict';
 
-  if (window.AppTitle && window.AppTitle.initialized) return;
+  if (window.AppTitle && window.AppTitle._initialized) {
+    return;
+  }
 
-  var cfg = window.ITWS_CONFIG;
-  if (!cfg) return;
+  /* ============================================================
+     1. HELPERS
+     ============================================================ */
 
-  var APP_NAME = cfg.APP_NAME || 'نقابة تكنولوجيا المعلومات والبرمجيات';
-  var COMMITTEE_NAME = 'لجنة التحول الرقمي والتدريب';
-
-  var state = {
-    channel: null,
-    currentLogo: null,
-    currentTitle: null,
-    initialized: false
-  };
-
-  // ============================================
-  // 1. تعيين عنوان الصفحة
-  // ============================================
-  function setTitle(unionName, committeeName) {
-    var finalTitle = unionName || APP_NAME;
-    if (committeeName) {
-      finalTitle += ' | ' + committeeName;
-    }
-    if (document.title !== finalTitle) {
-      document.title = finalTitle;
-      state.currentTitle = finalTitle;
-      logDebug('Title set:', finalTitle);
+  function log(level, msg, data) {
+    var cfg = window.ITWS_CONFIG || {};
+    if (level === 'error' || (cfg.DEBUG && level === 'debug')) {
+      try {
+        var args = ['[AppTitle]', msg];
+        if (data !== undefined) args.push(data);
+        if (level === 'error') console.error.apply(console, args);
+        else console.log.apply(console, args);
+      } catch (e) {}
     }
   }
 
-  // ============================================
-  // 2. تعيين الـ Favicon
-  // ============================================
-  function setFavicon(logoUrl) {
-    if (!logoUrl) return;
-    if (state.currentLogo === logoUrl) return;
-    state.currentLogo = logoUrl;
-
-    // احذف القديم
-    var oldIcons = document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="shortcut icon"]');
-    oldIcons.forEach(function (el) { el.remove(); });
-
-    // نوع الملف
-    var ext = logoUrl.split('.').pop().split('?')[0].toLowerCase();
-    var typeMap = {
-      'png': 'image/png',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'svg': 'image/svg+xml',
-      'webp': 'image/webp',
-      'ico': 'image/x-icon',
-      'gif': 'image/gif'
-    };
-    var mime = typeMap[ext] || 'image/png';
-
-    // icon عادي
-    var icon = document.createElement('link');
-    icon.rel = 'icon';
-    icon.type = mime;
-    icon.href = logoUrl;
-    document.head.appendChild(icon);
-
-    // shortcut icon
-    var shortcut = document.createElement('link');
-    shortcut.rel = 'shortcut icon';
-    shortcut.type = mime;
-    shortcut.href = logoUrl;
-    document.head.appendChild(shortcut);
-
-    // apple-touch-icon
-    var appleIcon = document.createElement('link');
-    appleIcon.rel = 'apple-touch-icon';
-    appleIcon.href = logoUrl;
-    document.head.appendChild(appleIcon);
-
-    logDebug('Favicon set:', logoUrl);
-  }
-
-  // ============================================
-  // 3. تعيين Meta tags
-  // ============================================
-  function setMetaTags(unionName, committeeName, logoUrl) {
-    var desc = unionName + ' - ' + committeeName + ' | النظام الرسمي للتحقق من الشهادات';
-
-    var descEl = document.querySelector('meta[name="description"]');
-    if (descEl) descEl.setAttribute('content', desc);
-
-    var ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', unionName);
-
-    var ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) ogDesc.setAttribute('content', desc);
-
-    var ogImage = document.querySelector('meta[property="og:image"]');
-    if (ogImage && logoUrl) ogImage.setAttribute('content', logoUrl);
-
-    var twTitle = document.querySelector('meta[name="twitter:title"]');
-    if (twTitle) twTitle.setAttribute('content', unionName);
-
-    var twDesc = document.querySelector('meta[name="twitter:description"]');
-    if (twDesc) twDesc.setAttribute('content', desc);
-
-    var twImage = document.querySelector('meta[name="twitter:image"]');
-    if (twImage && logoUrl) twImage.setAttribute('content', logoUrl);
-  }
-
-  // ============================================
-  // 4. تطبيق البيانات من settings object
-  // ============================================
-  function applySettings(s) {
-    if (!s) return;
-
-    var unionName = s.union_name || APP_NAME;
-    var committeeName = s.committee_name || COMMITTEE_NAME;
-    var logoUrl = s.logo_url || null;
-
-    setTitle(unionName, committeeName);
-    setMetaTags(unionName, committeeName, logoUrl);
-
-    if (logoUrl) {
-      setFavicon(logoUrl);
-    }
-  }
-
-  // ============================================
-  // 5. تحميل من Supabase
-  // ============================================
-  function loadFromSupabase() {
-    if (!window.sb) return Promise.resolve(null);
-
-    return window.sb
-      .from('settings')
-      .select('value')
-      .eq('key', 'app_identity')
-      .maybeSingle()
-      .then(function (res) {
-        if (res.error || !res.data || !res.data.value) {
-          logDebug('No app_identity in Supabase');
-          return null;
-        }
-        return res.data.value;
-      })
-      .catch(function (err) {
-        logDebug('Supabase load error:', err.message);
-        return null;
-      });
-  }
-
-  // ============================================
-  // 6. تحميل من AppSettings (أسرع - localStorage)
-  // ============================================
-  function loadFromAppSettings() {
-    if (!window.AppSettings || !window.AppSettings.get) return null;
-
+  function getSetting(path, fallback) {
     try {
-      return {
-        union_name: window.AppSettings.get('app_identity.union_name', APP_NAME),
-        committee_name: window.AppSettings.get('app_identity.committee_name', COMMITTEE_NAME),
-        logo_url: window.AppSettings.get('app_identity.logo_url', null)
-      };
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // ============================================
-  // 7. الاستماع للتغييرات (Realtime)
-  // ============================================
-  function subscribe() {
-    if (!window.sb || state.channel) return;
-
-    try {
-      state.channel = window.sb
-        .channel('itws-app-title')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.app_identity' },
-          function (payload) {
-            var newValue = payload.new && payload.new.value;
-            if (newValue) {
-              applySettings(newValue);
-              logDebug('Realtime update:', newValue);
-            }
-          }
-        )
-        .subscribe(function (status) {
-          logDebug('Channel status:', status);
-        });
-    } catch (e) {
-      logDebug('Subscribe error:', e.message);
-    }
-  }
-
-  // ============================================
-  // 8. الاستماع لـ AppSettings (fallback أسرع)
-  // ============================================
-  function subscribeAppSettings() {
-    if (!window.AppSettings || !window.AppSettings.onChange) return;
-
-    window.AppSettings.onChange(function (cache, changedKey) {
-      if (changedKey === 'app_identity' || !changedKey) {
-        var data = loadFromAppSettings();
-        if (data) applySettings(data);
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        var v = window.AppSettings.get(path);
+        return (v === undefined || v === null) ? fallback : v;
       }
+    } catch (e) {}
+    return fallback;
+  }
+
+  function getLabel(key, fallback) {
+    try {
+      if (window.Labels && typeof window.Labels.t === 'function') {
+        return window.Labels.t(key, fallback);
+      }
+    } catch (e) {}
+    return fallback;
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function dispatchEvent(name, detail) {
+    try {
+      window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+    } catch (e) {}
+  }
+
+  /* ============================================================
+     2. META TAG HELPERS
+     ============================================================ */
+
+  function getOrCreateMeta(attribute, value) {
+    if (!attribute || !value) return null;
+    var selector = 'meta[' + attribute + '="' + value + '"]';
+    var el = document.querySelector(selector);
+    if (el) return el;
+
+    el = document.createElement('meta');
+    el.setAttribute(attribute, value);
+    document.head.appendChild(el);
+    return el;
+  }
+
+  function setMetaName(name, content) {
+    if (!name) return;
+    var el = getOrCreateMeta('name', name);
+    if (el) el.setAttribute('content', content == null ? '' : String(content));
+  }
+
+  function setMetaProperty(prop, content) {
+    if (!prop) return;
+    var el = getOrCreateMeta('property', prop);
+    if (el) el.setAttribute('content', content == null ? '' : String(content));
+  }
+
+  function getOrCreateLink(rel, extras) {
+    var selector = 'link[rel="' + rel + '"]';
+    var el = document.querySelector(selector);
+    if (!el) {
+      el = document.createElement('link');
+      el.setAttribute('rel', rel);
+      document.head.appendChild(el);
+    }
+    if (extras && typeof extras === 'object') {
+      Object.keys(extras).forEach(function (k) {
+        el.setAttribute(k, extras[k]);
+      });
+    }
+    return el;
+  }
+
+  /* ============================================================
+     3. PAGE CONTEXT
+     ============================================================ */
+
+  /**
+   * Detect current page identifier from:
+   * 1. <body data-page="...">
+   * 2. <meta name="page-name" content="...">
+   * 3. URL pathname (fallback)
+   */
+  function detectPageName() {
+    try {
+      // 1. body data-page
+      var bodyPage = document.body && document.body.getAttribute('data-page');
+      if (bodyPage) return bodyPage;
+
+      // 2. meta name="page-name"
+      var metaPage = document.querySelector('meta[name="page-name"]');
+      if (metaPage) {
+        var content = metaPage.getAttribute('content');
+        if (content) return content;
+      }
+    } catch (e) {}
+
+    // 3. URL pathname
+    try {
+      var path = window.location.pathname || '';
+      var filename = path.split('/').pop() || '';
+      filename = filename.replace(/\.html?$/i, '');
+      if (filename) return filename;
+    } catch (e) {}
+
+    return '';
+  }
+
+  /**
+   * Get page-specific title from label.
+   * Tries: pages.<name>.title → falls back to page name
+   */
+  function getPageTitle(pageName) {
+    if (!pageName) return '';
+
+    var key = 'pages.' + pageName + '.title';
+    var title = getLabel(key, '');
+    if (title && title !== key) return title;
+
+    // Fallback: page titles defined in settings
+    var settingsTitle = getSetting('pages.titles.' + pageName, '');
+    if (settingsTitle) return settingsTitle;
+
+    return '';
+  }
+
+  /* ============================================================
+     4. CORE UPDATES
+     ============================================================ */
+
+  function updateTitle() {
+    var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
+    var pageName = detectPageName();
+    var pageTitle = getPageTitle(pageName);
+
+    // Format: [Page Title] | [Union Name]  OR  [Union Name]
+    var fullTitle;
+    if (pageTitle && unionName) {
+      fullTitle = pageTitle + ' | ' + unionName;
+    } else if (pageTitle) {
+      fullTitle = pageTitle;
+    } else if (unionName) {
+      fullTitle = unionName;
+    } else {
+      fullTitle = 'ITWS Platform';
+    }
+
+    if (document.title !== fullTitle) {
+      document.title = fullTitle;
+      log('debug', 'Title updated', fullTitle);
+      return true;
+    }
+    return false;
+  }
+
+  function updateFavicon() {
+    var logoUrl = getSetting('app_identity.logo_url', '');
+    if (!logoUrl) return false;
+
+    // Get or create main favicon
+    var mainIcon = getOrCreateLink('icon');
+    mainIcon.setAttribute('href', logoUrl);
+
+    // Determine MIME type based on extension
+    var ext = (logoUrl.split('.').pop() || '').toLowerCase().split('?')[0];
+    var type = 'image/png';
+    if (ext === 'svg') type = 'image/svg+xml';
+    else if (ext === 'ico') type = 'image/x-icon';
+    else if (ext === 'jpg' || ext === 'jpeg') type = 'image/jpeg';
+    else if (ext === 'webp') type = 'image/webp';
+    else if (ext === 'png') type = 'image/png';
+
+    mainIcon.setAttribute('type', type);
+
+    // Apple touch icon
+    var appleIcon = getOrCreateLink('apple-touch-icon');
+    appleIcon.setAttribute('href', logoUrl);
+
+    // Shortcut icon
+    var shortIcon = getOrCreateLink('shortcut icon');
+    shortIcon.setAttribute('href', logoUrl);
+    shortIcon.setAttribute('type', type);
+
+    log('debug', 'Favicon updated', logoUrl);
+    return true;
+  }
+
+  function updateMetaDescription() {
+    var description = getSetting('app_identity.meta_description', '');
+    if (!description) {
+      var unionName = getSetting('app_identity.union_name', '');
+      var committeeName = getSetting('app_identity.committee_name', '');
+      if (unionName) {
+        description = committeeName
+          ? unionName + ' — ' + committeeName
+          : unionName;
+      }
+    }
+
+    if (description) {
+      setMetaName('description', description);
+    }
+
+    return description;
+  }
+
+  function updateOGTags() {
+    var unionName = getSetting('app_identity.union_name', '');
+    var committeeName = getSetting('app_identity.committee_name', '');
+    var logoUrl = getSetting('app_identity.logo_url', '');
+    var websiteUrl = getSetting('app_identity.website_url', '');
+    var pageName = detectPageName();
+    var pageTitle = getPageTitle(pageName);
+
+    // Title (page + union)
+    var ogTitle = document.title || unionName;
+    if (pageTitle && unionName) ogTitle = pageTitle + ' | ' + unionName;
+    else if (unionName) ogTitle = unionName;
+
+    setMetaProperty('og:title', ogTitle);
+    setMetaProperty('og:site_name', unionName || 'ITWS Platform');
+    setMetaProperty('og:type', 'website');
+
+    // Description
+    var description = getSetting('app_identity.meta_description', '');
+    if (!description && committeeName && unionName) {
+      description = unionName + ' — ' + committeeName;
+    }
+    if (description) {
+      setMetaProperty('og:description', description);
+    }
+
+    // Image
+    if (logoUrl) {
+      setMetaProperty('og:image', logoUrl);
+    }
+
+    // URL
+    if (websiteUrl) {
+      setMetaProperty('og:url', websiteUrl);
+    } else {
+      try {
+        setMetaProperty('og:url', window.location.href);
+      } catch (e) {}
+    }
+
+    // Locale
+    setMetaProperty('og:locale', 'ar_EG');
+
+    log('debug', 'OG tags updated');
+  }
+
+  function updateTwitterTags() {
+    var unionName = getSetting('app_identity.union_name', '');
+    var logoUrl = getSetting('app_identity.logo_url', '');
+
+    setMetaName('twitter:card', 'summary');
+    setMetaName('twitter:title', document.title || unionName);
+    if (logoUrl) {
+      setMetaName('twitter:image', logoUrl);
+    }
+
+    var description = getSetting('app_identity.meta_description', '');
+    if (description) {
+      setMetaName('twitter:description', description);
+    }
+  }
+
+  function updateThemeColorMeta() {
+    // Read --bg CSS variable from current theme
+    try {
+      var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (bg) {
+        setMetaName('theme-color', bg);
+      }
+    } catch (e) {}
+  }
+
+  function updateAppManifest() {
+    var unionName = getSetting('app_identity.union_name', '');
+    if (!unionName) return;
+
+    // Apple mobile web app title
+    setMetaName('apple-mobile-web-app-title', unionName);
+    setMetaName('application-name', unionName);
+
+    // Apple mobile web app capable
+    var metaApple = getOrCreateMeta('name', 'apple-mobile-web-app-capable');
+    if (metaApple) metaApple.setAttribute('content', 'yes');
+
+    var metaStatus = getOrCreateMeta('name', 'apple-mobile-web-app-status-bar-style');
+    if (metaStatus) metaStatus.setAttribute('content', 'default');
+  }
+
+  function updateLangDir() {
+    try {
+      var lang = getSetting('behavior.language', 'ar');
+      if (lang === 'en') {
+        document.documentElement.setAttribute('lang', 'en');
+        document.documentElement.setAttribute('dir', 'ltr');
+      } else {
+        document.documentElement.setAttribute('lang', 'ar');
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    } catch (e) {}
+  }
+
+  /* ============================================================
+     5. MAIN UPDATE
+     ============================================================ */
+
+  function updateAll() {
+    var changed = false;
+
+    try {
+      if (updateTitle()) changed = true;
+    } catch (e) { log('error', 'updateTitle failed', e); }
+
+    try { updateFavicon(); } catch (e) { log('error', 'updateFavicon failed', e); }
+    try { updateMetaDescription(); } catch (e) { log('error', 'updateMetaDescription failed', e); }
+    try { updateOGTags(); } catch (e) { log('error', 'updateOGTags failed', e); }
+    try { updateTwitterTags(); } catch (e) { log('error', 'updateTwitterTags failed', e); }
+    try { updateThemeColorMeta(); } catch (e) { log('error', 'updateThemeColorMeta failed', e); }
+    try { updateAppManifest(); } catch (e) { log('error', 'updateAppManifest failed', e); }
+    try { updateLangDir(); } catch (e) { log('error', 'updateLangDir failed', e); }
+
+    dispatchEvent('itws:app-title-changed', {
+      title: document.title,
+      pageName: detectPageName()
+    });
+
+    return changed;
+  }
+
+  /* ============================================================
+     6. LISTENERS
+     ============================================================ */
+
+  function setupSettingsListener() {
+    try {
+      if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+        window.AppSettings.onChange(function (settings, changedKey) {
+          // Update on app_identity change, theme change, or full reload
+          if (!changedKey ||
+              changedKey === 'app_identity' ||
+              changedKey === 'theme' ||
+              changedKey === 'behavior') {
+            updateAll();
+          }
+        });
+      }
+    } catch (e) {
+      log('error', 'Settings listener failed', e);
+    }
+
+    // Global events
+    window.addEventListener('itws:settings-changed', function (e) {
+      var key = e && e.detail ? e.detail.key : null;
+      if (!key || key === 'app_identity' || key === 'theme' || key === 'behavior') {
+        updateAll();
+      }
+    });
+
+    window.addEventListener('itws:theme-changed', function () {
+      updateThemeColorMeta();
     });
   }
 
-  // ============================================
-  // 9. التهيئة الرئيسية
-  // ============================================
+  function setupLabelsListener() {
+    try {
+      if (window.Labels && typeof window.Labels.onChange === 'function') {
+        window.Labels.onChange(function (labels, changedKey) {
+          // Update if the changed label affects the title
+          if (!changedKey || (changedKey && changedKey.indexOf('pages.') === 0)) {
+            updateTitle();
+            updateOGTags();
+            updateTwitterTags();
+          }
+        });
+      }
+    } catch (e) {
+      log('error', 'Labels listener failed', e);
+    }
+  }
+
+  /* ============================================================
+     7. INIT
+     ============================================================ */
+
   function init() {
-    if (state.initialized) return;
-    state.initialized = true;
+    // Initial update (sync, no waiting)
+    updateAll();
 
-    // (1) تطبيق الافتراضي فوراً
-    setTitle(APP_NAME, COMMITTEE_NAME);
-
-    // (2) محاولة من AppSettings (سريع - localStorage)
-    var cached = loadFromAppSettings();
-    if (cached) {
-      applySettings(cached);
-    }
-
-    // (3) تحميل من Supabase (أحدث بيانات)
-    if (window.sb) {
-      loadFromSupabase().then(function (data) {
-        if (data) {
-          applySettings(data);
+    // After AppSettings ready → re-update with real values
+    var waitForSettings = function () {
+      return new Promise(function (resolve) {
+        if (window.AppSettings && typeof window.AppSettings.whenReady === 'function') {
+          window.AppSettings.whenReady().then(resolve).catch(resolve);
+        } else if (window.AppSettings && typeof window.AppSettings.isLoaded === 'function' && window.AppSettings.isLoaded()) {
+          resolve();
+        } else {
+          // Wait for event with timeout
+          var done = false;
+          var handler = function () {
+            if (done) return;
+            done = true;
+            window.removeEventListener('itws:settings-loaded', handler);
+            resolve();
+          };
+          window.addEventListener('itws:settings-loaded', handler);
+          setTimeout(function () {
+            if (done) return;
+            done = true;
+            window.removeEventListener('itws:settings-loaded', handler);
+            resolve();
+          }, 3000);
         }
       });
+    };
 
-      // (4) realtime
-      subscribe();
-    } else {
-      // نحاول بعد ثانية (لو Supabase لسه بيتحمل)
-      setTimeout(function () {
-        if (window.sb) {
-          loadFromSupabase().then(function (data) {
-            if (data) applySettings(data);
-          });
-          subscribe();
-        }
-      }, 1000);
-    }
+    waitForSettings().then(function () {
+      updateAll();
+      setupSettingsListener();
+      setupLabelsListener();
+    });
 
-    // (5) الاستماع لـ AppSettings
-    subscribeAppSettings();
+    // Also update on theme change
+    window.addEventListener('itws:theme-mode-changed', function () {
+      updateThemeColorMeta();
+    });
 
-    logDebug('AppTitle initialized');
+    log('debug', 'AppTitle initialized', { page: detectPageName() });
   }
 
-  // ============================================
-  // 10. Helper
-  // ============================================
-  function logDebug() {
-    if (cfg && cfg.DEBUG) {
-      console.log.apply(console, ['[AppTitle]'].concat(Array.prototype.slice.call(arguments)));
-    }
-  }
+  /* ============================================================
+     8. EXPORT
+     ============================================================ */
 
-  // ============================================
-  // 11. Public API
-  // ============================================
   window.AppTitle = {
-    initialized: true,
-    init: init,
-    refresh: function () {
-      return loadFromSupabase().then(function (data) {
-        if (data) applySettings(data);
-      });
+    _initialized: true,
+
+    // Public API
+    refresh: updateAll,
+    updateTitle: updateTitle,
+    updateFavicon: updateFavicon,
+    updateMeta: function () {
+      updateMetaDescription();
+      updateOGTags();
+      updateTwitterTags();
+      updateAppManifest();
     },
-    set: function (unionName, committeeName, logoUrl) {
-      applySettings({
-        union_name: unionName,
-        committee_name: committeeName,
-        logo_url: logoUrl
-      });
+    updateThemeColor: updateThemeColorMeta,
+
+    // Query
+    getPageName: detectPageName,
+    getCurrentTitle: function () { return document.title; },
+
+    // Manual override (for specific pages)
+    setPageTitle: function (title) {
+      if (!title) return;
+      var unionName = getSetting('app_identity.union_name', '');
+      document.title = unionName ? title + ' | ' + unionName : title;
+      setMetaProperty('og:title', document.title);
+      setMetaName('twitter:title', document.title);
+      dispatchEvent('itws:app-title-changed', { title: document.title });
     }
   };
 
-  // ============================================
-  // 12. Auto-init
-  // ============================================
+  // Boot
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+
+  /* ============================================================
+     9. DEBUG LOG
+     ============================================================ */
+
+  var cfg = window.ITWS_CONFIG || {};
+  if (cfg.DEBUG) {
+    try {
+      console.log('%c[AppTitle]', 'color: #F59E0B; font-weight: bold;', 'Ready');
+    } catch (e) {}
   }
 
 })();
