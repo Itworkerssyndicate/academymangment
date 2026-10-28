@@ -1,115 +1,34 @@
 /* ============================================================
-   ITWS Platform — Official Theme CSS V3
+   ITWS Platform — Theme CSS V4 (Based on Neon System)
    File: assets/css/theme.css
-   Description: Egyptian Government Portal Design Tokens
 
-   Load order: FIRST CSS
-
-   🎨 OFFICIAL DESIGN:
-   - Navy backgrounds (#0A1628)
-   - Gold accents (#D4A843)
-   - Egyptian Red CTAs (#C8102E)
-   - Cairo font only
-   - Sharp corners (2-10px, not 16-20px)
-   - Defined shadows (not soft glows)
-
-   ⚠️ These are FALLBACKS — theme.js injects actual values at runtime
-   If theme.js fails, page still renders in official dark mode
-
+   يستخدم نفس نظام themes.css
+   - accent + accent-2 + rgb vars
+   - يدعم 8 ثيمات (data-theme)
+   - Cairo + Alexandria + JetBrains Mono
+   - Glow + Glassmorphism + Gradients
    ============================================================ */
 
-
-/* ============================================================
-   1. OFFICIAL COLOR PALETTE — watanii_dark (default)
-   ============================================================ */
-
+/* ============================================
+   ROOT — Default (neon-dark)
+   ============================================ */
 :root {
-  /* ===== PRIMARY (Egyptian Red) ===== */
-  --primary: #C8102E;
-  --primary-hover: #A50D26;
-  --primary-soft: rgba(200, 16, 46, 0.12);
-  --primary-text: #FFFFFF;
+  /* Fonts */
+  --font-main: 'Cairo', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Alexandria', 'Cairo', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
-  /* ===== GOLD (Official Accent) ===== */
-  --gold: #D4A843;
-  --gold-hover: #E8BE5C;
-  --gold-soft: rgba(212, 168, 67, 0.15);
-  --gold-text: #0A1628;
+  /* Font Sizes */
+  --fs-xs: 11px;
+  --fs-sm: 12.5px;
+  --fs-base: 15px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 36px;
 
-  /* ===== BACKGROUNDS (Navy) ===== */
-  --bg: #0A1628;
-  --bg-alt: #0F1E33;
-  --surface: #142540;
-  --surface-elevated: #1B2F4D;
-  --surface-hover: #22375A;
-
-  /* ===== TEXT (Warm White) ===== */
-  --text: #F5F3EE;
-  --text-secondary: #B8C4D6;
-  --text-muted: #7A8BA5;
-
-  /* ===== BORDERS ===== */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.15);
-  --border-gold: rgba(212, 168, 67, 0.4);
-
-  /* ===== STATUS COLORS ===== */
-  --success: #10B981;
-  --success-soft: rgba(16, 185, 129, 0.12);
-  --success-hover: #059669;
-
-  --warning: #F59E0B;
-  --warning-soft: rgba(245, 158, 11, 0.12);
-
-  --error: #EF4444;
-  --error-soft: rgba(239, 68, 68, 0.12);
-  --error-hover: #DC2626;
-
-  --info: #3B82F6;
-  --info-soft: rgba(59, 130, 246, 0.12);
-
-  /* ===== GRADE COLORS ===== */
-  --grade-excellent-bg: rgba(16, 185, 129, 0.15);
-  --grade-excellent-text: #34D399;
-  --grade-very-good-bg: rgba(59, 130, 246, 0.15);
-  --grade-very-good-text: #60A5FA;
-  --grade-good-bg: rgba(245, 158, 11, 0.15);
-  --grade-good-text: #FBBF24;
-  --grade-pass-bg: rgba(249, 115, 22, 0.15);
-  --grade-pass-text: #FB923C;
-  --grade-fail-bg: rgba(239, 68, 68, 0.15);
-  --grade-fail-text: #F87171;
-
-  /* ===== SHADOWS (Defined, not soft) ===== */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
-  --shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
-
-  /* ===== GOLD SHADOWS (for accents) ===== */
-  --gold-glow: 0 0 24px rgba(212, 168, 67, 0.3);
-  --gold-glow-strong: 0 0 40px rgba(212, 168, 67, 0.4);
-
-  /* ===== STATUS SHADOWS ===== */
-  --success-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
-  --success-shadow-lg: 0 12px 40px rgba(16, 185, 129, 0.15);
-  --error-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
-  --error-shadow-lg: 0 12px 40px rgba(239, 68, 68, 0.15);
-}
-
-
-/* ============================================================
-   2. TYPOGRAPHY
-   ============================================================ */
-
-:root {
-  /* ===== FONT FAMILY ===== */
-  --font-primary: 'Cairo', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Cairo', 'Courier New', monospace;
-
-  /* ===== FONT WEIGHTS ===== */
-  --fw-light: 300;
+  /* Font Weights */
   --fw-regular: 400;
   --fw-medium: 500;
   --fw-semibold: 600;
@@ -117,159 +36,182 @@
   --fw-extrabold: 800;
   --fw-black: 900;
 
-  /* ===== FONT SIZES ===== */
-  --fs-xs: 11px;
-  --fs-sm: 13px;
-  --fs-base: 14px;
-  --fs-md: 15px;
-  --fs-lg: 17px;
-  --fs-xl: 20px;
-  --fs-2xl: 24px;
-  --fs-3xl: 30px;
-  --fs-4xl: 38px;
-  --fs-5xl: 48px;
+  /* Line Heights */
+  --lh-tight: 1.2;
+  --lh-snug: 1.4;
+  --lh-normal: 1.6;
+  --lh-relaxed: 1.8;
 
-  /* ===== LINE HEIGHTS (Tighter for official) ===== */
-  --lh-tight: 1.15;
-  --lh-snug: 1.3;
-  --lh-normal: 1.5;
-  --lh-relaxed: 1.65;
-  --lh-loose: 1.8;
+  /* Accent (default neon-dark) */
+  --accent: #00f0ff;
+  --accent-2: #b026ff;
+  --accent-rgb: 0, 240, 255;
+  --accent-2-rgb: 176, 38, 255;
 
-  /* ===== LETTER SPACING ===== */
-  --ls-tight: -0.3px;
-  --ls-normal: 0;
-  --ls-wide: 0.3px;
-  --ls-wider: 1px;
-  --ls-widest: 1.5px;
-}
+  /* Backgrounds */
+  --bg: #0a0c14;
+  --bg-2: #0f1119;
+  --bg-3: #141824;
+  --card-bg: rgba(15, 17, 25, 0.7);
+  --card-bg-solid: #0f1119;
 
+  /* Text */
+  --text: #ffffff;
+  --text-muted: #a0a8b8;
+  --text-dim: #6b7280;
 
-/* ============================================================
-   3. SPACING SCALE (4px base)
-   ============================================================ */
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-soft: rgba(255, 255, 255, 0.05);
+  --border-strong: rgba(255, 255, 255, 0.15);
 
-:root {
-  --space-0: 0;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-7: 28px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-14: 56px;
-  --space-16: 64px;
-  --space-20: 80px;
-  --space-24: 96px;
-}
+  /* Status */
+  --success: #22c55e;
+  --success-rgb: 34, 197, 94;
+  --danger: #ef4444;
+  --danger-rgb: 239, 68, 68;
+  --warning: #f59e0b;
+  --warning-rgb: 245, 158, 11;
+  --info: #3b82f6;
+  --info-rgb: 59, 130, 246;
 
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 100px;
 
-/* ============================================================
-   4. BORDER RADIUS (SHARP — Official)
-   ============================================================ */
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 30px 60px rgba(0, 0, 0, 0.4);
 
-:root {
-  --radius-xs: 2px;
-  --radius-sm: 3px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
-  --radius-xl: 8px;
-  --radius-2xl: 10px;
-  --radius-3xl: 12px;
-  --radius-full: 999px;
-  --radius-circle: 50%;
-}
+  /* Glow */
+  --glow-accent: 0 0 20px rgba(0, 240, 255, 0.3);
+  --glow-accent-strong: 0 0 30px rgba(0, 240, 255, 0.5);
+  --glow-accent-2: 0 0 20px rgba(176, 38, 255, 0.3);
 
+  /* Gradients */
+  --gradient-accent: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --gradient-bg: linear-gradient(135deg, var(--bg), var(--bg-2));
 
-/* ============================================================
-   5. Z-INDEX SCALE
-   ============================================================ */
-
-:root {
-  --z-base: 1;
-  --z-dropdown: 800;
-  --z-sidebar: 800;
-  --z-header: 900;
-  --z-fab: 900;
-  --z-tooltip: 9500;
-  --z-modal-backdrop: 9999;
-  --z-modal: 10000;
-  --z-toast: 9998;
-  --z-max: 99999;
-}
-
-
-/* ============================================================
-   6. TRANSITIONS
-   ============================================================ */
-
-:root {
+  /* Transitions */
   --transition-fast: 0.15s ease;
-  --transition-base: 0.2s ease;
-  --transition-slow: 0.3s ease;
-  --transition-slower: 0.5s ease;
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.4s ease;
 
-  --transition-color: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
-  --transition-transform: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-fade: opacity 0.2s ease;
-}
-
-
-/* ============================================================
-   7. LAYOUT TOKENS
-   ============================================================ */
-
-:root {
+  /* Layout */
   --header-height: 76px;
-  --sidebar-width: 260px;
-  --sidebar-width-collapsed: 72px;
   --container-max: 1280px;
-  --container-wide: 1440px;
-  --container-narrow: 960px;
   --content-padding: clamp(16px, 3vw, 32px);
 
+  /* Safe Areas */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
+
+  /* Z-index */
+  --z-dropdown: 800;
+  --z-header: 900;
+  --z-modal: 1000;
+  --z-toast: 1100;
 }
 
-@media (max-width: 767px) {
-  :root {
-    --header-height: 64px;
-    --sidebar-width: 280px;
-  }
+/* ============================================
+   ALL 8 THEMES
+   ============================================ */
+
+[data-theme="neon-dark"] {
+  --accent: #00f0ff; --accent-2: #b026ff;
+  --accent-rgb: 0, 240, 255; --accent-2-rgb: 176, 38, 255;
+  --bg: #0a0c14; --bg-2: #0f1119; --bg-3: #141824;
+  --card-bg: rgba(15, 17, 25, 0.7); --card-bg-solid: #0f1119;
+  --text: #ffffff; --text-muted: #a0a8b8; --text-dim: #6b7280;
+  --border: rgba(255,255,255,0.08); --border-soft: rgba(255,255,255,0.05); --border-strong: rgba(255,255,255,0.15);
+  --glow-accent: 0 0 20px rgba(0,240,255,0.3); --glow-accent-strong: 0 0 30px rgba(0,240,255,0.5);
 }
 
-
-/* ============================================================
-   8. COLOR SCHEME
-   ============================================================ */
-
-:root,
-[data-theme-mode="dark"] {
-  color-scheme: dark;
+[data-theme="neon-light"] {
+  --accent: #0099ff; --accent-2: #a020f0;
+  --accent-rgb: 0, 153, 255; --accent-2-rgb: 160, 32, 240;
+  --bg: #f5f7fb; --bg-2: #ffffff; --bg-3: #eef2f9;
+  --card-bg: rgba(255,255,255,0.85); --card-bg-solid: #ffffff;
+  --text: #0a0e1a; --text-muted: #4a5568; --text-dim: #718096;
+  --border: rgba(0,0,0,0.08); --border-soft: rgba(0,0,0,0.05); --border-strong: rgba(0,0,0,0.15);
+  --glow-accent: 0 0 20px rgba(0,153,255,0.25); --glow-accent-strong: 0 0 30px rgba(0,153,255,0.4);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06); --shadow-md: 0 8px 20px rgba(0,0,0,0.08);
+  --shadow-lg: 0 20px 40px rgba(0,0,0,0.12); --shadow-xl: 0 30px 60px rgba(0,0,0,0.15);
 }
 
-[data-theme-mode="light"] {
-  color-scheme: light;
+[data-theme="cyberpunk"] {
+  --accent: #ff0080; --accent-2: #ffcc00;
+  --accent-rgb: 255, 0, 128; --accent-2-rgb: 255, 204, 0;
+  --bg: #0d0619; --bg-2: #140a26; --bg-3: #1a0e33;
+  --card-bg: rgba(20,10,38,0.7); --card-bg-solid: #140a26;
+  --text: #ffffff; --text-muted: #c4b5d4; --text-dim: #8b7a9e;
+  --border: rgba(255,0,128,0.15); --border-soft: rgba(255,0,128,0.08); --border-strong: rgba(255,0,128,0.3);
+  --glow-accent: 0 0 20px rgba(255,0,128,0.4); --glow-accent-strong: 0 0 30px rgba(255,0,128,0.6);
 }
 
-
-/* ============================================================
-   9. GLOBAL RESET
-   ============================================================ */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+[data-theme="emerald"] {
+  --accent: #10b981; --accent-2: #fbbf24;
+  --accent-rgb: 16, 185, 129; --accent-2-rgb: 251, 191, 36;
+  --bg: #071410; --bg-2: #0a1c17; --bg-3: #0f261e;
+  --card-bg: rgba(10,28,23,0.7); --card-bg-solid: #0a1c17;
+  --text: #ffffff; --text-muted: #a7c4b8; --text-dim: #6b8a7e;
+  --border: rgba(16,185,129,0.12); --border-soft: rgba(16,185,129,0.06); --border-strong: rgba(16,185,129,0.25);
+  --glow-accent: 0 0 20px rgba(16,185,129,0.35); --glow-accent-strong: 0 0 30px rgba(16,185,129,0.55);
 }
 
+[data-theme="royal"] {
+  --accent: #8b5cf6; --accent-2: #06b6d4;
+  --accent-rgb: 139, 92, 246; --accent-2-rgb: 6, 182, 212;
+  --bg: #0a0618; --bg-2: #110a24; --bg-3: #170e30;
+  --card-bg: rgba(17,10,36,0.7); --card-bg-solid: #110a24;
+  --text: #ffffff; --text-muted: #b5a8d4; --text-dim: #7a6b9e;
+  --border: rgba(139,92,246,0.12); --border-soft: rgba(139,92,246,0.06); --border-strong: rgba(139,92,246,0.25);
+  --glow-accent: 0 0 20px rgba(139,92,246,0.35); --glow-accent-strong: 0 0 30px rgba(139,92,246,0.55);
+}
+
+[data-theme="patriot"] {
+  --accent: #e62e2e; --accent-2: #d4af37;
+  --accent-rgb: 230, 46, 46; --accent-2-rgb: 212, 175, 55;
+  --bg: #0a0a0a; --bg-2: #111111; --bg-3: #1a1a1a;
+  --card-bg: rgba(17,17,17,0.75); --card-bg-solid: #111111;
+  --text: #ffffff; --text-muted: #b8b8b8; --text-dim: #707070;
+  --border: rgba(230,46,46,0.15); --border-soft: rgba(230,46,46,0.08); --border-strong: rgba(230,46,46,0.3);
+  --glow-accent: 0 0 20px rgba(230,46,46,0.4); --glow-accent-strong: 0 0 30px rgba(230,46,46,0.6);
+}
+
+[data-theme="tech-cairo"] {
+  --accent: #e62e2e; --accent-2: #d4af37;
+  --accent-rgb: 230, 46, 46; --accent-2-rgb: 212, 175, 55;
+  --bg: #1a0a0a; --bg-2: #221010; --bg-3: #2a1515;
+  --card-bg: rgba(34,16,16,0.7); --card-bg-solid: #221010;
+  --text: #ffffff; --text-muted: #d4c4a8; --text-dim: #8a7a5e;
+  --border: rgba(212,175,55,0.15); --border-soft: rgba(212,175,55,0.08); --border-strong: rgba(212,175,55,0.3);
+  --glow-accent: 0 0 20px rgba(230,46,46,0.4); --glow-accent-strong: 0 0 30px rgba(230,46,46,0.6);
+  --glow-accent-2: 0 0 20px rgba(212,175,55,0.4);
+}
+
+[data-theme="minimal"] {
+  --accent: #e62e2e; --accent-2: #1a1a1a;
+  --accent-rgb: 230, 46, 46; --accent-2-rgb: 26, 26, 26;
+  --bg: #ffffff; --bg-2: #f8f9fa; --bg-3: #eef0f2;
+  --card-bg: rgba(255,255,255,0.9); --card-bg-solid: #ffffff;
+  --text: #0a0a0a; --text-muted: #4a4a4a; --text-dim: #888888;
+  --border: rgba(0,0,0,0.08); --border-soft: rgba(0,0,0,0.04); --border-strong: rgba(0,0,0,0.15);
+  --glow-accent: 0 0 20px rgba(230,46,46,0.2); --glow-accent-strong: 0 0 30px rgba(230,46,46,0.35);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06); --shadow-md: 0 8px 20px rgba(0,0,0,0.08);
+  --shadow-lg: 0 20px 40px rgba(0,0,0,0.12); --shadow-xl: 0 30px 60px rgba(0,0,0,0.15);
+}
+
+/* ============================================
+   BODY
+   ============================================ */
 html {
   overflow-x: hidden;
   width: 100%;
@@ -279,510 +221,138 @@ html {
 }
 
 body {
-  background-color: var(--bg);
+  margin: 0;
+  font-family: var(--font-main);
+  background: var(--bg);
   color: var(--text);
-  font-family: var(--font-primary);
   font-size: var(--fs-base);
   line-height: var(--lh-normal);
-  direction: rtl;
-  text-rendering: optimizeLegibility;
+  font-weight: var(--fw-regular);
+  transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
+/* Background gradient */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at top right, rgba(var(--accent-rgb), 0.08), transparent 50%),
+    radial-gradient(ellipse at bottom left, rgba(var(--accent-2-rgb), 0.06), transparent 50%),
+    var(--bg);
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+
+/* ============================================
+   HEADINGS — Alexandria
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+
+h1 { font-size: var(--fs-3xl); font-weight: 900; }
+h2 { font-size: var(--fs-2xl); font-weight: 900; }
+h3 { font-size: var(--fs-xl); font-weight: 800; }
+h4 { font-size: var(--fs-lg); font-weight: 800; }
+h5 { font-size: var(--fs-md); font-weight: 700; }
+h6 { font-size: var(--fs-base); font-weight: 700; }
+
+/* ============================================
+   LINKS
+   ============================================ */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover { color: var(--accent-2); }
+
+/* ============================================
+   SELECTION
+   ============================================ */
+::selection {
+  background: rgba(var(--accent-rgb), 0.3);
+  color: var(--text);
+}
+::-moz-selection {
+  background: rgba(var(--accent-rgb), 0.3);
+  color: var(--text);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent-rgb), 0.3);
+  border-radius: 5px;
+  border: 2px solid var(--bg-2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--accent-rgb), 0.5);
+}
+
+/* ============================================
+   FOCUS VISIBLE
+   ============================================ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 
-
-/* ============================================================
-   10. SELECTION & FOCUS
-   ============================================================ */
-
-::selection {
-  background-color: var(--gold);
-  color: var(--bg);
+/* ============================================
+   CONTAINER
+   ============================================ */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--content-padding);
+  width: 100%;
 }
 
-::-moz-selection {
-  background-color: var(--gold);
-  color: var(--bg);
-}
-
-:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-
-/* ============================================================
-   11. SCROLLBAR
-   ============================================================ */
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-alt);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--bg-alt);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gold);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) var(--bg-alt);
-}
-
-
-/* ============================================================
-   12. LINKS
-   ============================================================ */
-
-a {
-  color: var(--gold);
-  text-decoration: none;
-  transition: var(--transition-color);
-}
-
-a:hover {
-  color: var(--gold-hover);
-}
-
-a:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
-}
-
-
-/* ============================================================
-   13. FORM ELEMENTS
-   ============================================================ */
-
-input,
-textarea,
-select,
-button {
-  font-family: inherit;
-  font-size: inherit;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-muted);
-  opacity: 1;
-}
-
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  -webkit-text-fill-color: var(--text);
-  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-
-/* ============================================================
-   14. IMAGES & MEDIA
-   ============================================================ */
-
-img,
-svg,
-video,
-canvas {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-img {
-  background-color: var(--surface);
-  color: var(--text-muted);
-}
-
-
-/* ============================================================
-   15. UTILITY CLASSES (theme-specific)
-   ============================================================ */
-
-/* Text colors */
-.text-primary { color: var(--primary); }
-.text-gold { color: var(--gold); }
-.text-secondary { color: var(--text-secondary); }
-.text-muted { color: var(--text-muted); }
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-error { color: var(--error); }
-.text-info { color: var(--info); }
-
-/* Background colors */
-.bg-surface { background-color: var(--surface); }
-.bg-elevated { background-color: var(--surface-elevated); }
-.bg-primary { background-color: var(--primary); color: var(--primary-text); }
-.bg-gold { background-color: var(--gold); color: var(--gold-text); }
-
-/* Border colors */
-.border-default { border: 1px solid var(--border); }
-.border-strong { border: 1px solid var(--border-strong); }
-.border-primary { border: 1px solid var(--primary); }
-.border-gold { border: 1px solid var(--gold); }
-
-
-/* ============================================================
-   16. THEME TRANSITION
-   ============================================================ */
-
-html,
-body {
-  transition: background-color var(--transition-base),
-              color var(--transition-base);
-}
-
-.theme-transition,
-.theme-transition * {
-  transition: background-color 0.2s ease,
-              color 0.2s ease,
-              border-color 0.2s ease,
-              box-shadow 0.2s ease !important;
-}
-
-.itws-no-transition,
-.itws-no-transition * {
-  transition: none !important;
-}
-
-
-/* ============================================================
-   17. BRAND ELEMENTS
-   ============================================================ */
-
-.brand-logo,
-.brand-logo img {
-  background-color: var(--bg);
-}
-
-/* Gold divider line */
-.gold-divider {
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  border-radius: var(--radius-xs);
-  margin: 16px auto;
-}
-
-.gold-divider-start {
-  margin-inline-start: 0;
-}
-
-/* Gold accent bar */
-.gold-accent {
-  border-inline-start: 3px solid var(--gold);
-  padding-inline-start: 16px;
-}
-
-
-/* ============================================================
-   18. GLASS EFFECT
-   ============================================================ */
-
-.glass {
-  background-color: rgba(10, 22, 40, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-[data-theme-mode="light"] .glass {
-  background-color: rgba(255, 255, 255, 0.7);
-}
-
-
-/* ============================================================
-   19. GRADIENT OVERLAYS
-   ============================================================ */
-
-.gradient-overlay-top {
-  position: relative;
-}
-
-.gradient-overlay-top::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.gradient-overlay-radial {
-  position: relative;
-}
-
-.gradient-overlay-radial::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 50% 30%,
-              var(--gold-soft) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-
-/* ============================================================
-   20. HEXAGON PATTERN (Egyptian motif)
-   ============================================================ */
-
-.hexagon-bg {
-  position: relative;
-  overflow: hidden;
-}
-
-.hexagon-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 0L45 8.66v17.32L30 34.64 15 25.98V8.66z M30 34.64L45 43.3v17.32M30 34.64L15 43.3v17.32' stroke='%23D4A843' stroke-width='0.6' fill='none' opacity='0.08'/%3E%3C/svg%3E");
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.hexagon-bg > * {
-  position: relative;
-  z-index: 1;
-}
-
-
-/* ============================================================
-   21. LIGHT MODE FALLBACK
-   ============================================================ */
-
-[data-theme-mode="light"] {
-  --bg: #FAFBFC;
-  --bg-alt: #F0F3F7;
-  --surface: #FFFFFF;
-  --surface-elevated: #FFFFFF;
-  --surface-hover: #E8EEF5;
-  --text: #0A1628;
-  --text-secondary: #455568;
-  --text-muted: #7A8BA5;
-  --border: rgba(10, 22, 40, 0.08);
-  --border-strong: rgba(10, 22, 40, 0.15);
-  --shadow-sm: 0 1px 3px rgba(10, 22, 40, 0.08);
-  --shadow: 0 2px 6px rgba(10, 22, 40, 0.1);
-  --shadow-lg: 0 8px 28px rgba(10, 22, 40, 0.12);
-}
-
-
-/* ============================================================
-   22. PRINT
-   ============================================================ */
-
-@media print {
+/* ============================================
+   RESPONSIVE FONTS
+   ============================================ */
+@media (max-width: 768px) {
   :root {
-    --bg: #FFFFFF !important;
-    --bg-alt: #F8FAFC !important;
-    --surface: #FFFFFF !important;
-    --surface-elevated: #FFFFFF !important;
-    --text: #000000 !important;
-    --text-secondary: #333333 !important;
-    --text-muted: #666666 !important;
-    --border: rgba(0, 0, 0, 0.2) !important;
-    --border-strong: rgba(0, 0, 0, 0.3) !important;
-    --primary: #C8102E !important;
-    --gold: #A88833 !important;
-    --primary-soft: #FFE8EB !important;
-    --gold-soft: #F5EDD3 !important;
-    --primary-text: #FFFFFF !important;
-    --shadow: none !important;
-    --shadow-lg: none !important;
-    --shadow-xl: none !important;
-    --gold-glow: none !important;
-  }
-
-  *,
-  *::before,
-  *::after {
-    background: transparent !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  html,
-  body {
-    background: #FFFFFF !important;
-    color: #000000 !important;
-    font-size: 11pt !important;
-    line-height: 1.4 !important;
-  }
-
-  .no-print,
-  .itws-header,
-  .itws-sidebar,
-  .off-theme-fab-wrap,
-  .theme-fab-wrap,
-  .itws-mobile-drawer,
-  .itws-mobile-backdrop,
-  .itws-toast-root,
-  .itws-dd-root,
-  .itws-modal-backdrop,
-  nav,
-  button:not(.print-keep) {
-    display: none !important;
-  }
-
-  a {
-    color: #000000 !important;
-    text-decoration: underline !important;
-  }
-
-  a[href^="http"]::after {
-    content: " (" attr(href) ")";
-    font-size: 9pt;
-    color: #666666;
-  }
-
-  table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    page-break-inside: auto;
-  }
-
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-
-  thead { display: table-header-group; }
-
-  th, td {
-    border: 1px solid #333 !important;
-    padding: 6pt !important;
-    color: #000 !important;
-  }
-
-  th {
-    background: #EEEEEE !important;
-    font-weight: bold !important;
-  }
-
-  .card,
-  .off-academy-card,
-  .itws-table-card {
-    border: 1px solid #333 !important;
-    page-break-inside: avoid;
-  }
-
-  .page-break-before { page-break-before: always; }
-  .page-break-after { page-break-after: always; }
-  .page-break-avoid { page-break-inside: avoid; }
-
-  img {
-    max-width: 100% !important;
-    page-break-inside: avoid;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    color: #000 !important;
-    page-break-after: avoid;
-    page-break-inside: avoid;
-  }
-
-  .print-certificate {
-    page-break-after: always;
-    page-break-inside: avoid;
-  }
-
-  .print-certificate:last-child {
-    page-break-after: auto;
+    --fs-3xl: 28px; --fs-2xl: 22px; --fs-xl: 18px;
+    --fs-lg: 16px; --fs-base: 14px;
   }
 }
-
-
-/* ============================================================
-   23. HIGH CONTRAST MODE
-   ============================================================ */
-
-@media (prefers-contrast: more) {
-  :root {
-    --border: rgba(255, 255, 255, 0.3);
-    --border-strong: rgba(255, 255, 255, 0.5);
-    --text-secondary: #D8E2F0;
-    --text-muted: #A0B0C5;
-  }
-
-  [data-theme-mode="light"] {
-    --border: rgba(0, 0, 0, 0.3);
-    --border-strong: rgba(0, 0, 0, 0.5);
-    --text-secondary: #1A1A1A;
-    --text-muted: #333333;
-  }
-
-  a, button {
-    text-decoration: underline;
-  }
-}
-
-
-/* ============================================================
-   24. RESPONSIVE — SMALL
-   ============================================================ */
-
 @media (max-width: 480px) {
   :root {
-    --radius-2xl: 8px;
-    --radius-3xl: 10px;
-    --space-8: 28px;
-    --space-10: 32px;
+    --fs-3xl: 24px; --fs-2xl: 20px; --fs-xl: 17px;
+    --fs-lg: 15px; --fs-base: 13.5px;
   }
 }
 
-
-/* ============================================================
-   25. RESPONSIVE — LARGE
-   ============================================================ */
-
-@media (min-width: 1440px) {
-  :root {
-    --container-max: 1320px;
-    --container-wide: 1480px;
-  }
+/* ============================================
+   PRINT
+   ============================================ */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  body::before { display: none !important; }
 }
-
-@media (min-width: 1920px) {
-  :root {
-    --container-max: 1440px;
-    --container-wide: 1680px;
-    --fs-base: 15px;
-  }
-}
-
-
-/* ============================================================
-   END OF THEME.CSS V3
-   ============================================================ */
