@@ -1,98 +1,89 @@
-// ============================================
-// ITWS Platform - Auth Guard
-// Path: assets/js/auth-guard.js
-// ============================================
-// ✅ إصلاح: منع deadlock في onAuthStateChange
-// ✅ إضافة timeout لكل استدعاء (يمنع التعليق للأبد)
-// ✅ مسارات نسبية (GitHub Pages)
-// ✅ بدون إيموجي
-// ============================================
+/* ============================================================
+   ITWS Platform — Auth Guard V2
+   File: assets/js/auth-guard.js
+   Description: Page-level access control + redirect handling
+
+   Load order: AFTER permissions.js + session.js
+
+   Features:
+   - AuthGuard.require(roles, options) → throws redirect if not allowed
+   - AuthGuard.requireScope(type, id) → validates governorate/branch/academy
+   - AuthGuard.requirePermission(resource, action) → permission check
+   - AuthGuard.getUser() → current profile
+   - AuthGuard.getRole() → current role
+   - AuthGuard.isAuthenticated() → bool
+   - Loading state UI while checking
+   - Handles: not logged in, pending, rejected, suspended, wrong role
+   - Safe redirect with ?next= param
+   - Prevents loops (checks current URL before redirect)
+   - Auto-detects page role needs via [data-requires-role] attribute
+   - Events: itws:guard-passed, itws:guard-failed
+
+   Rules:
+   - No emoji
+   - ES5-style IIFE
+   - window.sb only
+   - Uses Permissions engine (single source of truth)
+   - Never trusts client-side only — RLS still enforced
+   ============================================================ */
 
 (function () {
   'use strict';
 
-  // ============================================
-  // حماية من التهيئة المكررة
-  // ============================================
-  if (window.AuthGuard && window.AuthGuard.initialized) return;
-
-  var cfg = window.ITWS_CONFIG || {};
-
-  // مهلة قصوى لأي عملية auth (15 ثانية)
-  var AUTH_TIMEOUT_MS = 15000;
-
-  // حالة داخلية
-  var state = {
-    currentUser: null,
-    authUser: null,
-    initialized: false,
-    listeners: [],
-    checking: null,
-    authChannel: null
-  };
-
-  // ============================================
-  // 1. Timeout wrapper
-  // ============================================
-  // يمنع أي promise من التعليق للأبد
-  function withTimeout(promise, ms, label) {
-    return Promise.race([
-      promise,
-      new Promise(function (_, reject) {
-        setTimeout(function () {
-          reject(new Error('انتهت مهلة ' + (label || 'العملية') + ' (' + ms + 'ms)'));
-        }, ms);
-      })
-    ]);
+  if (window.AuthGuard && window.AuthGuard._initialized) {
+    return;
   }
 
-  // ============================================
-  // 2. Helpers
-  // ============================================
-  function getBasePath() {
-    if (window.resolveUrl) {
-      return window.resolveUrl('').replace(/\/$/, '');
+  /* ============================================================
+     1. HELPERS
+     ============================================================ */
+
+  function log(level, msg, data) {
+    var cfg = window.ITWS_CONFIG || {};
+    if (level === 'error' || (cfg.DEBUG && level === 'debug')) {
+      try {
+        var args = ['[AuthGuard]', msg];
+        if (data !== undefined) args.push(data);
+        if (level === 'error') console.error.apply(console, args);
+        else console.log.apply(console, args);
+      } catch (e) {}
     }
-    var base = cfg.BASE_PATH || '';
-    return base.replace(/\/$/, '');
   }
 
-  function resolvePath(path) {
+  function getSb() {
+    return window.sb || window.supabaseClient || window.ITWS_SUPABASE || null;
+  }
+
+  function getConfig() {
+    return window.ITWS_CONFIG || {};
+  }
+
+  function resolve(path) {
     if (!path) return '#';
-    if (/^https?:\/\//.test(path) || path.indexOf('mailto:') === 0 || path.indexOf('tel:') === 0) {
-      return path;
-    }
     if (window.resolveUrl) return window.resolveUrl(path);
-    var base = cfg.BASE_PATH || '';
-    if (base && base.charAt(base.length - 1) !== '/') base += '/';
+    var base = (getConfig().BASE_PATH) || '/';
+    if (base.charAt(base.length - 1) !== '/') base += '/';
     return base + String(path).replace(/^\.?\//, '');
   }
 
-  function getLoginPage() {
-    return resolvePath('login.html');
+  function dispatchEvent(name, detail) {
+    try {
+      window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+    } catch (e) {}
   }
 
-  function getAdminPage() {
-    return resolvePath('admin/index.html');
+  function getLabel(key, fallback) {
+    try {
+      if (window.Labels && typeof window.Labels.t === 'function') {
+        return window.Labels.t(key, fallback);
+      }
+    } catch (e) {}
+    return fallback;
   }
 
-  function getHomePage() {
-    return resolvePath('home.html');
-  }
-
-  function translateRole(role) {
-    var map = {
-      'super_admin': 'سوبر أدمن',
-      'admin': 'أدمن',
-      'committee_manager': 'إدارة اللجنة',
-      'user': 'مستخدم'
-    };
-    return map[role] || role || 'غير معروف';
-  }
-
-  function escapeHtml(str) {
-    if (str == null) return '';
-    return String(str)
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -100,407 +91,730 @@
       .replace(/'/g, '&#039;');
   }
 
-  function logDebug() {
-    if (cfg.DEBUG) {
-      console.log.apply(console, ['[AuthGuard]'].concat(Array.prototype.slice.call(arguments)));
+  /* ============================================================
+     2. STATE
+     ============================================================ */
+
+  var state = {
+    initialized: false,
+    checking: false,
+    passed: false,
+    failed: false,
+    failReason: null,
+    user: null,
+    profile: null,
+    role: null,
+    loadingEl: null,
+    pendingCheckPromise: null,
+    lastCheckAt: 0
+  };
+
+  /* ============================================================
+     3. LOADING UI
+     ============================================================ */
+
+  function createLoadingOverlay() {
+    if (document.getElementById('itws-auth-loading')) return;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'itws-auth-loading';
+    overlay.setAttribute('role', 'status');
+    overlay.setAttribute('aria-live', 'polite');
+    overlay.setAttribute('aria-label', getLabel('auth.checking', 'جاري التحقق من الصلاحيات'));
+
+    // R13 — responsive, safe areas
+    overlay.style.cssText =
+      'position:fixed;inset:0;z-index:99997;' +
+      'background:var(--bg, #0A0E14);' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'gap:20px;font-family:Cairo, sans-serif;' +
+      'padding:max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) ' +
+      'max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));' +
+      'color:var(--text, #F8FAFC);' +
+      'transition:opacity 0.2s ease;';
+
+    var spinner = document.createElement('div');
+    spinner.style.cssText =
+      'width:48px;height:48px;' +
+      'border:3px solid var(--border, rgba(255,255,255,0.1));' +
+      'border-top-color:var(--primary, #CE1126);' +
+      'border-radius:50%;' +
+      'animation:itwsAuthSpin 0.8s linear infinite;';
+
+    var text = document.createElement('div');
+    text.textContent = getLabel('auth.checking', 'جاري التحقق من الصلاحيات...');
+    text.style.cssText =
+      'font-size:clamp(13px, 2vw, 15px);' +
+      'color:var(--text-muted, #64748B);' +
+      'font-weight:500;text-align:center;max-width:340px;line-height:1.6;';
+
+    overlay.appendChild(spinner);
+    overlay.appendChild(text);
+
+    // Inject keyframes once
+    if (!document.getElementById('itws-auth-spin-kf')) {
+      var style = document.createElement('style');
+      style.id = 'itws-auth-spin-kf';
+      style.textContent = '@keyframes itwsAuthSpin{to{transform:rotate(360deg);}}';
+      document.head.appendChild(style);
+    }
+
+    document.body.appendChild(overlay);
+    state.loadingEl = overlay;
+  }
+
+  function removeLoadingOverlay() {
+    if (!state.loadingEl || !state.loadingEl.parentNode) return;
+    var el = state.loadingEl;
+    el.style.opacity = '0';
+    setTimeout(function () {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 200);
+    state.loadingEl = null;
+  }
+
+  /* ============================================================
+     4. REDIRECT HELPER
+     ============================================================ */
+
+  function redirectTo(target, options) {
+    options = options || {};
+    if (!target) return;
+
+    var url = resolve(target);
+    var currentPath = window.location.pathname + window.location.search;
+
+    // Prevent redirect loops
+    try {
+      var targetUrl = new URL(url, window.location.origin);
+      var currentUrl = new URL(window.location.href);
+      if (targetUrl.pathname === currentUrl.pathname &&
+          targetUrl.search === currentUrl.search) {
+        log('error', 'Redirect loop prevented:', target);
+        return;
+      }
+    } catch (e) {}
+
+    // Add ?next= if requested
+    if (options.addNext) {
+      try {
+        var u = new URL(url, window.location.origin);
+        u.searchParams.set('next', currentPath);
+        url = u.toString();
+      } catch (e) {}
+    }
+
+    log('debug', 'Redirecting', { from: currentPath, to: url, reason: options.reason });
+    window.location.replace(url);
+  }
+
+  /* ============================================================
+     5. FAILURE HANDLERS
+     ============================================================ */
+
+  function failWith(reason, options) {
+    options = options || {};
+    state.failed = true;
+    state.failReason = reason;
+    removeLoadingOverlay();
+
+    dispatchEvent('itws:guard-failed', {
+      reason: reason,
+      path: window.location.pathname,
+      message: options.message || null
+    });
+
+    log('debug', 'Guard failed', { reason: reason });
+
+    switch (reason) {
+      case 'not-logged-in':
+        redirectTo('login.html', {
+          addNext: true,
+          reason: 'not-logged-in'
+        });
+        break;
+
+      case 'pending':
+        redirectTo('login.html?pending=1', { reason: 'pending' });
+        break;
+
+      case 'rejected':
+        redirectTo('login.html?rejected=1', { reason: 'rejected' });
+        break;
+
+      case 'suspended':
+        redirectTo('login.html?suspended=1', { reason: 'suspended' });
+        break;
+
+      case 'inactive':
+        redirectTo('login.html?inactive=1', { reason: 'inactive' });
+        break;
+
+      case 'wrong-role':
+        // Redirect to appropriate portal based on actual role
+        redirectToHomeForRole(state.role);
+        break;
+
+      case 'wrong-scope':
+        // Same — go home for role
+        redirectToHomeForRole(state.role);
+        break;
+
+      case 'no-permission':
+        // Show error page or redirect
+        showErrorPage(
+          getLabel('errors.403.title', 'غير مصرح لك بالوصول'),
+          getLabel('errors.403.message', 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        );
+        break;
+
+      case 'error':
+        showErrorPage(
+          getLabel('errors.generic', 'حدث خطأ غير متوقع'),
+          options.message || ''
+        );
+        break;
+
+      default:
+        redirectToHomeForRole(state.role);
     }
   }
 
-  // ============================================
-  // 3. جلب المستخدم الحالي (مع timeout)
-  // ============================================
-  function getCurrentUser() {
-    if (!window.sb) return Promise.resolve(null);
-
-    var authPromise = window.sb.auth.getUser()
-      .then(function (res) {
-        if (!res || !res.data || !res.data.user) return null;
-        state.authUser = res.data.user;
-
-        return window.sb
-          .from('profiles')
-          .select('id, email, full_name, phone, role, is_active, created_at')
-          .eq('id', res.data.user.id)
-          .maybeSingle()
-          .then(function (r) {
-            if (r.error || !r.data) return null;
-            if (r.data.is_active === false) return null;
-
-            var profile = {
-              id: r.data.id,
-              email: r.data.email || res.data.user.email,
-              full_name: r.data.full_name || res.data.user.email,
-              phone: r.data.phone || '',
-              role: r.data.role || 'user',
-              is_active: r.data.is_active !== false,
-              created_at: r.data.created_at
-            };
-            state.currentUser = profile;
-            return profile;
-          });
-      })
-      .catch(function (err) {
-        logDebug('getCurrentUser error:', err.message);
-        return null;
-      });
-
-    return withTimeout(authPromise, AUTH_TIMEOUT_MS, 'جلب بيانات المستخدم')
-      .catch(function (err) {
-        logDebug('getCurrentUser timeout:', err.message);
-        return null;
-      });
-  }
-
-  // ============================================
-  // 4. Redirects
-  // ============================================
-  function redirectToLogin() {
-    var currentPath = window.location.pathname + window.location.search;
-
-    // لو أصلاً في login، متحولش
-    if (currentPath.indexOf('login.html') !== -1) return;
-
-    var loginUrl = getLoginPage();
-    var next = encodeURIComponent(currentPath);
-    var sep = loginUrl.indexOf('?') !== -1 ? '&' : '?';
-    window.location.href = loginUrl + sep + 'next=' + next;
-  }
-
-  function redirectToSafe(user) {
-    if (!user) {
-      redirectToLogin();
+  function redirectToHomeForRole(role) {
+    if (!role) {
+      redirectTo('login.html', { reason: 'no-role' });
       return;
     }
 
-    var role = user.role;
-    if (role === 'super_admin' || role === 'admin' || role === 'committee_manager') {
-      window.location.href = getAdminPage();
-    } else {
-      window.location.href = getHomePage();
+    var dest = 'home.html';
+
+    if (role === 'super_admin' || role === 'committee_head' ||
+        role === 'committee_deputy' || role === 'committee_member') {
+      dest = 'admin/index.html';
+    } else if (role === 'branch_president' || role === 'branch_first_deputy' ||
+               role === 'branch_second_deputy' || role === 'branch_secretary' ||
+               role === 'branch_secretary_assistant' || role === 'branch_treasurer' ||
+               role === 'branch_treasurer_assistant' || role === 'branch_agent' ||
+               role === 'branch_agent_assistant') {
+      dest = 'branch/index.html';
+    } else if (role === 'academy_owner' || role === 'academy_manager') {
+      dest = 'portal/index.html';
+    } else if (role === 'user') {
+      dest = 'home.html';
+    } else if (role === 'pending_user') {
+      dest = 'login.html?pending=1';
+    }
+
+    redirectTo(dest, { reason: 'home-for-role', addNext: false });
+  }
+
+  function showErrorPage(title, message) {
+    // Clear body and show error
+    try {
+      document.body.innerHTML = '';
+      document.body.style.cssText =
+        'margin:0;padding:max(40px, env(safe-area-inset-top)) ' +
+        'max(20px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) ' +
+        'max(20px, env(safe-area-inset-left));' +
+        'font-family:Cairo, sans-serif;' +
+        'background:var(--bg, #0A0E14);color:var(--text, #F8FAFC);' +
+        'min-height:100vh;display:flex;align-items:center;justify-content:center;';
+
+      var wrap = document.createElement('div');
+      wrap.style.cssText =
+        'text-align:center;max-width:min(480px, 100%);padding:24px;';
+
+      var icon = document.createElement('div');
+      icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ' +
+        'width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" ' +
+        'stroke-linecap="round" stroke-linejoin="round" style="color:var(--error, #EF4444);margin:0 auto 20px;">' +
+        '<circle cx="12" cy="12" r="10"></circle>' +
+        '<line x1="12" y1="8" x2="12" y2="12"></line>' +
+        '<line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+
+      var h1 = document.createElement('h1');
+      h1.textContent = title;
+      h1.style.cssText =
+        'margin:0 0 12px;font-size:clamp(22px, 4vw, 28px);font-weight:800;line-height:1.3;';
+
+      var p = document.createElement('p');
+      p.textContent = message;
+      p.style.cssText =
+        'margin:0 0 28px;font-size:clamp(14px, 2vw, 16px);' +
+        'color:var(--text-secondary, #94A3B8);line-height:1.7;';
+
+      var btn = document.createElement('a');
+      btn.href = resolve('home.html');
+      btn.textContent = getLabel('common.back_to_home', 'العودة إلى الرئيسية');
+      btn.style.cssText =
+        'display:inline-flex;align-items:center;gap:8px;padding:12px 28px;' +
+        'background:var(--primary, #CE1126);' +
+        'color:var(--primary-text, #fff);text-decoration:none;' +
+        'border-radius:10px;font-weight:700;font-size:14px;' +
+        'transition:all 0.2s;';
+
+      wrap.appendChild(icon);
+      wrap.appendChild(h1);
+      wrap.appendChild(p);
+      wrap.appendChild(btn);
+      document.body.appendChild(wrap);
+    } catch (e) {
+      log('error', 'showErrorPage failed', e);
     }
   }
 
-  // ============================================
-  // 5. Guard (حماية الصفحة)
-  // ============================================
-  function guard(allowedRoles, options) {
+  /* ============================================================
+     6. STATUS CHECKS
+     ============================================================ */
+
+  function checkUserStatus(profile) {
+    if (!profile) return { ok: false, reason: 'not-logged-in' };
+
+    // is_deleted → treat as not-logged-in
+    if (profile.is_deleted === true) {
+      return { ok: false, reason: 'inactive' };
+    }
+
+    // status check
+    if (profile.status === 'pending') {
+      return { ok: false, reason: 'pending' };
+    }
+    if (profile.status === 'rejected') {
+      return { ok: false, reason: 'rejected' };
+    }
+    if (profile.status === 'suspended') {
+      return { ok: false, reason: 'suspended' };
+    }
+    if (profile.status !== 'active') {
+      return { ok: false, reason: 'inactive' };
+    }
+
+    // is_active boolean
+    if (profile.is_active === false) {
+      return { ok: false, reason: 'inactive' };
+    }
+
+    return { ok: true, reason: null };
+  }
+
+  /* ============================================================
+     7. ROLE / SCOPE / PERMISSION CHECKS
+     ============================================================ */
+
+  function checkRole(role, requiredRoles) {
+    if (!requiredRoles || requiredRoles.length === 0) return true;
+
+    // super_admin always passes
+    if (role === 'super_admin') return true;
+
+    if (Array.isArray(requiredRoles)) {
+      return requiredRoles.indexOf(role) !== -1;
+    }
+    return role === requiredRoles;
+  }
+
+  function checkScope(profile, options) {
+    if (!options) return true;
+
+    var scope = options.scope;
+
+    if (scope === 'governorate' && options.governorateId != null) {
+      return profile.governorate_id === options.governorateId;
+    }
+    if (scope === 'branch' && options.branchId) {
+      return profile.branch_id === options.branchId;
+    }
+    if (scope === 'academy' && options.academyId) {
+      return profile.academy_id === options.academyId;
+    }
+    if (scope === 'self' && options.userId) {
+      return profile.id === options.userId;
+    }
+    return true;
+  }
+
+  function checkPermission(resource, action, options) {
+    if (!resource || !action) return true;
+
+    try {
+      if (window.Permissions && typeof window.Permissions.can === 'function') {
+        return window.Permissions.can(resource, action, options || {});
+      }
+    } catch (e) {}
+    return true; // fallback — RLS still enforces
+  }
+
+  /* ============================================================
+     8. CORE — CHECK
+     ============================================================ */
+
+  function checkAccess(requiredRoles, options) {
     options = options || {};
-    var redirectMode = options.redirect || 'login';
 
-    // لو فيه فحص جاري، رجّع نفس الـ promise
-    if (state.checking) return state.checking;
+    // Wait for Permissions to be ready
+    var ready = (window.Permissions && typeof window.Permissions.whenReady === 'function')
+      ? window.Permissions.whenReady()
+      : Promise.resolve(null);
 
-    // إخفاء المحتوى فوراً (منع flash)
-    hideBody();
+    return ready
+      .then(function (result) {
+        var sb = getSb();
+        if (!sb) throw new Error('Supabase not available');
 
-    state.checking = getCurrentUser()
-      .then(function (user) {
-        state.checking = null;
+        // Fetch user
+        return sb.auth.getUser().then(function (res) {
+          var user = res && res.data && res.data.user ? res.data.user : null;
 
-        // (أ) مش مسجل دخول
-        if (!user) {
-          if (redirectMode === 'login') redirectToLogin();
-          else redirectToSafe(null);
-          return null;
+          if (!user) {
+            return { ok: false, reason: 'not-logged-in' };
+          }
+
+          state.user = user;
+
+          // Fetch profile (use cache if available)
+          if (result && result.profile && result.profile.id === user.id) {
+            return { user: user, profile: result.profile };
+          }
+
+          return sb.from('profiles')
+            .select('id, email, full_name, role, status, is_active, is_deleted, ' +
+                    'governorate_id, branch_id, academy_id, avatar_url, phone')
+            .eq('id', user.id)
+            .maybeSingle()
+            .then(function (profileRes) {
+              if (profileRes.error) throw new Error(profileRes.error.message);
+              if (!profileRes.data) {
+                return { ok: false, reason: 'no-profile' };
+              }
+              return { user: user, profile: profileRes.data };
+            });
+        });
+      })
+      .then(function (data) {
+        if (!data || data.ok === false) {
+          return { ok: false, reason: data ? data.reason : 'error' };
         }
 
-        // (ب) الدور مش مطابق
-        if (allowedRoles && allowedRoles.length > 0) {
-          if (allowedRoles.indexOf(user.role) === -1) {
-            showUnauthorizedMessage(user);
-            setTimeout(function () {
-              redirectToSafe(user);
-            }, 1500);
-            return null;
+        var user = data.user;
+        var profile = data.profile;
+
+        state.user = user;
+        state.profile = profile;
+        state.role = profile.role;
+
+        // Sync to Permissions engine
+        try {
+          if (window.Permissions && typeof window.Permissions.setProfile === 'function') {
+            window.Permissions.setProfile(profile);
+          }
+        } catch (e) {}
+
+        // Check user status
+        var statusCheck = checkUserStatus(profile);
+        if (!statusCheck.ok) {
+          return statusCheck;
+        }
+
+        // Check role
+        if (!checkRole(profile.role, requiredRoles)) {
+          return { ok: false, reason: 'wrong-role', role: profile.role };
+        }
+
+        // Check scope
+        if (options && !checkScope(profile, options)) {
+          return { ok: false, reason: 'wrong-scope', role: profile.role };
+        }
+
+        // Check permission
+        if (options && options.resource && options.action) {
+          if (!checkPermission(options.resource, options.action, options.permissionOptions)) {
+            return { ok: false, reason: 'no-permission', role: profile.role };
           }
         }
 
-        // (ج) كل حاجة تمام
-        showBody();
-        notifyAuthReady(user);
-        logDebug('Access granted:', user.email, '(', user.role, ')');
-        return user;
+        return { ok: true, user: user, profile: profile };
       })
       .catch(function (err) {
-        state.checking = null;
-        logDebug('Guard error:', err.message);
-        if (redirectMode === 'login') redirectToLogin();
-        else redirectToSafe(null);
-        return null;
-      });
-
-    return state.checking;
-  }
-
-  // ============================================
-  // 6. Guards جاهزة
-  // ============================================
-  function guardAdmin(options) {
-    return guard(['super_admin', 'admin', 'committee_manager'], options);
-  }
-
-  function guardSuperAdmin(options) {
-    return guard(['super_admin'], options);
-  }
-
-  function guardAcademy(options) {
-    return guard(null, options);
-  }
-
-  function optional() {
-    showBody();
-    return getCurrentUser().then(function (user) {
-      if (user) notifyAuthReady(user);
-      return user;
-    });
-  }
-
-  // ============================================
-  // 7. Body visibility
-  // ============================================
-  function hideBody() {
-    if (document.body) {
-      document.body.style.visibility = 'hidden';
-    } else {
-      document.addEventListener('DOMContentLoaded', function () {
-        if (document.body) document.body.style.visibility = 'hidden';
-      }, { once: true });
-    }
-  }
-
-  function showBody() {
-    if (document.body) {
-      document.body.style.visibility = '';
-    }
-  }
-
-  // ============================================
-  // 8. رسالة عدم التصريح
-  // ============================================
-  function showUnauthorizedMessage(user) {
-    var msg = document.createElement('div');
-    msg.id = 'itws-unauthorized-msg';
-    msg.style.cssText = [
-      'position:fixed',
-      'inset:0',
-      'display:flex',
-      'flex-direction:column',
-      'align-items:center',
-      'justify-content:center',
-      'background:var(--bg,#0A0E14)',
-      'z-index:99999',
-      'padding:20px',
-      'text-align:center',
-      'direction:rtl',
-      'font-family:var(--font,Cairo,sans-serif)',
-      'color:var(--text,#F8FAFC)'
-    ].join(';');
-
-    msg.innerHTML = '' +
-      '<div style="width:80px;height:80px;border-radius:50%;background:var(--error-soft,rgba(239,68,68,0.12));display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--error,#EF4444);margin-bottom:24px;font-weight:700;">&#10005;</div>' +
-      '<h2 style="font-size:24px;margin-bottom:12px;font-weight:700;">غير مصرح لك بالوصول</h2>' +
-      '<p style="color:var(--text-secondary,#94A3B8);font-size:14px;margin-bottom:20px;">هذه الصفحة مخصصة للمستخدمين المصرح لهم فقط</p>' +
-      '<p style="color:var(--text-muted,#64748B);font-size:13px;">دورك الحالي: <strong style="color:var(--primary,#CE1126);">' +
-        escapeHtml(translateRole(user.role)) +
-      '</strong></p>' +
-      '<p style="color:var(--text-muted,#64748B);font-size:13px;margin-top:20px;">جاري تحويلك للصفحة المناسبة...</p>';
-
-    document.body.appendChild(msg);
-  }
-
-  // ============================================
-  // 9. Logout
-  // ============================================
-  function logout() {
-    // إيقاف session heartbeat أولاً
-    if (window.SessionManager && window.SessionManager.stop) {
-      try { window.SessionManager.stop(); } catch (e) {}
-    }
-
-    if (!window.sb) {
-      window.location.href = getLoginPage();
-      return Promise.resolve();
-    }
-
-    // تسجيل النشاط (اختياري، بدون انتظار)
-    if (state.currentUser) {
-      logActivity('logout', 'تسجيل خروج', {});
-    }
-
-    var signOutPromise = window.sb.auth.signOut();
-
-    return withTimeout(signOutPromise, 5000, 'تسجيل الخروج')
-      .then(function () {
-        state.currentUser = null;
-        state.authUser = null;
-        window.location.href = getLoginPage();
-      })
-      .catch(function () {
-        window.location.href = getLoginPage();
+        log('error', 'Check failed', err && err.message);
+        return { ok: false, reason: 'error', message: err && err.message };
       });
   }
 
-  // ============================================
-  // 10. Log Activity
-  // ============================================
-  function logActivity(type, description, details) {
-    if (!window.sb || !state.currentUser) return Promise.resolve();
+  /* ============================================================
+     9. PUBLIC API — REQUIRE
+     ============================================================ */
 
-    return window.sb.from('activities').insert({
-      user_id: state.currentUser.id,
-      user_name: state.currentUser.full_name,
-      user_role: state.currentUser.role,
-      action_type: type,
-      description: description,
-      details: details || {}
-    }).catch(function () {});
-  }
+  /**
+   * Require access to current page
+   * @param {array|string} roles - Required roles (super_admin always passes)
+   * @param {object} options - { scope, governorateId, branchId, academyId, userId,
+   *                            resource, action, permissionOptions,
+   *                            showLoading, redirectTo }
+   * @returns {Promise} Resolves with { user, profile } if allowed,
+   *                    or redirects & rejects if not
+   */
+  function require_(roles, options) {
+    options = options || {};
 
-  // ============================================
-  // 11. onAuthChange (⚠️ ممنوع أي async هنا)
-  // ============================================
-  function onAuthChange(callback) {
-    if (!window.sb) return null;
-    if (typeof callback !== 'function') return null;
+    if (typeof roles === 'string') roles = [roles];
+    if (!Array.isArray(roles)) roles = [];
 
-    state.listeners.push(callback);
+    if (state.passed) {
+      return Promise.resolve({ user: state.user, profile: state.profile });
+    }
 
-    // تسجيل listener مرة واحدة فقط
-    if (!state.authChannel) {
-      var result = window.sb.auth.onAuthStateChange(function (event, session) {
-        logDebug('Auth state changed:', event);
+    if (state.pendingCheckPromise) {
+      return state.pendingCheckPromise;
+    }
 
-        // ✅ آمن: تحديث الحالة بس (متزامن)
-        if (event === 'SIGNED_OUT') {
-          state.currentUser = null;
-          state.authUser = null;
+    state.checking = true;
+
+    // Show loading overlay (default true)
+    if (options.showLoading !== false) {
+      createLoadingOverlay();
+    }
+
+    state.pendingCheckPromise = checkAccess(roles, options)
+      .then(function (result) {
+        state.checking = false;
+        state.pendingCheckPromise = null;
+
+        if (result.ok) {
+          state.passed = true;
+          state.failed = false;
+          state.lastCheckAt = Date.now();
+          removeLoadingOverlay();
+
+          dispatchEvent('itws:guard-passed', {
+            role: result.profile.role,
+            userId: result.user.id,
+            path: window.location.pathname
+          });
+
+          return result;
         }
 
-        // ✅ آمن: تأجيل تنفيذ كل listener بره الـ callback
-        // عشان أي async جوه المستمع ميعملش deadlock
-        var listeners = state.listeners.slice();
-        listeners.forEach(function (cb) {
-          setTimeout(function () {
-            try {
-              cb(event, session);
-            } catch (e) {
-              logDebug('Listener error:', e.message);
-            }
-          }, 0);
-        });
+        // Failed
+        var failOptions = {
+          message: result.message || null,
+          redirectTo: options.redirectTo || null
+        };
+
+        if (options.redirectTo) {
+          removeLoadingOverlay();
+          redirectTo(options.redirectTo, {
+            reason: result.reason,
+            addNext: result.reason === 'not-logged-in'
+          });
+        } else {
+          failWith(result.reason, failOptions);
+        }
+
+        // Reject so callers know access denied
+        var err = new Error('Access denied: ' + result.reason);
+        err.reason = result.reason;
+        err.role = result.role;
+        throw err;
+      })
+      .catch(function (err) {
+        state.checking = false;
+        state.pendingCheckPromise = null;
+        removeLoadingOverlay();
+        throw err;
       });
 
-      // تخزين subscription لو متاح
-      if (result && result.data && result.data.subscription) {
-        state.authChannel = result.data.subscription;
-      }
+    return state.pendingCheckPromise;
+  }
+
+  /* ============================================================
+     10. CONVENIENCE — requirePermission
+     ============================================================ */
+
+  function requirePermission(resource, action, options) {
+    options = options || {};
+    options.resource = resource;
+    options.action = action;
+    return require_([], options);
+  }
+
+  /* ============================================================
+     11. CONVENIENCE — requireScope
+     ============================================================ */
+
+  function requireScope(scopeType, scopeId, roles) {
+    var options = { scope: scopeType };
+
+    if (scopeType === 'governorate') options.governorateId = scopeId;
+    else if (scopeType === 'branch') options.branchId = scopeId;
+    else if (scopeType === 'academy') options.academyId = scopeId;
+    else if (scopeType === 'self') options.userId = scopeId;
+
+    return require_(roles || [], options);
+  }
+
+  /* ============================================================
+     12. AUTO-DETECT [data-requires-role]
+     ============================================================ */
+
+  function autoDetect() {
+    var body = document.body;
+    if (!body) return null;
+
+    var requiresRole = body.getAttribute('data-requires-role');
+    if (!requiresRole) return null;
+
+    var roles = requiresRole.split(',').map(function (r) { return r.trim(); }).filter(Boolean);
+
+    var requiresScope = body.getAttribute('data-requires-scope');
+    var options = {};
+
+    if (requiresScope) {
+      var parts = requiresScope.split(':');
+      options.scope = parts[0];
+      var scopeId = parts[1] || null;
+
+      if (options.scope === 'governorate' && scopeId) options.governorateId = parseInt(scopeId, 10);
+      else if (options.scope === 'branch' && scopeId) options.branchId = scopeId;
+      else if (options.scope === 'academy' && scopeId) options.academyId = scopeId;
+      else if (options.scope === 'self' && scopeId) options.userId = scopeId;
     }
 
-    // return unsubscribe function
-    return function unsubscribe() {
-      var idx = state.listeners.indexOf(callback);
-      if (idx !== -1) state.listeners.splice(idx, 1);
-    };
+    return { roles: roles, options: options };
   }
 
-  // ============================================
-  // 12. Notify
-  // ============================================
-  function notifyAuthReady(user) {
-    try {
-      window.dispatchEvent(new CustomEvent('itws:auth-ready', {
-        detail: { user: user }
-      }));
-    } catch (e) {}
+  /* ============================================================
+     13. CONVENIENCE — currentUser / currentProfile / currentRole
+     ============================================================ */
+
+  function getUser() {
+    return state.user;
   }
 
-  // ============================================
-  // 13. Public API
-  // ============================================
+  function getProfile() {
+    return state.profile;
+  }
+
+  function getRole() {
+    return state.role;
+  }
+
+  function isAuthenticated() {
+    return !!(state.user && state.profile && state.profile.status === 'active');
+  }
+
+  function hasRole(role) {
+    if (!role) return false;
+    if (Array.isArray(role)) return role.indexOf(state.role) !== -1;
+    return state.role === role;
+  }
+
+  function isSuperAdmin() {
+    return state.role === 'super_admin';
+  }
+
+  function isCommittee() {
+    return state.role === 'committee_head' ||
+           state.role === 'committee_deputy' ||
+           state.role === 'committee_member';
+  }
+
+  function isBranchLevel() {
+    return state.role && state.role.indexOf('branch_') === 0;
+  }
+
+  function isAcademyLevel() {
+    return state.role === 'academy_owner' || state.role === 'academy_manager';
+  }
+
+  /* ============================================================
+     14. INIT — AUTO-RUN IF [data-requires-role]
+     ============================================================ */
+
+  function init() {
+    if (state.initialized) return;
+    state.initialized = true;
+
+    // Auto-detect page requirement
+    var detected = autoDetect();
+    if (detected && detected.roles.length > 0) {
+      log('debug', 'Auto-detected page requirement', detected);
+      require_(detected.roles, detected.options).catch(function () {
+        // Already redirected by require_()
+      });
+    }
+  }
+
+  /* ============================================================
+     15. EXPORT
+     ============================================================ */
+
   window.AuthGuard = {
-    initialized: true,
+    _initialized: true,
 
     // Core
-    getCurrentUser: getCurrentUser,
-    isAuthenticated: function () {
-      return getCurrentUser().then(function (u) { return !!u; });
-    },
-    hasRole: function (role) {
-      return getCurrentUser().then(function (u) {
-        if (!u) return false;
-        if (Array.isArray(role)) return role.indexOf(u.role) !== -1;
-        return u.role === role;
-      });
-    },
-    isAdmin: function () {
-      return window.AuthGuard.hasRole(['super_admin', 'admin', 'committee_manager']);
-    },
-    isSuperAdmin: function () {
-      return window.AuthGuard.hasRole('super_admin');
-    },
+    require: require_,
+    requirePermission: requirePermission,
+    requireScope: requireScope,
+    init: init,
 
-    // Guards
-    guard: guard,
-    guardAdmin: guardAdmin,
-    guardSuperAdmin: guardSuperAdmin,
-    guardAcademy: guardAcademy,
-    optional: optional,
+    // User info
+    getUser: getUser,
+    getProfile: getProfile,
+    getRole: getRole,
+    isAuthenticated: isAuthenticated,
+    hasRole: hasRole,
 
-    // Actions
-    logout: logout,
-    logActivity: logActivity,
-    redirectToLogin: redirectToLogin,
-    redirectToSafe: redirectToSafe,
-
-    // Events
-    onAuthChange: onAuthChange,
-
-    // Helpers
-    translateRole: translateRole,
+    // Role helpers
+    isSuperAdmin: isSuperAdmin,
+    isCommittee: isCommittee,
+    isBranchLevel: isBranchLevel,
+    isAcademyLevel: isAcademyLevel,
 
     // State
-    getUser: function () { return state.currentUser; }
+    isPassed: function () { return state.passed; },
+    isFailed: function () { return state.failed; },
+    getFailReason: function () { return state.failReason; },
+    getState: function () {
+      return {
+        checking: state.checking,
+        passed: state.passed,
+        failed: state.failed,
+        failReason: state.failReason,
+        role: state.role,
+        userId: state.user ? state.user.id : null,
+        profile: state.profile,
+        lastCheckAt: state.lastCheckAt
+      };
+    },
+
+    // Utilities
+    redirectToHomeForRole: redirectToHomeForRole,
+    redirectToLogin: function () {
+      redirectTo('login.html', { addNext: true, reason: 'manual' });
+    }
   };
 
-  // ============================================
-  // 14. Auto-guard (حماية تلقائية بـ data attributes)
-  // ============================================
-  function autoGuard() {
-    if (!document.body) return;
+  // Shorthands
+  window.requireAuth = function (roles, options) {
+    return require_(roles, options);
+  };
 
-    var body = document.body;
-    var requiresAuth = body.hasAttribute('data-requires-auth');
-    var requiredRoles = body.getAttribute('data-required-roles');
-
-    // صفحة عامة
-    if (!requiresAuth) {
-      showBody();
-      getCurrentUser().then(function (user) {
-        if (user) notifyAuthReady(user);
-      });
-      return;
-    }
-
-    // صفحة محمية
-    var roles = null;
-    if (requiredRoles) {
-      roles = requiredRoles.split(',').map(function (r) { return r.trim(); });
-    }
-
-    guard(roles, { redirect: 'login' });
-  }
-
+  // Auto-init
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', autoGuard);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    autoGuard();
+    init();
   }
 
-  // ============================================
-  // 15. إشعار
-  // ============================================
+  /* ============================================================
+     16. DEBUG LOG
+     ============================================================ */
+
+  var cfg = getConfig();
   if (cfg.DEBUG) {
-    console.log('%c✅ [ITWS] AuthGuard ready', 'color: #10B981; font-weight: bold;');
+    try {
+      console.log('%c[AuthGuard]', 'color: #EF4444; font-weight: bold;', 'Ready');
+    } catch (e) {}
   }
 
 })();
