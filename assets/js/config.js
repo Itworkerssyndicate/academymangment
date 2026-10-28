@@ -1,5 +1,5 @@
 /* ============================================================
-   ITWS Platform — Configuration V2
+   ITWS Platform — Configuration V3 (Silent + ES5-safe)
    File: assets/js/config.js
    ============================================================ */
 
@@ -9,20 +9,14 @@
   if (window.ITWS_CONFIG) return;
 
   /* ============================================================
-     ⚠️⚠️⚠️  استبدل القيمتين دول بقيم مشروعك من Supabase  ⚠️⚠️⚠️
-     
-     طريقة الحصول عليهم:
-     1. افتح https://supabase.com/dashboard
-     2. اختار مشروعك
-     3. Settings (⚙️) → API
-     4. كوبي Project URL و anon public key
+     ✅ Supabase Credentials (filled with your project)
      ============================================================ */
 
-  var SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
-  var SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+  var SUPABASE_URL = 'https://hfupkxbajpnaillsqayc.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable__9lVaIyTxYzyykQ_AY_u9w_On795zBK';
 
   /* ============================================================
-     ⛔ متعدلش تحت السطر ده إلا لو عارف بتعمل إيه
+     ⛔ لا تعدل تحت السطر ده
      ============================================================ */
 
   function detectEnvironment() {
@@ -84,13 +78,21 @@
     PAGE_DEPTH: detectPageDepth(),
     APP_VERSION: '2.0.0',
     APP_NAME: 'ITWS Platform',
+    RATE_LIMITS: {
+      searchDebounceMs: 300,
+      toastDurationMs: 4000,
+      toastErrorDurationMs: 8000,
+      realtimeDebounceMs: 300
+    },
     STORAGE_KEYS: {
       AUTH: 'itws_auth',
       THEME: 'itws_theme',
       SAVED_EMAIL: 'itws_saved_email',
       SETTINGS_CACHE: 'itws_settings_cache',
       LABELS_CACHE: 'itws_labels_cache',
-      THEMES_CACHE: 'itws_themes_cache'
+      THEMES_CACHE: 'itws_themes_cache',
+      LAST_VISIT: 'itws_last_visit',
+      PENDING_REDIRECT: 'itws_pending_redirect'
     },
     HOSTNAME: window.location.hostname,
     PROTOCOL: window.location.protocol
@@ -99,28 +101,26 @@
   window.resolveUrl = resolveUrl;
   window.getBase = getBase;
 
-  function validateConfig() {
-    var errors = [];
-    if (!SUPABASE_URL || SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) {
-      errors.push('SUPABASE_URL not configured in config.js');
-    }
-    if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf('YOUR_ANON_KEY') !== -1) {
-      errors.push('SUPABASE_ANON_KEY not configured in config.js');
-    }
-    if (errors.length > 0) {
-      console.error('[ITWS Config] Validation errors:');
-      errors.forEach(function (e) { console.error('  - ' + e); });
-    }
-    return errors.length === 0;
+  var isValid = true;
+  if (!SUPABASE_URL || SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) isValid = false;
+  if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf('YOUR_ANON_KEY') !== -1) isValid = false;
+
+  if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 0) {
+    try {
+      var parts = SUPABASE_ANON_KEY.split('.');
+      if (parts.length >= 2) {
+        var payload = JSON.parse(atob(parts[1]));
+        if (payload && payload.role === 'service_role') isValid = false;
+      }
+    } catch (e) {}
   }
 
-  try { validateConfig(); } catch (e) {}
+  window.ITWS_CONFIG_VALID = isValid;
 
   if (DEBUG) {
     try {
-      console.log('%c[ITWS Config]', 'color: #D4A843; font-weight: bold;', {
-        ENV: env, BASE_PATH: window.ITWS_CONFIG.BASE_PATH, DEBUG: DEBUG
-      });
+      console.log('%c[ITWS Config]', 'color: #D4A843; font-weight: bold;',
+        'Env:', env, '| Valid:', isValid);
     } catch (e) {}
   }
 
