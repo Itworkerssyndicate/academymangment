@@ -1,1230 +1,1047 @@
-/* ============================================
-   [14/50] ITWS Platform - Layouts
-   Path: assets/css/layout.css
-   ============================================ */
-/* 💡 Header, Sidebar, Footer, Page Layouts */
-/* 💡 آخر ملف في الـ Foundation */
-/* 💡 يعتمد على base.css و components.css */
-/* ============================================ */
+/* ============================================================
+   ITWS Platform — Layout System V2
+   File: assets/css/layout.css
+   Description: Page structure + layout primitives
 
-/* ============================================
-   1. Page Wrapper
-   ============================================ */
+   Load order: FOURTH CSS (after components.css, before pages.css)
+
+   Sections:
+   1.  Page wrapper (full height)
+   2.  Containers
+   3.  Layout Grid (12-col responsive)
+   4.  Flex utilities
+   5.  Stack (vertical flow)
+   6.  Cluster (horizontal flow with wrap)
+   7.  Sidebar layout (main wrapper)
+   8.  Grid helpers
+   9.  Section spacing
+   10. Spacers / utilities
+   11. Safe-area handling
+   12. Responsive breakpoints
+   13. Print layouts
+   14. RTL logical properties
+
+   Rules:
+   - R13: mobile-first, no fixed widths, safe-area
+   - No emoji
+   - RTL-first (logical properties only)
+   - Cairo font
+   - All colors from theme.css variables
+   ============================================================ */
+
+
+/* ============================================================
+   1. PAGE WRAPPER
+   ============================================================ */
+
 .page-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--bg);
 }
 
+/* Fixed header variant — content scrolls under sticky header */
+.page-wrapper.page-with-sticky-header {
+  padding-top: var(--header-height, 72px);
+}
+
+.page-wrapper.page-with-sticky-header .itws-header {
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  z-index: var(--z-header, 900);
+}
+
+/* Main content area */
 .page-main {
   flex: 1;
-  padding: var(--space-6) 0;
-}
-
-.page-main-full {
-  flex: 1;
-  padding: 0;
-}
-
-.page-container {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--space-5);
-}
-
-/* ============================================
-   2. Public Header (Navbar)
-   ============================================ */
-.public-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(15, 30, 53, 0.95);
-  transition: background var(--transition-fast);
-}
-
-.theme-light .public-header {
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.public-header.scrolled {
-  box-shadow: var(--shadow);
-}
-
-.public-header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-5);
-  padding: var(--space-3) var(--space-5);
-  max-width: 1280px;
-  margin: 0 auto;
-  min-height: 68px;
-}
-
-/* ===== Logo ===== */
-.public-header .logo {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  text-decoration: none;
-  color: var(--text);
-  flex-shrink: 0;
-}
-
-.public-header .logo:hover {
-  text-decoration: none;
-  color: var(--text);
-}
-
-.public-header .logo-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: var(--weight-extrabold);
-  color: var(--primary-text);
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.public-header .logo-mark img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 4px;
-}
-
-.public-header .logo-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  min-height: 0;
+  min-width: 0;
 }
 
-.public-header .logo-title {
-  font-size: var(--text-base);
-  font-weight: var(--weight-bold);
-  color: var(--text);
-}
 
-.public-header .logo-subtitle {
-  font-size: 11px;
-  color: var(--text-muted);
-}
+/* ============================================================
+   2. CONTAINERS
+   ============================================================ */
 
-/* ===== Navigation ===== */
-.public-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  flex: 1;
-  justify-content: center;
-}
-
-.public-nav-link {
-  padding: var(--space-2) var(--space-4);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  text-decoration: none;
-  border-radius: var(--radius);
-  transition: background var(--transition-fast), color var(--transition-fast);
-  white-space: nowrap;
-}
-
-.public-nav-link:hover {
-  background: var(--surface-hover);
-  color: var(--text);
-  text-decoration: none;
-}
-
-.public-nav-link.active {
-  background: var(--primary-soft);
-  color: var(--primary);
-}
-
-/* ===== Header Actions ===== */
-.public-header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-/* ===== Mobile Menu Button ===== */
-.mobile-menu-btn {
-  display: none;
-  width: 40px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 20px;
-}
-
-.mobile-menu-btn:hover {
-  background: var(--surface-hover);
-}
-
-/* ===== Mobile Nav Overlay ===== */
-.mobile-nav-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: var(--z-overlay);
-}
-
-.mobile-nav-overlay.open {
-  display: block;
-}
-
-.mobile-nav {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 280px;
-  max-width: 85vw;
-  background: var(--surface-elevated);
-  border-left: 1px solid var(--border);
-  z-index: calc(var(--z-overlay) + 1);
-  padding: var(--space-6);
-  transform: translateX(100%);
-  transition: transform var(--transition-base);
-  overflow-y: auto;
-}
-
-.mobile-nav.open {
-  transform: translateX(0);
-}
-
-.mobile-nav-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-6);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--border);
-}
-
-.mobile-nav-links {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.mobile-nav-links .public-nav-link {
-  padding: var(--space-3) var(--space-4);
-  text-align: right;
+/* Default container — max width 1280, centered, padding */
+.container {
   width: 100%;
+  max-width: var(--container-max, 1280px);
+  margin-inline: auto;
+  padding-inline: var(--content-padding, 20px);
 }
 
-/* ============================================
-   3. Admin / Portal Layout (Sidebar + Content)
-   ============================================ */
-.app-layout {
+.container-sm {
+  max-width: 640px;
+}
+
+.container-md {
+  max-width: 960px;
+}
+
+.container-lg {
+  max-width: var(--container-wide, 1440px);
+}
+
+.container-xl {
+  max-width: 1680px;
+}
+
+.container-full {
+  max-width: 100%;
+}
+
+/* Flush (no padding) */
+.container-flush {
+  padding-inline: 0;
+}
+
+/* Container with vertical padding */
+.container-padded {
+  padding-block: clamp(24px, 4vw, 48px);
+}
+
+/* Centered content */
+.container-narrow {
+  max-width: var(--container-narrow, 960px);
+  margin-inline: auto;
+}
+
+/* Reading width */
+.reading-width {
+  max-width: 72ch;
+  margin-inline: auto;
+}
+
+
+/* ============================================================
+   3. LAYOUT GRID (12-column responsive)
+   ============================================================ */
+
+.grid {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  min-height: 100vh;
-}
-
-/* ===== Sidebar ===== */
-.app-sidebar {
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  z-index: var(--z-sticky);
-  transition: transform var(--transition-base);
-}
-
-.app-sidebar-header {
-  padding: var(--space-5);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.app-sidebar-header .logo {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  text-decoration: none;
-  color: var(--text);
-}
-
-.app-sidebar-header .logo-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: var(--weight-extrabold);
-  color: var(--primary-text);
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.app-sidebar-header .logo-mark img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 4px;
+  gap: var(--grid-gap, 24px);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
-.app-sidebar-header .logo-title {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
-  color: var(--text);
-  line-height: 1.2;
+/* Custom gap variants */
+.grid-gap-sm { --grid-gap: 12px; }
+.grid-gap-md { --grid-gap: 20px; }
+.grid-gap-lg { --grid-gap: 32px; }
+.grid-gap-xl { --grid-gap: 48px; }
+
+/* Grid spanning — mobile first (default = full width) */
+.grid > * {
+  grid-column: span 12;
 }
 
-.app-sidebar-header .logo-subtitle {
-  font-size: 10px;
-  color: var(--text-muted);
+/* Tablet (640px+) */
+@media (min-width: 640px) {
+  .col-sm-1 { grid-column: span 1; }
+  .col-sm-2 { grid-column: span 2; }
+  .col-sm-3 { grid-column: span 3; }
+  .col-sm-4 { grid-column: span 4; }
+  .col-sm-5 { grid-column: span 5; }
+  .col-sm-6 { grid-column: span 6; }
+  .col-sm-7 { grid-column: span 7; }
+  .col-sm-8 { grid-column: span 8; }
+  .col-sm-9 { grid-column: span 9; }
+  .col-sm-10 { grid-column: span 10; }
+  .col-sm-11 { grid-column: span 11; }
+  .col-sm-12 { grid-column: span 12; }
 }
 
-/* ===== Sidebar Nav ===== */
-.app-sidebar-nav {
-  flex: 1;
-  padding: var(--space-4) var(--space-3);
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+  .col-md-1 { grid-column: span 1; }
+  .col-md-2 { grid-column: span 2; }
+  .col-md-3 { grid-column: span 3; }
+  .col-md-4 { grid-column: span 4; }
+  .col-md-5 { grid-column: span 5; }
+  .col-md-6 { grid-column: span 6; }
+  .col-md-7 { grid-column: span 7; }
+  .col-md-8 { grid-column: span 8; }
+  .col-md-9 { grid-column: span 9; }
+  .col-md-10 { grid-column: span 10; }
+  .col-md-11 { grid-column: span 11; }
+  .col-md-12 { grid-column: span 12; }
+}
+
+/* Large (1440px+) */
+@media (min-width: 1440px) {
+  .col-lg-1 { grid-column: span 1; }
+  .col-lg-2 { grid-column: span 2; }
+  .col-lg-3 { grid-column: span 3; }
+  .col-lg-4 { grid-column: span 4; }
+  .col-lg-5 { grid-column: span 5; }
+  .col-lg-6 { grid-column: span 6; }
+  .col-lg-7 { grid-column: span 7; }
+  .col-lg-8 { grid-column: span 8; }
+  .col-lg-9 { grid-column: span 9; }
+  .col-lg-10 { grid-column: span 10; }
+  .col-lg-11 { grid-column: span 11; }
+  .col-lg-12 { grid-column: span 12; }
+}
+
+
+/* ============================================================
+   4. FLEX UTILITIES
+   ============================================================ */
+
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.flex-1 { flex: 1; }
+.flex-auto { flex: 1 1 auto; }
+.flex-initial { flex: 0 1 auto; }
+.flex-none { flex: none; }
+
+.flex-shrink-0 { flex-shrink: 0; }
+.flex-shrink-1 { flex-shrink: 1; }
+.flex-grow-0 { flex-grow: 0; }
+.flex-grow-1 { flex-grow: 1; }
+
+/* Alignment */
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+.items-baseline { align-items: baseline; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-evenly { justify-content: space-evenly; }
+
+.self-start { align-self: flex-start; }
+.self-center { align-self: center; }
+.self-end { align-self: flex-end; }
+.self-stretch { align-self: stretch; }
+
+.content-center { align-content: center; }
+.content-between { align-content: space-between; }
+
+/* Gap utilities */
+.gap-0 { gap: 0; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-5 { gap: 20px; }
+.gap-6 { gap: 24px; }
+.gap-7 { gap: 32px; }
+.gap-8 { gap: 40px; }
+.gap-10 { gap: 48px; }
+
+.gap-x-2 { column-gap: 8px; }
+.gap-x-4 { column-gap: 16px; }
+.gap-y-2 { row-gap: 8px; }
+.gap-y-4 { row-gap: 16px; }
+
+
+/* ============================================================
+   5. STACK (vertical flow with consistent spacing)
+   ============================================================ */
+
+.stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  overflow-y: auto;
+  gap: var(--stack-gap, 16px);
 }
 
-.sidebar-group {
-  margin-bottom: var(--space-4);
+.stack-0 { --stack-gap: 0; }
+.stack-1 { --stack-gap: 4px; }
+.stack-2 { --stack-gap: 8px; }
+.stack-3 { --stack-gap: 12px; }
+.stack-4 { --stack-gap: 16px; }
+.stack-5 { --stack-gap: 20px; }
+.stack-6 { --stack-gap: 24px; }
+.stack-7 { --stack-gap: 32px; }
+.stack-8 { --stack-gap: 40px; }
+
+/* Optional divider between stack children */
+.stack-divided > * + * {
+  padding-top: var(--stack-gap, 16px);
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
 }
 
-.sidebar-group-title {
-  font-size: 10px;
-  font-weight: var(--weight-semibold);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-1);
-}
 
-.sidebar-link {
+/* ============================================================
+   6. CLUSTER (horizontal with wrap — good for chips/tags/buttons)
+   ============================================================ */
+
+.cluster {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--cluster-gap, 8px);
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-3);
-  border-radius: var(--radius);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast);
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: right;
-  font-family: inherit;
-  position: relative;
 }
 
-.sidebar-link:hover {
-  background: var(--surface-hover);
-  color: var(--text);
-  text-decoration: none;
-}
+.cluster-1 { --cluster-gap: 4px; }
+.cluster-2 { --cluster-gap: 8px; }
+.cluster-3 { --cluster-gap: 12px; }
+.cluster-4 { --cluster-gap: 16px; }
+.cluster-5 { --cluster-gap: 20px; }
 
-.sidebar-link.active {
-  background: var(--primary-soft);
-  color: var(--primary);
-  font-weight: var(--weight-semibold);
-}
-
-.sidebar-link.active::before {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  background: var(--primary);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.sidebar-link .sidebar-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-  width: 20px;
-  text-align: center;
-  opacity: 0.85;
-}
-
-.sidebar-link.active .sidebar-icon {
-  opacity: 1;
-}
-
-.sidebar-link .sidebar-badge {
-  margin-right: auto;
-  background: var(--error);
-  color: #fff;
-  font-size: 10px;
-  font-weight: var(--weight-bold);
-  padding: 2px 6px;
-  border-radius: var(--radius-full);
-  min-width: 18px;
-  text-align: center;
-}
-
-/* ===== Sidebar Footer ===== */
-.app-sidebar-footer {
-  padding: var(--space-4);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.sidebar-user {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2);
-  border-radius: var(--radius);
-  transition: background var(--transition-fast);
-  cursor: pointer;
-}
-
-.sidebar-user:hover {
-  background: var(--surface-hover);
-}
-
-.sidebar-user .avatar {
-  width: 36px;
-  height: 36px;
-  font-size: var(--text-sm);
-}
-
-.sidebar-user-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.sidebar-user-name {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-user-role {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-/* ===== Main Content ===== */
-.app-main {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background: var(--bg-alt);
-}
-
-.app-topbar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: var(--space-3) var(--space-6);
-  display: flex;
-  align-items: center;
+/* Distribute cluster items to edges */
+.cluster-between {
   justify-content: space-between;
-  gap: var(--space-4);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-  min-height: 60px;
-  backdrop-filter: blur(12px);
 }
 
-.app-topbar-left {
+.cluster-center {
+  justify-content: center;
+}
+
+/* Cluster without wrapping (always one line) */
+.cluster-nowrap {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cluster-nowrap::-webkit-scrollbar {
+  height: 6px;
+}
+
+.cluster-nowrap::-webkit-scrollbar-thumb {
+  background: var(--border-strong, rgba(255, 255, 255, 0.15));
+  border-radius: 3px;
+}
+
+
+/* ============================================================
+   7. SIDEBAR LAYOUT (for admin/portal pages)
+   ============================================================ */
+
+/* Main wrapper — sidebar + content */
+.layout-sidebar {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex: 1;
-  min-width: 0;
-}
-
-.app-topbar-title {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  color: var(--text);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.app-topbar-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-.app-content {
-  flex: 1;
-  padding: var(--space-6);
+  min-height: calc(100vh - var(--header-height, 72px));
+  min-height: calc(100dvh - var(--header-height, 72px));
+  width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
 }
 
-.app-content-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-/* ===== Sidebar Toggle (Mobile) ===== */
-.sidebar-toggle-btn {
-  display: none;
-  width: 40px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 20px;
+/* Sidebar area (children are injected by sidebar.js) */
+.layout-sidebar-aside {
   flex-shrink: 0;
+  position: sticky;
+  top: var(--header-height, 72px);
+  height: calc(100vh - var(--header-height, 72px));
+  height: calc(100dvh - var(--header-height, 72px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--surface, #131820);
+  border-inline-end: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  transition: width var(--transition-slow, 0.3s) ease;
 }
 
-.sidebar-toggle-btn:hover {
-  background: var(--surface-hover);
+/* Main content area in sidebar layout */
+.layout-sidebar-main {
+  flex: 1;
+  min-width: 0;
+  padding: clamp(16px, 2vw, 32px);
+  overflow-x: hidden;
 }
 
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: calc(var(--z-sticky) - 1);
+/* Mobile (<1024px) — sidebar is hidden, main is full */
+@media (max-width: 1023px) {
+  .layout-sidebar {
+    flex-direction: column;
+  }
+
+  .layout-sidebar-aside {
+    display: none;
+  }
+
+  .layout-sidebar-main {
+    padding: 16px;
+  }
 }
 
-.sidebar-overlay.open {
-  display: block;
+/* Desktop (>=1024px) — sidebar visible */
+@media (min-width: 1024px) {
+  .layout-sidebar-aside {
+    display: block;
+  }
 }
 
-/* ============================================
-   4. Footer
-   ============================================ */
-.public-footer {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: var(--space-6) 0 var(--space-5);
-  margin-top: auto;
-}
-
-.public-footer-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--space-5);
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: var(--space-6);
-  margin-bottom: var(--space-6);
-}
-
-.footer-col-title {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
-  color: var(--text);
-  margin-bottom: var(--space-3);
-}
-
-.footer-col-text {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  line-height: var(--line-relaxed);
-}
-
-.footer-links {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  list-style: none;
+/* Sidebar layout variants */
+.layout-sidebar-flush .layout-sidebar-main {
   padding: 0;
 }
 
-.footer-links a {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color var(--transition-fast);
+.layout-sidebar-wide .layout-sidebar-main {
+  padding: clamp(24px, 3vw, 48px);
 }
 
-.footer-links a:hover {
-  color: var(--primary);
-  text-decoration: none;
-}
 
-.footer-bottom {
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  flex-wrap: wrap;
-}
+/* ============================================================
+   8. GRID HELPERS (auto-fit patterns)
+   ============================================================ */
 
-.footer-bottom-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.footer-president {
-  color: var(--primary);
-  font-weight: var(--weight-semibold);
-}
-
-/* ============================================
-   5. Page Header (Hero / Title Section)
-   ============================================ */
-.page-hero {
-  background: linear-gradient(135deg, var(--surface), var(--surface-elevated));
-  border-bottom: 1px solid var(--border);
-  padding: var(--space-10) 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.page-hero::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, var(--primary-soft), transparent 70%);
-  pointer-events: none;
-}
-
-.page-hero-title {
-  font-size: var(--text-3xl);
-  font-weight: var(--weight-extrabold);
-  color: var(--text);
-  margin-bottom: var(--space-3);
-  position: relative;
-  z-index: 1;
-}
-
-.page-hero-subtitle {
-  font-size: var(--text-md);
-  color: var(--text-secondary);
-  max-width: 600px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-/* ===== Simple Page Header ===== */
-.page-header {
-  margin-bottom: var(--space-6);
-}
-
-.page-header-title {
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-bold);
-  color: var(--text);
-  margin-bottom: var(--space-2);
-}
-
-.page-header-subtitle {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-}
-
-.page-header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-  flex-wrap: wrap;
-}
-
-/* ============================================
-   6. Content Grids
-   ============================================ */
-.grid-2 {
+/* Auto-fit with min column width */
+.auto-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--grid-gap, 20px);
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--auto-min, 260px), 100%), 1fr));
 }
 
-.grid-3 {
+.auto-grid-sm { --auto-min: 200px; }
+.auto-grid-md { --auto-min: 260px; }
+.auto-grid-lg { --auto-min: 320px; }
+.auto-grid-xl { --auto-min: 400px; }
+
+/* Auto-fill (keeps empty columns) */
+.auto-fill {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--grid-gap, 20px);
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--auto-min, 260px), 100%), 1fr));
 }
 
-.grid-4 {
+/* Fixed column grids with responsive fallback */
+.grid-cols-1 { grid-template-columns: 1fr; }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 767px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Common patterns */
+.grid-dashboard {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: clamp(12px, 2vw, 20px);
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
 }
 
-.grid-auto {
+.grid-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-4);
+  gap: clamp(12px, 2vw, 20px);
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
 }
 
-.grid-auto-sm {
+.grid-split {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-3);
+  gap: 24px;
+  grid-template-columns: 1fr;
 }
 
-.grid-auto-lg {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: var(--space-5);
+@media (min-width: 1024px) {
+  .grid-split {
+    grid-template-columns: 1fr 320px;
+  }
+
+  .grid-split-reverse {
+    grid-template-columns: 320px 1fr;
+  }
+
+  .grid-split-even {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-/* ===== Dashboard Stats Grid ===== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-}
 
-/* ===== Two-Column Layout ===== */
-.two-column {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--space-5);
-}
+/* ============================================================
+   9. SECTION SPACING
+   ============================================================ */
 
-.two-column-reverse {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: var(--space-5);
-}
-
-/* ===== Sidebar Layout (Filters + Content) ===== */
-.sidebar-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: var(--space-5);
-  align-items: start;
-}
-
-.sidebar-layout-sidebar {
-  position: sticky;
-  top: 84px;
-}
-
-/* ============================================
-   7. Dividers & Spacing Helpers
-   ============================================ */
 .section {
-  margin-bottom: var(--space-8);
+  padding-block: clamp(32px, 6vw, 64px);
 }
 
-.section:last-child {
-  margin-bottom: 0;
+.section-sm {
+  padding-block: clamp(24px, 4vw, 40px);
+}
+
+.section-lg {
+  padding-block: clamp(48px, 8vw, 96px);
+}
+
+.section-flush {
+  padding-block: 0;
+}
+
+/* Section head */
+.section-head {
+  text-align: center;
+  margin-bottom: clamp(24px, 4vw, 40px);
+  max-width: 720px;
+  margin-inline: auto;
 }
 
 .section-title {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  color: var(--text);
-  margin-bottom: var(--space-4);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  font-size: clamp(20px, 3.5vw, 32px);
+  font-weight: var(--fw-extrabold, 800);
+  color: var(--text, #F8FAFC);
+  margin: 0 0 12px;
+  line-height: 1.3;
 }
 
 .section-subtitle {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  margin-top: calc(var(--space-1) * -1);
-  margin-bottom: var(--space-4);
+  font-size: var(--fs-md, 15px);
+  color: var(--text-secondary, #94A3B8);
+  line-height: 1.7;
+  margin: 0;
 }
 
-/* ============================================
-   8. Search Bar (Public)
-   ============================================ */
-.search-hero {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: var(--space-8);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  position: relative;
-  z-index: 2;
+/* Section head aligned start */
+.section-head-start {
+  text-align: start;
+  margin-inline: 0;
 }
 
-.search-hero-form {
+/* Section with alternating background */
+.section-alt {
+  background-color: var(--bg-alt, var(--surface, #131820));
+}
+
+.section-surface {
+  background-color: var(--surface, #131820);
+}
+
+
+/* ============================================================
+   10. SPACERS (margin / padding utilities)
+   ============================================================ */
+
+/* Margins */
+.m-0 { margin: 0; }
+.m-auto { margin: auto; }
+.mx-auto { margin-inline: auto; }
+.my-auto { margin-block: auto; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mt-5 { margin-top: 20px; }
+.mt-6 { margin-top: 24px; }
+.mt-8 { margin-top: 32px; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-5 { margin-bottom: 20px; }
+.mb-6 { margin-bottom: 24px; }
+.mb-8 { margin-bottom: 32px; }
+
+.ms-1 { margin-inline-start: 4px; }
+.ms-2 { margin-inline-start: 8px; }
+.ms-3 { margin-inline-start: 12px; }
+.ms-4 { margin-inline-start: 16px; }
+
+.me-1 { margin-inline-end: 4px; }
+.me-2 { margin-inline-end: 8px; }
+.me-3 { margin-inline-end: 12px; }
+.me-4 { margin-inline-end: 16px; }
+
+/* Padding */
+.p-0 { padding: 0; }
+.p-1 { padding: 4px; }
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 20px; }
+.p-6 { padding: 24px; }
+.p-8 { padding: 32px; }
+
+.px-2 { padding-inline: 8px; }
+.px-3 { padding-inline: 12px; }
+.px-4 { padding-inline: 16px; }
+.px-6 { padding-inline: 24px; }
+.py-2 { padding-block: 8px; }
+.py-3 { padding-block: 12px; }
+.py-4 { padding-block: 16px; }
+.py-6 { padding-block: 24px; }
+.py-8 { padding-block: 32px; }
+
+
+/* ============================================================
+   11. SIZING UTILITIES
+   ============================================================ */
+
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.w-screen { width: 100vw; }
+.w-fit { width: fit-content; }
+
+.h-full { height: 100%; }
+.h-auto { height: auto; }
+.h-screen { height: 100vh; height: 100dvh; }
+.h-fit { height: fit-content; }
+
+.min-w-0 { min-width: 0; }
+.min-h-0 { min-height: 0; }
+
+.max-w-full { max-width: 100%; }
+.max-w-screen { max-width: 100vw; }
+
+/* Aspect ratios */
+.aspect-square { aspect-ratio: 1 / 1; }
+.aspect-video { aspect-ratio: 16 / 9; }
+.aspect-4-3 { aspect-ratio: 4 / 3; }
+.aspect-3-4 { aspect-ratio: 3 / 4; }
+.aspect-wide { aspect-ratio: 21 / 9; }
+
+
+/* ============================================================
+   12. POSITIONING UTILITIES
+   ============================================================ */
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+.inset-0 { inset: 0; }
+.top-0 { top: 0; }
+.bottom-0 { bottom: 0; }
+.start-0 { inset-inline-start: 0; }
+.end-0 { inset-inline-end: 0; }
+
+.z-0 { z-index: 0; }
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-50 { z-index: 50; }
+
+
+/* ============================================================
+   13. OVERFLOW UTILITIES
+   ============================================================ */
+
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-x-auto { overflow-x: auto; overflow-y: hidden; }
+.overflow-y-auto { overflow-y: auto; overflow-x: hidden; }
+.overflow-x-hidden { overflow-x: hidden; }
+.overflow-y-hidden { overflow-y: hidden; }
+
+.scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.scroll-y {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* ============================================================
+   14. SAFE AREA HANDLING
+   ============================================================ */
+
+/* Apply padding for notched devices */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-x {
+  padding-inline-start: env(safe-area-inset-left, 0px);
+  padding-inline-end: env(safe-area-inset-right, 0px);
+}
+
+.safe-area {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-inline-start: env(safe-area-inset-left, 0px);
+  padding-inline-end: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Skip padding for safe area */
+.unsafe-top {
+  padding-top: 0;
+}
+
+/* ============================================================
+   15. FIXED FAB (for theme picker, etc.)
+   ============================================================ */
+
+.fab-container {
+  position: fixed;
+  inset-inline-end: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-fab, 900);
   display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.search-hero-input {
-  flex: 1;
-  min-width: 200px;
-  padding: var(--space-4) var(--space-5);
-  background: var(--bg-alt);
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: var(--text-md);
-  font-family: inherit;
-  transition: all var(--transition-fast);
+/* ============================================================
+   16. RESPONSIVE BREAKPOINTS (utility wrappers)
+   ============================================================ */
+
+/* Small (<640px) */
+@media (max-width: 639px) {
+  .only-sm { display: initial; }
+  .only-md,
+  .only-lg,
+  .only-xl { display: none !important; }
 }
 
-.search-hero-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: var(--surface);
-  box-shadow: 0 0 0 4px var(--primary-soft);
+/* Tablet (640-1023px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .only-sm,
+  .only-lg,
+  .only-xl { display: none !important; }
+  .only-md { display: initial; }
 }
 
-.search-hero-input::placeholder {
-  color: var(--text-muted);
+/* Desktop (1024-1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .only-sm,
+  .only-md,
+  .only-xl { display: none !important; }
+  .only-lg { display: initial; }
 }
 
-/* ============================================
-   9. Auth Layout (Login Page)
-   ============================================ */
-.auth-layout {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-5);
-  background: var(--bg);
-  position: relative;
-  overflow: hidden;
+/* XL (>=1440px) */
+@media (min-width: 1440px) {
+  .only-sm,
+  .only-md,
+  .only-lg { display: none !important; }
+  .only-xl { display: initial; }
 }
 
-.auth-layout::before {
-  content: "";
-  position: absolute;
-  top: -200px;
-  right: -200px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, var(--primary-soft), transparent 70%);
-  pointer-events: none;
+/* ============================================================
+   17. RESPONSIVE HIDE/SHOW
+   ============================================================ */
+
+.hide { display: none !important; }
+
+@media (max-width: 639px) {
+  .hide-sm { display: none !important; }
 }
 
-.auth-layout::after {
-  content: "";
-  position: absolute;
-  bottom: -200px;
-  left: -200px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, var(--accent-soft), transparent 70%);
-  pointer-events: none;
+@media (min-width: 640px) {
+  .hide-md-up { display: none !important; }
 }
 
-.auth-card {
+@media (max-width: 1023px) {
+  .hide-lg { display: none !important; }
+}
+
+@media (min-width: 1024px) {
+  .hide-lg-up { display: none !important; }
+}
+
+@media (max-width: 1439px) {
+  .hide-xl { display: none !important; }
+}
+
+/* Show only on mobile/tablet */
+@media (min-width: 1024px) {
+  .show-mobile-only { display: none !important; }
+}
+
+/* ============================================================
+   18. RTL UTILITIES
+   ============================================================ */
+
+/* Force direction */
+.rtl { direction: rtl; text-align: right; }
+.ltr { direction: ltr; text-align: left; }
+
+/* Flip element horizontally in RTL */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* ============================================================
+   19. TYPOGRAPHY ALIGNMENT (RTL-aware)
+   ============================================================ */
+
+.text-start { text-align: start; }
+.text-end { text-align: end; }
+.text-center { text-align: center; }
+.text-justify { text-align: justify; }
+
+/* ============================================================
+   20. DIVIDER UTILITIES
+   ============================================================ */
+
+.divider-h {
+  height: 1px;
   width: 100%;
-  max-width: 440px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-lg);
+  background-color: var(--border, rgba(255, 255, 255, 0.08));
+  margin: 16px 0;
+}
+
+.divider-v {
+  width: 1px;
+  height: 100%;
+  min-height: 24px;
+  background-color: var(--border, rgba(255, 255, 255, 0.08));
+  margin: 0 12px;
+}
+
+/* ============================================================
+   21. ASPECT RATIO BOXES
+   ============================================================ */
+
+.ratio {
   position: relative;
-  z-index: 1;
-  animation: authCardIn 0.5s ease;
-}
-
-@keyframes authCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.auth-logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto var(--space-4);
-  font-size: 28px;
-  font-weight: var(--weight-extrabold);
-  color: var(--primary-text);
+  display: block;
+  width: 100%;
   overflow: hidden;
 }
 
-.auth-logo img {
+.ratio > * {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  padding: 8px;
+  object-fit: cover;
 }
 
-.auth-title {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
-  text-align: center;
-  color: var(--text);
-  margin-bottom: var(--space-2);
+.ratio-1x1 { aspect-ratio: 1 / 1; }
+.ratio-4x3 { aspect-ratio: 4 / 3; }
+.ratio-3x4 { aspect-ratio: 3 / 4; }
+.ratio-16x9 { aspect-ratio: 16 / 9; }
+.ratio-21x9 { aspect-ratio: 21 / 9; }
+
+/* ============================================================
+   22. PAGE HEADER OVERRIDES (complements components.css)
+   ============================================================ */
+
+/* Full-width page header (e.g., dashboard) */
+.page-header-hero {
+  padding: clamp(24px, 4vw, 40px) 0;
+  margin-bottom: clamp(24px, 4vw, 40px);
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
 }
 
-.auth-subtitle {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  text-align: center;
-  margin-bottom: var(--space-6);
+/* Compact header (e.g., settings) */
+.page-header-compact {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
 }
 
-.auth-footer {
-  margin-top: var(--space-5);
-  text-align: center;
-  font-size: var(--text-sm);
-  color: var(--text-muted);
+.page-header-compact .page-header-title {
+  font-size: var(--fs-lg, 16px);
 }
 
-/* ============================================
-   10. Sticky Footer (للصفحات القصيرة)
-   ============================================ */
-.sticky-footer-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+/* Breadcrumb inside page header */
+.page-header .breadcrumbs {
+  margin-bottom: 8px;
 }
 
-.sticky-footer-layout main {
-  flex: 1;
+/* ============================================================
+   23. SCROLLBAR BEHAVIOR
+   ============================================================ */
+
+/* Prevent scroll on body when modal open (managed by modal.js) */
+body.itws-modal-open {
+  overflow: hidden !important;
 }
 
-/* ============================================
-   11. Container Variants
-   ============================================ */
-.container-narrow {
-  max-width: 720px;
+/* Prevent iOS rubber-band scroll */
+html, body {
+  overscroll-behavior-y: none;
 }
 
-.container-wide {
-  max-width: 1440px;
+/* Restore normal scroll inside scrollable containers */
+.overflow-y-auto,
+.overflow-auto,
+.scroll-y {
+  overscroll-behavior: contain;
 }
 
-.container-padded {
-  padding: var(--space-5);
+/* ============================================================
+   24. STICKY HELPERS
+   ============================================================ */
+
+.sticky-top {
+  position: sticky;
+  top: var(--header-height, 72px);
+  z-index: 10;
 }
 
-/* ============================================
-   12. Centered Content
-   ============================================ */
-.centered {
+.sticky-top-offset {
+  position: sticky;
+  top: calc(var(--header-height, 72px) + 16px);
+  z-index: 10;
+}
+
+.sticky-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background-color: var(--surface, #131820);
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  padding: 12px 16px;
+}
+
+/* ============================================================
+   25. SKIP TO CONTENT (a11y)
+   ============================================================ */
+
+.skip-content {
+  position: absolute;
+  top: -100px;
+  inset-inline-start: 16px;
+  padding: 10px 20px;
+  background-color: var(--primary, #CE1126);
+  color: var(--primary-text, #FFFFFF);
+  border-radius: var(--radius-md, 8px);
+  font-weight: var(--fw-bold, 700);
+  z-index: var(--z-max, 99999);
+  transition: top 0.15s ease;
+}
+
+.skip-content:focus {
+  top: 16px;
+}
+
+/* ============================================================
+   26. EMPTY CONTENT AREA (when no content but should show)
+   ============================================================ */
+
+.content-placeholder {
+  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  padding: var(--space-6);
-}
-
-.centered-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  padding: var(--space-6);
+  color: var(--text-muted, #64748B);
+  font-size: var(--fs-sm, 12px);
   text-align: center;
+  padding: 40px 20px;
+  border: 2px dashed var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-xl, 12px);
 }
 
-/* ============================================
-   13. Responsive
-   ============================================ */
+/* ============================================================
+   27. PRINT LAYOUTS
+   ============================================================ */
 
-/* ===== Tablet (≤ 1024px) ===== */
-@media (max-width: 1024px) {
-  .app-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .app-sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 280px;
-    max-width: 85vw;
-    transform: translateX(100%);
-    z-index: calc(var(--z-sticky) + 10);
-    box-shadow: var(--shadow-lg);
-    border-left: 1px solid var(--border);
-  }
-
-  .app-sidebar.open {
-    transform: translateX(0);
-  }
-
-  .sidebar-toggle-btn {
-    display: flex;
-  }
-
-  .app-content {
-    padding: var(--space-5);
-  }
-
-  .footer-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-5);
-  }
-
-  .two-column,
-  .two-column-reverse {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar-layout-sidebar {
-    position: static;
-  }
-
-  .grid-3,
-  .grid-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* ===== Mobile (≤ 768px) ===== */
-@media (max-width: 768px) {
-  .public-header-inner {
-    padding: var(--space-3) var(--space-4);
-    min-height: 60px;
-  }
-
-  .public-nav {
-    display: none;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-  }
-
-  .public-header .logo-title {
-    font-size: var(--text-sm);
-  }
-
-  .public-header .logo-subtitle {
-    display: none;
-  }
-
-  .public-header .logo-mark {
-    width: 36px;
-    height: 36px;
-    font-size: 15px;
-  }
-
-  .page-main {
-    padding: var(--space-4) 0;
-  }
-
-  .page-container {
-    padding: 0 var(--space-4);
-  }
-
-  .page-hero {
-    padding: var(--space-8) 0;
-  }
-
-  .page-hero-title {
-    font-size: var(--text-2xl);
-  }
-
-  .page-hero-subtitle {
-    font-size: var(--text-base);
-  }
-
-  .page-header-title {
-    font-size: var(--text-xl);
-  }
-
-  .app-content {
-    padding: var(--space-4);
-  }
-
-  .app-topbar {
-    padding: var(--space-3) var(--space-4);
-    min-height: 56px;
-  }
-
-  .app-topbar-title {
-    font-size: var(--text-base);
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
-  }
-
-  .grid-2,
-  .grid-3,
-  .grid-4 {
-    grid-template-columns: 1fr;
-  }
-
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-5);
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    text-align: center;
-    gap: var(--space-2);
-  }
-
-  .search-hero {
-    padding: var(--space-5);
-  }
-
-  .search-hero-form {
-    flex-direction: column;
-  }
-
-  .search-hero-input {
-    font-size: var(--text-base);
-    padding: var(--space-3) var(--space-4);
-  }
-
-  .auth-card {
-    padding: var(--space-6);
-  }
-
-  .auth-logo {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-  }
-
-  .auth-title {
-    font-size: var(--text-lg);
-  }
-
-  .section-title {
-    font-size: var(--text-base);
-  }
-}
-
-/* ===== Small Mobile (≤ 480px) ===== */
-@media (max-width: 480px) {
-  .page-container {
-    padding: 0 var(--space-3);
-  }
-
-  .app-content {
-    padding: var(--space-3);
-  }
-
-  .public-header-actions .btn span:not(.btn-icon) {
-    display: none;
-  }
-
-  .public-header-actions .btn {
-    padding: var(--space-2);
-    width: 36px;
-    height: 36px;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .footer-grid {
-    gap: var(--space-4);
-  }
-
-  .page-hero {
-    padding: var(--space-6) 0;
-  }
-
-  .page-hero-title {
-    font-size: var(--text-xl);
-  }
-}
-
-/* ============================================
-   14. Print Overrides
-   ============================================ */
 @media print {
-  .public-header,
-  .public-footer,
-  .app-sidebar,
-  .app-topbar,
-  .mobile-menu-btn,
-  .sidebar-toggle-btn,
-  .mobile-nav,
-  .mobile-nav-overlay {
+  /* Force full-width containers in print */
+  .container {
+    max-width: 100%;
+    padding-inline: 0;
+  }
+
+  /* Remove section padding */
+  .section {
+    padding-block: 8mm;
+  }
+
+  /* Sidebar hidden in print */
+  .layout-sidebar-aside {
     display: none !important;
   }
 
-  .app-layout {
-    grid-template-columns: 1fr;
+  .layout-sidebar {
+    display: block;
   }
 
-  .app-content {
+  .layout-sidebar-main {
     padding: 0;
   }
 
-  .page-hero {
-    background: none;
-    border: none;
-    padding: 0 0 var(--space-4);
+  /* Remove FABs and sticky elements */
+  .fab-container,
+  .sticky-top,
+  .sticky-top-offset,
+  .sticky-bottom {
+    display: none !important;
   }
 
-  .page-hero::before {
-    display: none;
+  /* Collapse multi-column grids to single column */
+  .grid,
+  .auto-grid,
+  .auto-fill,
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  .grid-dashboard,
+  .grid-cards,
+  .grid-split {
+    display: block !important;
+  }
+
+  .grid > *,
+  .auto-grid > *,
+  .auto-fill > * {
+    margin-bottom: 8mm;
+    page-break-inside: avoid;
+  }
+
+  /* Prevent page breaks inside sections */
+  .section,
+  .section-sm,
+  .section-lg {
+    page-break-inside: avoid;
+  }
+
+  /* Page break helpers */
+  .print-page-break-before {
+    page-break-before: always;
+  }
+
+  .print-page-break-after {
+    page-break-after: always;
+  }
+
+  .print-no-break {
+    page-break-inside: avoid;
   }
 }
+
+/* ============================================================
+   28. MOTION / REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-sidebar-aside {
+    transition: none !important;
+  }
+}
+
+/* ============================================================
+   END OF LAYOUT.CSS
+   ============================================================ */
