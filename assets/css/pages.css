@@ -1,0 +1,1210 @@
+/* ============================================================
+   ITWS Platform — Shared Page Patterns V2
+   File: assets/css/pages.css
+   Description: Reusable patterns shared across all public pages
+
+   Load order: LAST CSS file, before inline page-specific styles
+
+   Sections:
+   1.  Page hero (used by verify, track, student, academies)
+   2.  Page search card (shared)
+   3.  Page result card wrapper
+   4.  Page info grid (3 info cards)
+   5.  Page loading spinner
+   6.  Page error message
+   7.  Page empty state (extends components.css empty-state)
+   8.  Page CTA banner
+   9.  Page meta grid (2-col / 3-col / 4-col)
+   10. Page tabs (3 tabs variant)
+   11. Page section wrappers (verify / track / student)
+   12. Splash (index.html base)
+   13. Login (base — inline CSS in login.html refines)
+   14. 404 page
+   15. Utility classes for pages
+   16. Responsive common breakpoints
+   17. Print overrides
+
+   Rules:
+   - R13: mobile-first, safe-area, no fixed widths
+   - No emoji
+   - RTL-first
+   - Cairo font only
+   - Uses theme.css variables
+   - Must work with or without inline page-specific CSS
+   ============================================================ */
+
+
+/* ============================================================
+   1. PAGE HERO
+   ============================================================ */
+
+.page-hero {
+  padding: clamp(40px, 6vw, 72px) clamp(16px, 3vw, 24px) clamp(32px, 5vw, 56px);
+  text-align: center;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 30%,
+    var(--primary-soft) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.page-hero-inner {
+  position: relative;
+  max-width: 800px;
+  margin-inline: auto;
+  z-index: 1;
+}
+
+.page-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-sm, 12px);
+  font-weight: var(--fw-semibold, 600);
+  color: var(--primary);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.page-hero-title {
+  font-size: clamp(26px, 4.5vw, 42px);
+  font-weight: var(--fw-extrabold, 800);
+  color: var(--text);
+  line-height: 1.25;
+  margin: 0 0 12px;
+  letter-spacing: 0;
+}
+
+.page-hero-title-accent {
+  color: var(--primary);
+}
+
+.page-hero-subtitle {
+  font-size: clamp(14px, 2vw, 17px);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 600px;
+  margin-inline: auto;
+  margin-block: 0;
+}
+
+
+/* ============================================================
+   2. PAGE SEARCH CARD
+   ============================================================ */
+
+.page-search-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3xl, 20px);
+  padding: clamp(20px, 3vw, 28px);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: clamp(24px, 4vw, 32px);
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.page-search-card-wide {
+  max-width: 100%;
+}
+
+.page-search-card-narrow {
+  max-width: 520px;
+}
+
+.page-search-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-base, 14px);
+  font-weight: var(--fw-semibold, 600);
+  color: var(--text);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.page-search-label-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.page-search-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.page-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 18px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xl, 12px);
+  color: var(--text);
+  font-family: inherit;
+  font-size: clamp(14px, 1.8vw, 16px);
+  font-weight: var(--fw-semibold, 600);
+  letter-spacing: 0.5px;
+  transition: all var(--transition-base, 0.2s) ease;
+  outline: none;
+  min-height: 52px;
+}
+
+.page-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.page-search-input::placeholder {
+  color: var(--text-muted);
+  font-weight: var(--fw-regular, 400);
+  letter-spacing: 0;
+}
+
+.page-search-input[dir="ltr"] {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-search-input[dir="rtl"] {
+  text-align: right;
+}
+
+.page-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--primary);
+  color: var(--primary-text);
+  border: none;
+  border-radius: var(--radius-xl, 12px);
+  font-family: inherit;
+  font-size: clamp(14px, 1.8vw, 16px);
+  font-weight: var(--fw-bold, 700);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-base, 0.2s) ease;
+  min-height: 52px;
+}
+
+.page-search-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--primary-soft);
+}
+
+.page-search-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.page-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.page-search-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.page-search-hint {
+  font-size: var(--fs-sm, 12px);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline: 4px;
+  line-height: 1.5;
+}
+
+.page-search-hint svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   3. PAGE RESULT CARD WRAPPER
+   ============================================================ */
+
+.page-result-wrapper {
+  max-width: 1000px;
+  margin-inline: auto;
+  padding: 0 clamp(16px, 3vw, 24px) clamp(40px, 6vw, 64px);
+}
+
+.page-result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3xl, 20px);
+  overflow: hidden;
+  animation: page-result-fadein 0.4s ease;
+}
+
+.page-result-card.valid {
+  border: 2px solid var(--success);
+  box-shadow: 0 20px 60px var(--success-shadow-lg, rgba(16, 185, 129, 0.15));
+}
+
+.page-result-card.invalid {
+  border: 2px solid var(--error);
+  box-shadow: 0 20px 60px var(--error-shadow-lg, rgba(239, 68, 68, 0.15));
+}
+
+@keyframes page-result-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-result-header {
+  padding: clamp(20px, 3vw, 28px);
+  background: linear-gradient(135deg, var(--success-soft), transparent);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-result-header.invalid {
+  background: linear-gradient(135deg, var(--error-soft), transparent);
+}
+
+.page-result-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.page-result-seal {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 6px var(--success-soft),
+    0 8px 24px var(--success-shadow, rgba(16, 185, 129, 0.3));
+}
+
+.page-result-header.invalid .page-result-seal {
+  background: var(--error);
+  box-shadow:
+    0 0 0 6px var(--error-soft),
+    0 8px 24px var(--error-shadow, rgba(239, 68, 68, 0.3));
+}
+
+.page-result-seal svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 3;
+}
+
+.page-result-title {
+  font-size: clamp(18px, 2.5vw, 22px);
+  font-weight: var(--fw-extrabold, 800);
+  color: var(--text);
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.page-result-subtitle {
+  font-size: var(--fs-sm, 12px);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+
+.page-result-body {
+  padding: clamp(20px, 3vw, 28px);
+}
+
+.page-result-actions {
+  padding: clamp(16px, 2vw, 20px) clamp(20px, 3vw, 28px) clamp(20px, 3vw, 24px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.page-result-footer {
+  padding: 14px clamp(20px, 3vw, 28px);
+  background: var(--bg-alt, var(--bg));
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: var(--fs-xs, 11px);
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+
+/* ============================================================
+   4. PAGE INFO GRID (3 info cards)
+   ============================================================ */
+
+.page-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: clamp(12px, 2vw, 16px);
+  margin-top: clamp(32px, 5vw, 48px);
+  max-width: 1000px;
+  margin-inline: auto;
+}
+
+.page-info-card {
+  padding: clamp(16px, 2.5vw, 22px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl, 16px);
+  text-align: center;
+  transition: all var(--transition-base, 0.2s) ease;
+}
+
+.page-info-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.page-info-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-xl, 12px);
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.page-info-card-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.page-info-card-title {
+  font-size: var(--fs-base, 14px);
+  font-weight: var(--fw-bold, 700);
+  color: var(--text);
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.page-info-card-text {
+  font-size: var(--fs-sm, 12px);
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+
+/* ============================================================
+   5. PAGE LOADING
+   ============================================================ */
+
+.page-loading {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: clamp(32px, 5vw, 48px) 20px;
+  text-align: center;
+}
+
+.page-loading.is-visible {
+  display: flex;
+}
+
+.page-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: page-spin 0.8s linear infinite;
+}
+
+@keyframes page-spin {
+  to { transform: rotate(360deg); }
+}
+
+.page-loading-text {
+  font-size: var(--fs-base, 14px);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   6. PAGE ERROR
+   ============================================================ */
+
+.page-error {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: clamp(32px, 5vw, 48px) clamp(20px, 3vw, 24px);
+  background: var(--error-soft);
+  border: 1px solid var(--error);
+  border-radius: var(--radius-3xl, 20px);
+  text-align: center;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.page-error.is-visible {
+  display: flex;
+  animation: page-error-fadein 0.3s ease;
+}
+
+@keyframes page-error-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-error-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--error);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-error-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.page-error-title {
+  font-size: clamp(18px, 2.5vw, 22px);
+  font-weight: var(--fw-bold, 700);
+  color: var(--error);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.page-error-text {
+  font-size: var(--fs-base, 14px);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 520px;
+}
+
+
+/* ============================================================
+   7. PAGE EMPTY STATE (extends components.css empty-state)
+   ============================================================ */
+
+.page-empty {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: clamp(40px, 6vw, 60px) 20px;
+  text-align: center;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+.page-empty.is-visible {
+  display: flex;
+}
+
+.page-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.page-empty-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.page-empty-title {
+  font-size: clamp(16px, 2.5vw, 20px);
+  font-weight: var(--fw-bold, 700);
+  color: var(--text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.page-empty-text {
+  font-size: var(--fs-base, 14px);
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 400px;
+}
+
+
+/* ============================================================
+   8. PAGE CTA
+   ============================================================ */
+
+.page-cta {
+  padding: clamp(48px, 6vw, 72px) clamp(16px, 3vw, 24px);
+  background: linear-gradient(135deg, var(--surface), var(--surface-elevated));
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.page-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    var(--primary-soft) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.page-cta-inner {
+  position: relative;
+  max-width: 640px;
+  margin-inline: auto;
+  z-index: 1;
+}
+
+.page-cta-title {
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-weight: var(--fw-extrabold, 800);
+  color: var(--text);
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+
+.page-cta-subtitle {
+  font-size: var(--fs-md, 15px);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+
+.page-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 36px;
+  background: var(--primary);
+  color: var(--primary-text);
+  border-radius: var(--radius-xl, 12px);
+  text-decoration: none;
+  font-weight: var(--fw-bold, 700);
+  font-size: var(--fs-md, 15px);
+  transition: all var(--transition-base, 0.2s) ease;
+  min-height: 52px;
+}
+
+.page-cta-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--primary-soft);
+  color: var(--primary-text);
+}
+
+.page-cta-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   9. PAGE META GRID
+   ============================================================ */
+
+.page-meta-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.page-meta-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+}
+
+.page-meta-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+}
+
+.page-meta-grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+}
+
+.page-meta-item {
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 10px);
+}
+
+.page-meta-label {
+  font-size: 10px;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.page-meta-value {
+  font-size: var(--fs-base, 14px);
+  font-weight: var(--fw-semibold, 600);
+  color: var(--text);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.page-meta-value.mono {
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+  font-size: var(--fs-sm, 12px);
+}
+
+.page-meta-value.warning {
+  color: var(--warning);
+}
+
+.page-meta-value.success {
+  color: var(--success);
+}
+
+.page-meta-value.error {
+  color: var(--error);
+}
+
+
+/* ============================================================
+   10. PAGE TABS (3 tabs)
+   ============================================================ */
+
+.page-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: var(--radius-xl, 12px);
+  padding: 4px;
+  margin-bottom: 14px;
+}
+
+.page-tab {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--fs-sm, 12px);
+  font-weight: var(--fw-semibold, 600);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s) ease;
+  white-space: nowrap;
+  min-height: 38px;
+}
+
+.page-tab:hover {
+  color: var(--text);
+}
+
+.page-tab.is-active {
+  background: var(--surface-elevated);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.page-tab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+
+/* ============================================================
+   11. PAGE SECTION WRAPPERS
+   ============================================================ */
+
+.page-main {
+  padding-block: clamp(24px, 4vw, 48px);
+}
+
+.page-main-inner {
+  max-width: 1000px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 3vw, 24px);
+}
+
+
+/* ============================================================
+   12. SPLASH PAGE (index.html base)
+   ============================================================ */
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  text-align: center;
+}
+
+.splash-logo {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-2xl, 16px);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: var(--primary-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: var(--fw-black, 900);
+  box-shadow:
+    0 0 0 8px var(--primary-soft),
+    0 20px 60px var(--primary-soft);
+  overflow: hidden;
+}
+
+.splash-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 12px;
+}
+
+.splash-text {
+  font-size: var(--fs-md, 15px);
+  font-weight: var(--fw-semibold, 600);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  min-height: 1.5em;
+}
+
+.splash-progress {
+  width: min(280px, 80vw);
+  height: 4px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.splash-progress-bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: inherit;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.splash-footer {
+  position: absolute;
+  bottom: 24px;
+  inset-inline: 24px;
+  text-align: center;
+  font-size: var(--fs-xs, 11px);
+  color: var(--text-muted);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+
+/* ============================================================
+   13. LOGIN BASE (login.html adds inline refinements)
+   ============================================================ */
+
+.login-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--bg);
+}
+
+@media (min-width: 1024px) {
+  .login-wrapper {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.login-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 5vw, 40px) clamp(16px, 3vw, 24px);
+  padding-top: max(clamp(24px, 5vw, 40px), env(safe-area-inset-top, 0px));
+  padding-bottom: max(clamp(24px, 5vw, 40px), env(safe-area-inset-bottom, 0px));
+}
+
+.login-form-inner {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-brand-side {
+  display: none;
+  background: linear-gradient(135deg, var(--surface), var(--bg-alt, var(--bg)));
+  border-inline-start: 1px solid var(--border);
+  padding: clamp(40px, 6vw, 60px);
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .login-brand-side {
+    display: flex;
+  }
+}
+
+.login-brand-inner {
+  max-width: 400px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ============================================================
+   14. 404 PAGE
+   ============================================================ */
+
+.page-404 {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  padding-top: max(40px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(40px, env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+  text-align: center;
+}
+
+.page-404-inner {
+  max-width: 480px;
+  width: 100%;
+}
+
+.page-404-number {
+  font-size: clamp(80px, 20vw, 140px);
+  font-weight: var(--fw-black, 900);
+  color: var(--primary);
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -2px;
+  opacity: 0.9;
+}
+
+.page-404-title {
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: var(--fw-extrabold, 800);
+  color: var(--text);
+  margin: 16px 0 12px;
+  line-height: 1.3;
+}
+
+.page-404-text {
+  font-size: var(--fs-md, 15px);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0 0 28px;
+}
+
+.page-404-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+
+/* ============================================================
+   15. UTILITY CLASSES FOR PAGES
+   ============================================================ */
+
+.page-narrow {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.page-medium {
+  max-width: 880px;
+  margin-inline: auto;
+}
+
+.page-wide {
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+/* Hide / show helpers */
+.hide-if-mobile {
+  display: initial;
+}
+
+@media (max-width: 767px) {
+  .hide-if-mobile {
+    display: none !important;
+  }
+}
+
+.show-if-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .show-if-mobile {
+    display: initial;
+  }
+}
+
+
+/* ============================================================
+   16. RESPONSIVE ADJUSTMENTS
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .page-search-form {
+    flex-direction: column;
+  }
+
+  .page-search-btn {
+    width: 100%;
+  }
+
+  .page-result-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .page-result-header-left {
+    justify-content: center;
+  }
+
+  .page-result-seal {
+    width: 52px;
+    height: 52px;
+  }
+
+  .page-result-seal svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .page-result-actions {
+    flex-direction: column;
+  }
+
+  .page-result-actions .btn,
+  .page-result-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page-tab {
+    padding: 8px 10px;
+    font-size: 11px;
+    min-height: 34px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-hero {
+    padding-top: clamp(32px, 5vw, 48px);
+    padding-bottom: clamp(24px, 4vw, 40px);
+  }
+
+  .page-hero-title {
+    font-size: clamp(22px, 5vw, 30px);
+  }
+
+  .page-hero-subtitle {
+    font-size: var(--fs-base, 14px);
+  }
+
+  .page-search-card {
+    padding: 16px;
+  }
+
+  .page-search-input,
+  .page-search-btn {
+    min-height: 48px;
+    font-size: var(--fs-base, 14px);
+  }
+
+  .page-result-body {
+    padding: 16px;
+  }
+
+  .page-info-card {
+    padding: 16px 14px;
+  }
+
+  .splash-logo {
+    width: 76px;
+    height: 76px;
+    font-size: 26px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .page-hero {
+    padding-block: 88px 72px;
+  }
+
+  .page-search-card {
+    padding: 32px;
+  }
+}
+
+
+/* ============================================================
+   17. PRINT OVERRIDES
+   ============================================================ */
+
+@media print {
+  .page-hero,
+  .page-search-card,
+  .page-info-grid,
+  .page-cta,
+  .page-result-actions,
+  .page-loading,
+  .splash-screen,
+  .login-brand-side,
+  .page-404-actions {
+    display: none !important;
+  }
+
+  .page-result-wrapper {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .page-result-card {
+    border-width: 2px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  .page-result-header,
+  .page-result-body {
+    background: transparent !important;
+  }
+
+  .page-result-card.valid {
+    border-color: #333333 !important;
+  }
+
+  .page-result-card.valid .page-result-seal {
+    background: #666666 !important;
+    box-shadow: none !important;
+  }
+
+  .page-result-seal {
+    border: 1px solid #000000 !important;
+  }
+}
+
+
+/* ============================================================
+   18. REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .page-result-card,
+  .page-error,
+  .page-loading-spinner,
+  .splash-progress-bar,
+  .page-info-card,
+  .page-cta-btn,
+  .page-search-btn {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .page-info-card:hover,
+  .page-cta-btn:hover,
+  .page-search-btn:hover {
+    transform: none !important;
+  }
+}
+
+
+/* ============================================================
+   END OF PAGES.CSS
+   ============================================================ */
