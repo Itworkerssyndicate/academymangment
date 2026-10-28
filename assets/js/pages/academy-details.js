@@ -1,34 +1,86 @@
-// ============================================
-// [29/50] ITWS Platform - Academy Details Logic
-// Path: assets/js/pages/academy-details.js
-// ============================================
-// محدث: يتعامل مع الأكاديميات بس (النقابة مش في academies)
-// يتحقق من is_deleted و status
-// بدون إيموجي
-// مسارات نسبية
-// ============================================
+/* ============================================================
+   ITWS Platform — Academy Details Page Logic V2
+   File: assets/js/pages/academy-details.js
+   Description: Fetch academy + related data + render + review flow
+
+   Load order: AFTER all core modules + AFTER academy-details.html
+
+   Features:
+   - Reads academy ID from URL (?id=uuid)
+   - Fetches academy (approved only) + branches + courses + ratings
+   - Renders profile card + sections (description / contact / branches / courses / reviews)
+   - Rating summary (avg + distribution bars) + reviews list
+   - Add review flow (modal): stars + review text
+   - Respects ratings settings (enable_ratings / allow_public_rating / require_login / allow_reviews)
+   - Edit own review
+   - Delete own review
+   - Realtime updates (academy / ratings changes)
+   - Share button (navigator.share / clipboard)
+   - All strings from Labels.t() with fallbacks
+   - Uses Icons / Toast / Modal
+   - RTL-aware, R13 responsive
+
+   Rules:
+   - No emoji
+   - ES5-style IIFE
+   - window.sb only
+   - Never render unapproved academies
+   - Never expose internal IDs of other users
+   ============================================================ */
 
 (function () {
   'use strict';
 
-  if (window.AcademyDetailsPage && window.AcademyDetailsPage.initialized) return;
+  if (window.AcademyDetailsPage && window.AcademyDetailsPage._initialized) {
+    return;
+  }
 
-  var state = {
-    academyId: null,
-    academy: null,
-    category: null,
-    branches: [],
-    courses: [],
-    certificatesCount: 0,
-    loading: false,
-    initialized: false
-  };
+  /* ============================================================
+     1. HELPERS
+     ============================================================ */
 
-  function $(id) { return document.getElementById(id); }
+  function log(level, msg, data) {
+    var cfg = window.ITWS_CONFIG || {};
+    if (level === 'error' || (cfg.DEBUG && level === 'debug')) {
+      try {
+        var args = ['[AcademyDetailsPage]', msg];
+        if (data !== undefined) args.push(data);
+        if (level === 'error') console.error.apply(console, args);
+        else console.log.apply(console, args);
+      } catch (e) {}
+    }
+  }
 
-  function setText(id, t) {
-    var el = $(id);
-    if (el) el.textContent = t;
+  function getSb() {
+    return window.sb || window.supabaseClient || window.ITWS_SUPABASE || null;
+  }
+
+  function getLabel(key, fallback) {
+    try {
+      if (window.Labels && typeof window.Labels.t === 'function') {
+        var v = window.Labels.t(key);
+        if (v && v !== key) return v;
+      }
+    } catch (e) {}
+    return fallback;
+  }
+
+  function getSetting(path, fallback) {
+    try {
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        var v = window.AppSettings.get(path);
+        return (v === undefined || v === null) ? fallback : v;
+      }
+    } catch (e) {}
+    return fallback;
+  }
+
+  function resolve(path) {
+    if (!path) return '#';
+    if (window.resolveUrl) return window.resolveUrl(path);
+    var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '/';
+    if (base.charAt(base.length - 1) !== '/') base += '/';
+    return base + String(path).replace(/^\.?\//, '');
   }
 
   function escapeHtml(s) {
@@ -41,74 +93,117 @@
       .replace(/'/g, '&#039;');
   }
 
-  function formatDate(date, opts) {
-    if (!date) return '—';
+  function icon(name, size) {
     try {
-      var d = date instanceof Date ? date : new Date(date);
-      if (isNaN(d.getTime())) return '—';
-      return d.toLocaleDateString('ar-EG', opts || {
-        year: 'numeric', month: 'long', day: 'numeric'
-      });
-    } catch (e) {
-      return '—';
-    }
-  }
-
-  function getSetting(p, f) {
-    if (window.AppSettings && window.AppSettings.get) {
-      return window.AppSettings.get(p, f);
-    }
-    if (window.ITWS_SETTINGS_DEFAULTS) {
-      var parts = p.split('.');
-      var value = window.ITWS_SETTINGS_DEFAULTS;
-      for (var i = 0; i < parts.length; i++) {
-        if (value && typeof value === 'object') value = value[parts[i]];
-        else { value = undefined; break; }
+      if (window.Icons && typeof window.Icons.get === 'function') {
+        return window.Icons.get(name, { size: size || 16 });
       }
-      if (value !== undefined) return value;
-    }
-    return f;
+    } catch (e) {}
+    return '';
   }
 
-  function toast(msg, type) {
-    if (window.Utils && window.Utils.showToast) {
-      window.Utils.showToast(msg, type || 'info');
-    } else if (type === 'error') {
-      alert(msg);
-    }
+  function dispatchEvent(name, detail) {
+    try {
+      window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+    } catch (e) {}
   }
 
-  function logDebug() {
-    if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-      console.log.apply(console, ['[AcademyDetailsPage]'].concat(Array.prototype.slice.call(arguments)));
-    }
+  function showToast(msg, type) {
+    try {
+      if (window.Toast && typeof window.Toast.show === 'function') {
+        window.Toast.show({ type: type || 'info', message: msg });
+      } else if (window.Utils && typeof window.Utils.showToast === 'function') {
+        window.Utils.showToast(msg, type);
+      }
+    } catch (e) {}
   }
 
-  function resolve(path) {
-    if (!path) return '#';
-    if (window.resolveUrl) return window.resolveUrl(path);
-    var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
-    return base + String(path).replace(/^\.?\//, '');
+  function $(id) { return document.getElementById(id); }
+
+  function formatDate(v) {
+    try {
+      if (window.Utils && typeof window.Utils.formatDate === 'function') {
+        return window.Utils.formatDate(v);
+      }
+    } catch (e) {}
+    if (!v) return '';
+    try {
+      var d = new Date(v);
+      if (isNaN(d.getTime())) return '';
+      return d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
+    } catch (e) { return ''; }
   }
+
+  function daysAgo(v) {
+    if (!v) return '';
+    try {
+      var d = new Date(v).getTime();
+      var now = Date.now();
+      var diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+      if (diff === 0) return getLabel('common.today', 'اليوم');
+      if (diff === 1) return getLabel('common.yesterday', 'أمس');
+      if (diff < 7) return getLabel('common.days_ago', 'منذ {n} أيام').replace('{n}', diff);
+      if (diff < 30) {
+        var weeks = Math.floor(diff / 7);
+        return getLabel('common.weeks_ago', 'منذ {n} أسابيع').replace('{n}', weeks);
+      }
+      if (diff < 365) {
+        var months = Math.floor(diff / 30);
+        return getLabel('common.months_ago', 'منذ {n} أشهر').replace('{n}', months);
+      }
+      return formatDate(v);
+    } catch (e) { return ''; }
+  }
+
+  /* ============================================================
+     2. STATE
+     ============================================================ */
+
+  var state = {
+    _initialized: false,
+    academyId: null,
+    loading: false,
+    error: null,
+    notFound: false,
+    academy: null,
+    branches: [],
+    courses: [],
+    ratings: [],
+    category: null,
+    governorate: null,
+    currentUser: null,
+    currentProfile: null,
+    myRating: null,
+    realtimeUnsubs: []
+  };
+
+  /* ============================================================
+     3. READ ID FROM URL
+     ============================================================ */
 
   function readAcademyId() {
     try {
       var params = new URLSearchParams(window.location.search);
-      var id = params.get('id') || params.get('academy');
-      return id ? id.trim() : null;
-    } catch (e) {
-      return null;
-    }
+      var id = params.get('id');
+      if (id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+        return id;
+      }
+    } catch (e) {}
+    return null;
   }
 
-  // ✅ تحميل الأكاديمية (يستثني is_deleted)
-  function loadAcademy(id) {
-    if (!window.sb) return Promise.reject(new Error('Supabase not available'));
+  /* ============================================================
+     4. FETCH DATA
+     ============================================================ */
 
-    return window.sb
-      .from('academies')
-      .select('id, name, license_number, tax_number, description, logo_url, category_id, status, is_deleted, created_at, approved_at, expires_at, owner_name, founded_year, email, phone, website_url, facebook_url, academy_type')
+  function fetchAcademy(id) {
+    var sb = getSb();
+    if (!sb) return Promise.reject(new Error(getLabel('errors.network', 'تعذر الاتصال بالخادم')));
+
+    return sb.from('academies')
+      .select('id, name, description, logo_url, cover_url, category_id, governorate_id, city, address, contact_email, contact_phone, website_url, status, is_deleted, rating_avg, rating_count, is_rating_visible, approved_at, created_at')
       .eq('id', id)
+      .eq('status', 'approved')
       .eq('is_deleted', false)
       .maybeSingle()
       .then(function (res) {
@@ -117,524 +212,1054 @@
       });
   }
 
-  function loadCategory(categoryId) {
-    if (!categoryId || !window.sb) return Promise.resolve(null);
+  function fetchCategory(categoryId) {
+    if (!categoryId) return Promise.resolve(null);
+    var sb = getSb();
+    if (!sb) return Promise.resolve(null);
 
-    return window.sb
-      .from('academy_categories')
-      .select('id, name, name_en, color')
+    return sb.from('academy_categories')
+      .select('id, name_ar')
       .eq('id', categoryId)
       .maybeSingle()
-      .then(function (res) {
-        if (res.error || !res.data) return null;
-        return res.data;
-      })
+      .then(function (res) { return res.data || null; })
       .catch(function () { return null; });
   }
 
-  function loadBranches(academyId) {
-    if (!window.sb) return Promise.resolve([]);
+  function fetchGovernorate(govId) {
+    if (!govId) return Promise.resolve(null);
+    var sb = getSb();
+    if (!sb) return Promise.resolve(null);
 
-    return window.sb
-      .from('academy_branches')
-      .select('id, governorate, address, phone, is_main, branch_manager')
-      .eq('academy_id', academyId)
-      .order('is_main', { ascending: false })
-      .order('governorate', { ascending: true })
-      .then(function (res) {
-        if (res.error || !res.data) return [];
-        return res.data;
-      })
-      .catch(function () { return []; });
+    return sb.from('governorates')
+      .select('id, name_ar')
+      .eq('id', govId)
+      .maybeSingle()
+      .then(function (res) { return res.data || null; })
+      .catch(function () { return null; });
   }
 
-  function loadCourses(academyId) {
-    if (!window.sb) return Promise.resolve([]);
+  function fetchBranches(academyId) {
+    var sb = getSb();
+    if (!sb) return Promise.resolve([]);
 
-    return window.sb
-      .from('academy_courses')
-      .select('id, name, description, duration_hours, price, instructors_count')
-      .eq('academy_id', academyId)
-      .order('created_at', { ascending: false })
-      .then(function (res) {
-        if (res.error || !res.data) return [];
-        return res.data;
-      })
-      .catch(function () { return []; });
-  }
-
-  // ✅ عد الشهادات (بس اللي من الأكاديمية دي - مش من النقابة)
-  function countCertificates(academyId) {
-    if (!window.sb) return Promise.resolve(0);
-
-    return window.sb
-      .from('certificates')
-      .select('*', { count: 'exact', head: true })
+    return sb.from('academy_branches')
+      .select('id, name, governorate_id, address, phone, is_main, is_active')
       .eq('academy_id', academyId)
       .eq('is_active', true)
+      .order('is_main', { ascending: false })
+      .order('name', { ascending: true })
+      .then(function (res) { return res.data || []; })
+      .catch(function () { return []; });
+  }
+
+  function fetchCourses(academyId) {
+    var sb = getSb();
+    if (!sb) return Promise.resolve([]);
+
+    return sb.from('academy_courses')
+      .select('id, title, description, duration_hours, price, level, is_active')
+      .eq('academy_id', academyId)
+      .eq('is_active', true)
+      .order('order_index', { ascending: true })
+      .order('title', { ascending: true })
+      .then(function (res) { return res.data || []; })
+      .catch(function () { return []; });
+  }
+
+  function fetchRatings(academyId) {
+    var sb = getSb();
+    if (!sb) return Promise.resolve([]);
+
+    var ratingsEnabled = getSetting('ratings.enable_ratings', true);
+    if (ratingsEnabled === false) return Promise.resolve([]);
+
+    return sb.from('academy_ratings')
+      .select('id, academy_id, rated_by, stars, review, is_visible, is_verified, created_at, updated_at')
+      .eq('academy_id', academyId)
+      .eq('is_visible', true)
+      .order('created_at', { ascending: false })
+      .limit(50)
+      .then(function (res) { return res.data || []; })
+      .catch(function () { return []; });
+  }
+
+  function fetchMyRating(academyId, userId) {
+    if (!userId) return Promise.resolve(null);
+    var sb = getSb();
+    if (!sb) return Promise.resolve(null);
+
+    return sb.from('academy_ratings')
+      .select('id, stars, review, is_visible, created_at')
+      .eq('academy_id', academyId)
+      .eq('rated_by', userId)
+      .maybeSingle()
+      .then(function (res) { return res.data || null; })
+      .catch(function () { return null; });
+  }
+
+  /* ============================================================
+     5. LOAD CURRENT USER
+     ============================================================ */
+
+  function loadCurrentUser() {
+    var sb = getSb();
+    if (!sb || !sb.auth) return Promise.resolve();
+
+    return sb.auth.getUser()
       .then(function (res) {
-        if (res.error) return 0;
-        return res.count || 0;
+        var user = res && res.data && res.data.user;
+        if (!user) return;
+        state.currentUser = user;
+
+        return sb.from('profiles')
+          .select('id, full_name, avatar_url, role')
+          .eq('id', user.id)
+          .maybeSingle()
+          .then(function (profileRes) {
+            state.currentProfile = (profileRes && profileRes.data) ? profileRes.data : null;
+          });
       })
-      .catch(function () { return 0; });
+      .catch(function () {});
   }
 
-  function logSearch(academyName) {
-    if (!window.sb) return;
+  /* ============================================================
+     6. STATE UI
+     ============================================================ */
 
-    window.sb.from('search_logs').insert({
-      search_type: 'academy',
-      search_value: academyName || '',
-      result_count: 1,
-      user_agent: navigator.userAgent.substring(0, 200)
-    }).catch(function () {});
+  function showLoading() {
+    var l = $('academyLoader');
+    if (l) l.classList.add('is-visible');
+    var e = $('academyError');
+    if (e) e.classList.remove('is-visible');
+    var n = $('academyNotFound');
+    if (n) n.classList.remove('is-visible');
+    var r = $('academyResult');
+    if (r) r.classList.remove('show');
+    var cta = $('academyCTA');
+    if (cta) cta.setAttribute('hidden', '');
   }
 
-  function updateSEO(academy) {
-    if (!academy) return;
+  function showError(msg) {
+    var l = $('academyLoader');
+    if (l) l.classList.remove('is-visible');
+    var e = $('academyError');
+    if (e) e.classList.add('is-visible');
+    var n = $('academyNotFound');
+    if (n) n.classList.remove('is-visible');
+    var r = $('academyResult');
+    if (r) r.classList.remove('show');
 
-    var unionName = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
-    var title = academy.name + ' | ' + unionName;
-    var desc = academy.description
-      ? String(academy.description).substring(0, 160)
-      : 'أكاديمية ' + academy.name + ' - معتمدة رسمياً من ' + unionName;
-
-    document.title = title;
-
-    var descEl = document.querySelector('meta[name="description"]');
-    if (descEl) descEl.setAttribute('content', desc);
-
-    var ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', title);
-
-    var ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) ogDesc.setAttribute('content', desc);
-
-    var ogImage = document.querySelector('meta[property="og:image"]');
-    if (ogImage && academy.logo_url) ogImage.setAttribute('content', academy.logo_url);
-
-    var ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute('content', window.location.href);
-
-    var ogType = document.querySelector('meta[property="og:type"]');
-    if (ogType) ogType.setAttribute('content', 'website');
+    var txt = $('errorText');
+    if (txt) txt.textContent = msg || getLabel('errors.network', 'تعذر الاتصال بالخادم');
   }
 
-  function renderHero() {
-    var academy = state.academy;
-    if (!academy) return;
+  function showNotFound() {
+    var l = $('academyLoader');
+    if (l) l.classList.remove('is-visible');
+    var e = $('academyError');
+    if (e) e.classList.remove('is-visible');
+    var n = $('academyNotFound');
+    if (n) n.classList.add('is-visible');
+    var r = $('academyResult');
+    if (r) r.classList.remove('show');
+    var cta = $('academyCTA');
+    if (cta) cta.setAttribute('hidden', '');
+  }
 
-    var hero = $('acadHero');
-    if (hero) hero.style.display = 'block';
+  function showResult() {
+    var l = $('academyLoader');
+    if (l) l.classList.remove('is-visible');
+    var e = $('academyError');
+    if (e) e.classList.remove('is-visible');
+    var n = $('academyNotFound');
+    if (n) n.classList.remove('is-visible');
+    var r = $('academyResult');
+    if (r) {
+      r.removeAttribute('hidden');
+      r.classList.add('show');
+    }
+    var cta = $('academyCTA');
+    if (cta) cta.removeAttribute('hidden');
+  }
 
-    var main = $('acadMain');
-    if (main) main.style.display = 'block';
+  /* ============================================================
+     7. RENDER — PROFILE CARD
+     ============================================================ */
 
-    setText('breadcrumbCurrent', academy.name || 'تفاصيل الأكاديمية');
+  function renderStars(rating, opts) {
+    opts = opts || {};
+    var size = opts.size || 14;
+    var max = opts.max || 5;
+    var r = Math.round(Number(rating) || 0);
+    if (r > max) r = max;
+    if (r < 0) r = 0;
 
-    var logoEl = $('acadLogo');
-    if (logoEl) {
-      if (academy.logo_url) {
-        logoEl.innerHTML = '<img src="' + escapeHtml(academy.logo_url) + '" alt="' + escapeHtml(academy.name) + '">';
+    var html = '';
+    for (var i = 0; i < max; i++) {
+      if (i < r) {
+        html += icon('star-filled', size);
       } else {
-        logoEl.textContent = (academy.name || '?').charAt(0);
+        html += icon('star', size).replace('class="', 'class="star-empty ');
       }
     }
-
-    setText('acadName', academy.name || 'أكاديمية');
-
-    var descEl = $('acadDescription');
-    if (descEl && academy.description) {
-      descEl.textContent = academy.description;
-      descEl.style.display = 'block';
-    }
-
-    setText('acadLicense', academy.license_number || '—');
-
-    if (state.category) {
-      var catWrap = $('acadCategoryWrap');
-      var catEl = $('acadCategory');
-      if (catWrap) catWrap.style.display = 'flex';
-      if (catEl) catEl.textContent = state.category.name || '—';
-    }
+    return html;
   }
 
-  function renderInfoGrid() {
-    var grid = $('infoGrid');
-    if (!grid || !state.academy) return;
-
-    var academy = state.academy;
-    var cards = [];
-
-    if (academy.license_number) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
-        'رقم الاعتماد',
-        academy.license_number,
-        true
-      ));
+  function renderProfileCard(a) {
+    var logoHtml;
+    if (a.logo_url) {
+      logoHtml = '<img src="' + escapeHtml(a.logo_url) + '" alt="" onerror="this.parentNode.textContent=\'' + escapeHtml((a.name || 'أ').charAt(0)) + '\';">';
+    } else {
+      logoHtml = escapeHtml((a.name || 'أ').charAt(0));
     }
 
-    if (academy.tax_number) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>',
-        'البطاقة الضريبية',
-        academy.tax_number,
-        true
-      ));
+    var coverHtml;
+    if (a.cover_url) {
+      coverHtml = '<div class="academy-profile-cover" style="background-image: url(\'' + escapeHtml(a.cover_url) + '\');"></div>';
+    } else {
+      coverHtml = '<div class="academy-profile-cover"></div>';
     }
 
-    if (academy.approved_at) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
-        'تاريخ الاعتماد',
-        formatDate(academy.approved_at)
-      ));
+    var categoryHtml = '';
+    if (state.category && state.category.name_ar) {
+      categoryHtml = '<span class="academy-profile-category">'
+        + icon('tag', 14)
+        + '<span>' + escapeHtml(state.category.name_ar) + '</span>'
+        + '</span>';
     }
 
-    if (state.certificatesCount > 0) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>',
-        'الشهادات الصادرة',
-        state.certificatesCount + ' شهادة'
-      ));
+    var locationText = '';
+    if (state.governorate && state.governorate.name_ar) {
+      locationText = state.governorate.name_ar;
+      if (a.city) locationText += ' — ' + a.city;
+    } else if (a.city) {
+      locationText = a.city;
     }
 
-    if (academy.founded_year) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
-        'سنة التأسيس',
-        String(academy.founded_year)
-      ));
+    var locationHtml = '';
+    if (locationText) {
+      locationHtml = '<span class="academy-profile-location">'
+        + icon('map-pin', 14)
+        + '<span>' + escapeHtml(locationText) + '</span>'
+        + '</span>';
     }
 
-    if (state.branches.length > 0) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
-        'الفروع',
-        state.branches.length + ' فرع'
-      ));
+    var ratingHtml = '';
+    var ratingsEnabled = getSetting('ratings.enable_ratings', true) !== false;
+    if (ratingsEnabled && a.is_rating_visible !== false && Number(a.rating_count) > 0) {
+      ratingHtml = '<span class="academy-profile-rating">'
+        + icon('star-filled', 14)
+        + '<span>' + escapeHtml((Number(a.rating_avg) || 0).toFixed(1)) + '</span>'
+        + '<span class="academy-profile-rating-count">(' + (Number(a.rating_count) || 0) + ')</span>'
+        + '</span>';
     }
 
-    if (academy.email) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
-        'البريد الإلكتروني',
-        academy.email,
-        false,
-        'mailto:' + academy.email
-      ));
+    var actionsHtml = ''
+      + '<a href="' + escapeHtml(resolve('verify.html')) + '" class="academy-action-btn primary">'
+      +   icon('badge-check', 16)
+      +   '<span>' + escapeHtml(getLabel('academy_details.action_verify', 'تحقق من شهادة')) + '</span>'
+      + '</a>';
+
+    if (a.website_url) {
+      actionsHtml += '<a href="' + escapeHtml(a.website_url) + '" target="_blank" rel="noopener" class="academy-action-btn">'
+        + icon('external-link', 16)
+        + '<span>' + escapeHtml(getLabel('academy_details.action_website', 'الموقع الرسمي')) + '</span>'
+        + '</a>';
     }
 
-    if (academy.phone) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
-        'الهاتف',
-        academy.phone,
-        false,
-        'tel:' + academy.phone
-      ));
+    if (a.contact_phone) {
+      actionsHtml += '<a href="tel:' + escapeHtml(String(a.contact_phone).replace(/[^0-9+]/g, '')) + '" class="academy-action-btn">'
+        + icon('phone', 16)
+        + '<span>' + escapeHtml(getLabel('academy_details.action_call', 'اتصل')) + '</span>'
+        + '</a>';
     }
 
-    if (academy.website_url) {
-      cards.push(makeInfoCard(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
-        'الموقع الإلكتروني',
-        String(academy.website_url).replace(/^https?:\/\//, ''),
-        false,
-        academy.website_url
-      ));
-    }
+    actionsHtml += '<button type="button" class="academy-action-btn" id="academyShareBtn">'
+      + icon('share', 16)
+      + '<span>' + escapeHtml(getLabel('academy_details.action_share', 'مشاركة')) + '</span>'
+      + '</button>';
 
-    grid.innerHTML = cards.join('');
+    return ''
+      + '<div class="academy-profile-card">'
+      +   coverHtml
+      +   '<div class="academy-profile-body">'
+      +     '<div class="academy-profile-header">'
+      +       '<div class="academy-profile-logo">' + logoHtml + '</div>'
+      +       '<div class="academy-profile-info">'
+      +         '<h2 class="academy-profile-name">' + escapeHtml(a.name || '') + '</h2>'
+      +         '<div class="academy-profile-meta">'
+      +           '<span class="academy-profile-badge">' + icon('check-circle', 13) + '<span>' + escapeHtml(getLabel('academies.card.verified', 'معتمدة')) + '</span></span>'
+      +           categoryHtml
+      +           locationHtml
+      +           ratingHtml
+      +         '</div>'
+      +       '</div>'
+      +     '</div>'
+      +     '<div class="academy-profile-actions">' + actionsHtml + '</div>'
+      +   '</div>'
+      + '</div>';
   }
 
-  function makeInfoCard(iconSvg, label, value, isMono, linkUrl) {
-    var valueHtml = linkUrl
-      ? '<a href="' + escapeHtml(linkUrl) + '" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;" onmouseover="this.style.color=\'var(--primary)\'" onmouseout="this.style.color=\'\'">' + escapeHtml(value) + '</a>'
-      : escapeHtml(value);
+  /* ============================================================
+     8. RENDER — DESCRIPTION
+     ============================================================ */
 
-    return '' +
-      '<div class="info-card">' +
-        '<div class="info-card-icon">' + iconSvg + '</div>' +
-        '<div class="info-card-label">' + escapeHtml(label) + '</div>' +
-        '<div class="info-card-value' + (isMono ? ' mono' : '') + '">' + valueHtml + '</div>' +
-      '</div>';
+  function renderDescription(a) {
+    if (!a.description) return '';
+    return ''
+      + '<section class="academy-section">'
+      +   '<h3 class="academy-section-title">' + icon('file-text', 22) + '<span>' + escapeHtml(getLabel('academy_details.section_about', 'عن الأكاديمية')) + '</span></h3>'
+      +   '<div class="academy-description">' + escapeHtml(a.description) + '</div>'
+      + '</section>';
   }
+
+  /* ============================================================
+     9. RENDER — CONTACT
+     ============================================================ */
+
+  function renderContact(a) {
+    var items = [];
+
+    if (a.contact_email) {
+      items.push({
+        icon: 'mail',
+        label: getLabel('academy_details.contact.email', 'البريد الإلكتروني'),
+        value: a.contact_email,
+        href: 'mailto:' + a.contact_email
+      });
+    }
+
+    if (a.contact_phone) {
+      items.push({
+        icon: 'phone',
+        label: getLabel('academy_details.contact.phone', 'الهاتف'),
+        value: a.contact_phone,
+        href: 'tel:' + String(a.contact_phone).replace(/[^0-9+]/g, '')
+      });
+    }
+
+    if (a.website_url) {
+      items.push({
+        icon: 'globe',
+        label: getLabel('academy_details.contact.website', 'الموقع'),
+        value: String(a.website_url).replace(/^https?:\/\//, '').replace(/\/$/, ''),
+        href: a.website_url,
+        target: '_blank'
+      });
+    }
+
+    if (a.address) {
+      items.push({
+        icon: 'map-pin',
+        label: getLabel('academy_details.contact.address', 'العنوان'),
+        value: a.address,
+        href: null
+      });
+    }
+
+    if (items.length === 0) return '';
+
+    var itemsHtml = items.map(function (it) {
+      var inner = ''
+        + '<div class="academy-contact-icon">' + icon(it.icon, 18) + '</div>'
+        + '<div class="academy-contact-info">'
+        +   '<div class="academy-contact-label">' + escapeHtml(it.label) + '</div>'
+        +   '<div class="academy-contact-value">' + escapeHtml(it.value) + '</div>'
+        + '</div>';
+
+      if (it.href) {
+        return '<a href="' + escapeHtml(it.href) + '" '
+          + (it.target ? 'target="' + it.target + '" rel="noopener" ' : '')
+          + 'class="academy-contact-item">' + inner + '</a>';
+      }
+      return '<div class="academy-contact-item">' + inner + '</div>';
+    }).join('');
+
+    return ''
+      + '<section class="academy-section">'
+      +   '<h3 class="academy-section-title">' + icon('message-circle', 22) + '<span>' + escapeHtml(getLabel('academy_details.section_contact', 'بيانات التواصل')) + '</span></h3>'
+      +   '<div class="academy-contact-grid">' + itemsHtml + '</div>'
+      + '</section>';
+  }
+
+  /* ============================================================
+     10. RENDER — BRANCHES
+     ============================================================ */
 
   function renderBranches() {
-    var grid = $('branchesGrid');
-    var countEl = $('branchesCount');
-    if (!grid) return;
+    if (!state.branches || state.branches.length === 0) return '';
 
-    var branches = state.branches || [];
-
-    if (countEl) {
-      countEl.textContent = branches.length + ' فرع';
-    }
-
-    if (branches.length === 0) {
-      grid.innerHTML = '<div class="empty-inline" style="grid-column:1/-1;">لا توجد فروع مسجلة لهذه الأكاديمية</div>';
-      return;
-    }
-
-    grid.innerHTML = branches.map(function (b) {
-      var mainBadge = b.is_main
-        ? '<span class="branch-main-badge">الفرع الرئيسي</span>'
+    var itemsHtml = state.branches.map(function (b) {
+      var mainTag = b.is_main
+        ? '<span class="academy-branch-main-tag">' + escapeHtml(getLabel('academy_details.branch_main', 'رئيسي')) + '</span>'
         : '';
 
-      var phoneHtml = b.phone
-        ? '<div class="branch-info-row">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>' +
-            '<a href="tel:' + escapeHtml(b.phone) + '">' + escapeHtml(b.phone) + '</a>' +
-          '</div>'
-        : '';
+      var detailsHtml = '';
+      if (b.address) {
+        detailsHtml += '<div class="academy-branch-detail">' + icon('map-pin', 12) + '<span>' + escapeHtml(b.address) + '</span></div>';
+      }
+      if (b.phone) {
+        detailsHtml += '<div class="academy-branch-detail">' + icon('phone', 12) + '<span>' + escapeHtml(b.phone) + '</span></div>';
+      }
 
-      var managerHtml = b.branch_manager
-        ? '<div class="branch-info-row">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' +
-            '<span>' + escapeHtml(b.branch_manager) + '</span>' +
-          '</div>'
-        : '';
-
-      return '' +
-        '<div class="branch-card">' +
-          '<div class="branch-header">' +
-            '<div class="branch-gov">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>' +
-                '<circle cx="12" cy="10" r="3"></circle>' +
-              '</svg>' +
-              escapeHtml(b.governorate || 'فرع') +
-            '</div>' +
-            mainBadge +
-          '</div>' +
-          '<div class="branch-body">' +
-            (b.address
-              ? '<div class="branch-info-row">' +
-                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>' +
-                  '<span>' + escapeHtml(b.address) + '</span>' +
-                '</div>'
-              : '') +
-            phoneHtml +
-            managerHtml +
-          '</div>' +
-        '</div>';
+      return ''
+        + '<div class="academy-branch-card' + (b.is_main ? ' main' : '') + '">'
+        +   '<div class="academy-branch-header">'
+        +     '<div class="academy-branch-icon">' + icon('map-pin', 16) + '</div>'
+        +     '<div class="academy-branch-name">' + escapeHtml(b.name || '') + '</div>'
+        +     mainTag
+        +   '</div>'
+        +   detailsHtml
+        + '</div>';
     }).join('');
+
+    return ''
+      + '<section class="academy-section" data-section="branches">'
+      +   '<h3 class="academy-section-title">' + icon('map', 22) + '<span>' + escapeHtml(getLabel('academy_details.section_branches', 'الفروع')) + '</span></h3>'
+      +   '<div class="academy-branches-grid">' + itemsHtml + '</div>'
+      + '</section>';
   }
+
+  /* ============================================================
+     11. RENDER — COURSES
+     ============================================================ */
 
   function renderCourses() {
-    var section = $('coursesSection');
-    var grid = $('coursesGrid');
-    var countEl = $('coursesCount');
+    if (!state.courses || state.courses.length === 0) return '';
 
-    if (!grid) return;
-
-    var courses = state.courses || [];
-
-    if (courses.length === 0) {
-      if (section) section.style.display = 'none';
-      return;
-    }
-
-    if (section) section.style.display = 'block';
-    if (countEl) countEl.textContent = courses.length + ' كورس';
-
-    grid.innerHTML = courses.map(function (c) {
-      var metaItems = [];
+    var itemsHtml = state.courses.map(function (c) {
+      var metaHtml = '';
       if (c.duration_hours) {
-        metaItems.push(
-          '<span class="course-meta-item">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' +
-            escapeHtml(c.duration_hours + ' ساعة') +
-          '</span>'
-        );
+        metaHtml += '<span class="academy-course-meta-item">' + icon('clock', 12) + '<span>' + c.duration_hours + ' ' + escapeHtml(getLabel('common.hours', 'ساعة')) + '</span></span>';
+      }
+      if (c.level) {
+        var levelLabel = c.level === 'beginner'
+          ? getLabel('common.level_beginner', 'مبتدئ')
+          : c.level === 'intermediate'
+            ? getLabel('common.level_intermediate', 'متوسط')
+            : getLabel('common.level_advanced', 'متقدم');
+        metaHtml += '<span class="academy-course-meta-item">' + icon('trending-up', 12) + '<span>' + levelLabel + '</span></span>';
       }
       if (c.price) {
-        metaItems.push(
-          '<span class="course-meta-item">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>' +
-            escapeHtml(String(c.price)) + ' ج.م' +
-          '</span>'
-        );
-      }
-      if (c.instructors_count) {
-        metaItems.push(
-          '<span class="course-meta-item">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>' +
-            escapeHtml(String(c.instructors_count)) +
-          '</span>'
-        );
+        metaHtml += '<span class="academy-course-meta-item">' + icon('tag', 12) + '<span>' + Number(c.price).toFixed(0) + ' ' + escapeHtml(getLabel('common.currency_egp', 'ج.م')) + '</span></span>';
       }
 
-      return '' +
-        '<div class="course-card">' +
-          '<div class="course-icon">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>' +
-              '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>' +
-            '</svg>' +
-          '</div>' +
-          '<div class="course-info">' +
-            '<h3 class="course-name">' + escapeHtml(c.name || 'كورس') + '</h3>' +
-            (metaItems.length > 0
-              ? '<div class="course-meta">' + metaItems.join('') + '</div>'
-              : '') +
-          '</div>' +
-        '</div>';
+      return ''
+        + '<div class="academy-course-card">'
+        +   '<div class="academy-course-icon">' + icon('book', 20) + '</div>'
+        +   '<div class="academy-course-body">'
+        +     '<h4 class="academy-course-title">' + escapeHtml(c.title || '') + '</h4>'
+        +     (c.description ? '<p class="academy-course-desc">' + escapeHtml(c.description) + '</p>' : '')
+        +     (metaHtml ? '<div class="academy-course-meta">' + metaHtml + '</div>' : '')
+        +   '</div>'
+        + '</div>';
     }).join('');
+
+    return ''
+      + '<section class="academy-section" data-section="courses">'
+      +   '<h3 class="academy-section-title">' + icon('book', 22) + '<span>' + escapeHtml(getLabel('academy_details.section_courses', 'الكورسات')) + '</span></h3>'
+      +   '<div class="academy-courses-grid">' + itemsHtml + '</div>'
+      + '</section>';
   }
 
-  function shareAcademy() {
-    if (!state.academy) return;
+  /* ============================================================
+     12. RENDER — REVIEWS
+     ============================================================ */
 
-    var url = window.location.href;
-    var title = state.academy.name;
-    var text = 'أكاديمية ' + title + ' - معتمدة من نقابة تكنولوجيا المعلومات';
-
-    if (navigator.share) {
-      navigator.share({
-        title: title,
-        text: text,
-        url: url
-      }).catch(function () {});
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(function () {
-        toast('تم نسخ الرابط', 'success');
-      }).catch(function () {
-        prompt('انسخ الرابط:', url);
-      });
-    } else {
-      prompt('انسخ الرابط:', url);
-    }
-  }
-
-  function showError(message) {
-    var loader = $('acadLoader');
-    var error = $('acadError');
-    var hero = $('acadHero');
-    var main = $('acadMain');
-
-    if (loader) loader.classList.remove('show');
-    if (hero) hero.style.display = 'none';
-    if (main) main.style.display = 'none';
-
-    if (error) {
-      if (message) {
-        var errText = $('acadErrorText');
-        if (errText) errText.textContent = message;
+  function computeRatingDistribution(ratings) {
+    var dist = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    var total = 0;
+    ratings.forEach(function (r) {
+      var s = Math.max(1, Math.min(5, Math.round(Number(r.stars) || 0)));
+      if (s >= 1 && s <= 5) {
+        dist[s]++;
+        total++;
       }
-      error.classList.add('show');
-    }
+    });
+    return { dist: dist, total: total };
   }
 
-  function loadAll() {
-    if (!state.academyId) {
-      showError('لم يتم تحديد الأكاديمية. تأكد من الرابط.');
+  function renderReviewsSection(a) {
+    var ratingsEnabled = getSetting('ratings.enable_ratings', true) !== false;
+    if (!ratingsEnabled) return '';
+
+    var showOnDirectory = getSetting('ratings.show_on_directory', true) !== false;
+    if (!showOnDirectory) return '';
+
+    var ratings = state.ratings || [];
+    var count = Number(a.rating_count) || ratings.length;
+    var avg = Number(a.rating_avg) || 0;
+    var dist = computeRatingDistribution(ratings);
+
+    // Summary
+    var summaryHtml = '';
+    if (count > 0) {
+      var barsHtml = '';
+      for (var star = 5; star >= 1; star--) {
+        var c = dist.dist[star] || 0;
+        var pct = dist.total > 0 ? Math.round((c / dist.total) * 100) : 0;
+        barsHtml += ''
+          + '<div class="academy-rating-bar-row">'
+          +   '<span class="academy-rating-bar-label">' + star + ' ' + icon('star-filled', 10) + '</span>'
+          +   '<div class="academy-rating-bar"><div class="academy-rating-bar-fill" style="width:' + pct + '%;"></div></div>'
+          +   '<span class="academy-rating-bar-count">' + c + '</span>'
+          + '</div>';
+      }
+
+      summaryHtml = ''
+        + '<div class="academy-reviews-summary">'
+        +   '<div class="academy-rating-big">'
+        +     '<div class="academy-rating-value">' + avg.toFixed(1) + '</div>'
+        +     '<div class="academy-rating-stars-lg">' + renderStars(avg, { size: 18 }) + '</div>'
+        +     '<div class="academy-rating-total">' + count + ' ' + escapeHtml(getLabel('academy_details.rating_count', 'تقييم')) + '</div>'
+        +   '</div>'
+        +   '<div class="academy-rating-bars">' + barsHtml + '</div>'
+        + '</div>';
+    }
+
+    // Reviews list
+    var reviewsHtml = '';
+    if (ratings.length === 0) {
+      reviewsHtml = '<div class="academy-reviews-empty">'
+        + escapeHtml(getLabel('academy_details.reviews_empty', 'لا توجد تقييمات بعد. كن أول من يقيّم هذه الأكاديمية'))
+        + '</div>';
+    } else {
+      reviewsHtml = '<div class="academy-reviews-list">'
+        + ratings.map(renderReviewCard).join('')
+        + '</div>';
+    }
+
+    // Add review button (conditionally)
+    var addBtnHtml = '';
+    var canReview = canSubmitReview();
+    if (canReview.allowed) {
+      addBtnHtml = '<button type="button" class="academy-add-review-btn" id="addReviewBtn">'
+        + icon(state.myRating ? 'edit' : 'star-filled', 16)
+        + '<span>' + escapeHtml(state.myRating
+            ? getLabel('academy_details.edit_review', 'تعديل تقييمك')
+            : getLabel('academy_details.add_review', 'أضف تقييمك'))
+        + '</span>'
+        + '</button>';
+    } else if (canReview.reason === 'not-logged-in') {
+      addBtnHtml = '<a href="' + escapeHtml(resolve('login.html?next=' + encodeURIComponent(window.location.pathname + window.location.search))) + '" class="academy-add-review-btn">'
+        + icon('log-in', 16)
+        + '<span>' + escapeHtml(getLabel('academy_details.login_to_review', 'سجل دخولك لتقييم الأكاديمية')) + '</span>'
+        + '</a>';
+    }
+
+    return ''
+      + '<section class="academy-section" data-section="reviews">'
+      +   '<h3 class="academy-section-title">' + icon('star', 22) + '<span>' + escapeHtml(getLabel('academy_details.section_reviews', 'التقييمات')) + '</span></h3>'
+      +   summaryHtml
+      +   reviewsHtml
+      +   addBtnHtml
+      + '</section>';
+  }
+
+  function renderReviewCard(r) {
+    var stars = Math.max(1, Math.min(5, Math.round(Number(r.stars) || 0)));
+    var starsHtml = renderStars(stars, { size: 12 });
+    var dateText = daysAgo(r.created_at);
+    var isMine = state.myRating && r.id === state.myRating.id;
+
+    var reviewerName = getLabel('academy_details.reviewer_anonymous', 'مستخدم');
+    if (isMine && state.currentProfile && state.currentProfile.full_name) {
+      reviewerName = state.currentProfile.full_name;
+    } else if (r.is_verified) {
+      reviewerName = getLabel('academy_details.reviewer_verified', 'تقييم موثّق');
+    }
+
+    var initials = String(reviewerName).trim().substring(0, 2).toUpperCase();
+
+    return ''
+      + '<div class="academy-review-card">'
+      +   '<div class="academy-review-header">'
+      +     '<div class="academy-review-avatar">' + escapeHtml(initials) + '</div>'
+      +     '<div class="academy-review-info">'
+      +       '<div class="academy-review-author">' + escapeHtml(reviewerName) + '</div>'
+      +       '<div class="academy-review-stars">' + starsHtml + '</div>'
+      +     '</div>'
+      +     '<div class="academy-review-date">' + escapeHtml(dateText) + '</div>'
+      +   '</div>'
+      +   (r.review ? '<p class="academy-review-text">' + escapeHtml(r.review) + '</p>' : '')
+      + '</div>';
+  }
+
+  /* ============================================================
+     13. REVIEW PERMISSIONS
+     ============================================================ */
+
+  function canSubmitReview() {
+    if (!state.currentUser) return { allowed: false, reason: 'not-logged-in' };
+
+    var requireLogin = getSetting('ratings.require_login_to_rate', true);
+    if (requireLogin !== false && !state.currentUser) {
+      return { allowed: false, reason: 'not-logged-in' };
+    }
+
+    var allowPublic = getSetting('ratings.allow_public_rating', true);
+    if (allowPublic === false) {
+      // Only committee/admin can rate
+      var role = state.currentProfile ? state.currentProfile.role : null;
+      if (role !== 'super_admin' && role !== 'committee_head' &&
+          role !== 'committee_deputy' && role !== 'committee_member') {
+        return { allowed: false, reason: 'not-allowed' };
+      }
+    }
+
+    return { allowed: true };
+  }
+
+  /* ============================================================
+     14. ADD/EDIT REVIEW MODAL
+     ============================================================ */
+
+  function openReviewModal() {
+    if (!window.Modal || typeof window.Modal.create !== 'function') {
+      showToast(getLabel('errors.generic', 'حدث خطأ'), 'error');
       return;
     }
 
-    state.loading = true;
+    var currentStars = state.myRating ? Number(state.myRating.stars) : 0;
+    var currentReview = state.myRating ? (state.myRating.review || '') : '';
+    var selectedStars = currentStars;
 
-    var loader = $('acadLoader');
-    if (loader) loader.classList.add('show');
+    var bodyEl = document.createElement('div');
 
-    loadAcademy(state.academyId)
+    // Star selector
+    var starLabel = document.createElement('div');
+    starLabel.textContent = getLabel('academy_details.review_stars', 'تقييمك:');
+    starLabel.style.cssText = 'margin-bottom:8px;color:var(--text,#F8FAFC);font-weight:600;font-size:13px;';
+    bodyEl.appendChild(starLabel);
+
+    var starsRow = document.createElement('div');
+    starsRow.style.cssText = 'display:flex;gap:6px;margin-bottom:16px;justify-content:center;';
+    bodyEl.appendChild(starsRow);
+
+    var starButtons = [];
+    for (var i = 1; i <= 5; i++) {
+      (function (value) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('data-star', String(value));
+        btn.style.cssText = 'width:48px;height:48px;border-radius:10px;background:transparent;border:2px solid var(--border,rgba(255,255,255,0.1));color:var(--text-muted,#64748B);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;padding:0;';
+        btn.innerHTML = icon('star', 24);
+        btn.addEventListener('click', function () {
+          selectedStars = value;
+          starButtons.forEach(function (b) {
+            var v = parseInt(b.getAttribute('data-star'), 10);
+            if (v <= value) {
+              b.style.background = 'var(--warning-soft, rgba(245,158,11,0.14))';
+              b.style.borderColor = 'var(--warning, #F59E0B)';
+              b.style.color = 'var(--warning, #F59E0B)';
+              b.innerHTML = icon('star-filled', 24);
+            } else {
+              b.style.background = 'transparent';
+              b.style.borderColor = 'var(--border, rgba(255,255,255,0.1))';
+              b.style.color = 'var(--text-muted, #64748B)';
+              b.innerHTML = icon('star', 24);
+            }
+          });
+        });
+        starsRow.appendChild(btn);
+        starButtons.push(btn);
+      })(i);
+    }
+
+    // Trigger initial
+    if (currentStars > 0) {
+      var btn0 = starButtons[currentStars - 1];
+      if (btn0) btn0.click();
+    }
+
+    // Review textarea (if allowed)
+    var allowReviews = getSetting('ratings.allow_reviews', true) !== false;
+    var reviewMaxLength = parseInt(getSetting('ratings.review_max_length', 500), 10) || 500;
+    var textareaEl = null;
+
+    if (allowReviews) {
+      var reviewLabel = document.createElement('div');
+      reviewLabel.textContent = getLabel('academy_details.review_text', 'تعليقك (اختياري):');
+      reviewLabel.style.cssText = 'margin-bottom:8px;color:var(--text,#F8FAFC);font-weight:600;font-size:13px;';
+      bodyEl.appendChild(reviewLabel);
+
+      textareaEl = document.createElement('textarea');
+      textareaEl.value = currentReview;
+      textareaEl.setAttribute('maxlength', String(reviewMaxLength));
+      textareaEl.setAttribute('placeholder', getLabel('academy_details.review_placeholder', 'شاركنا تجربتك مع هذه الأكاديمية...'));
+      textareaEl.style.cssText = 'width:100%;padding:12px 14px;background:var(--bg,#0A0E14);border:2px solid var(--border,rgba(255,255,255,0.08));border-radius:10px;color:var(--text,#F8FAFC);font-family:inherit;font-size:14px;min-height:100px;resize:vertical;outline:none;';
+      bodyEl.appendChild(textareaEl);
+
+      var counterEl = document.createElement('div');
+      counterEl.style.cssText = 'text-align:end;font-size:11px;color:var(--text-muted,#64748B);margin-top:4px;';
+      counterEl.textContent = currentReview.length + ' / ' + reviewMaxLength;
+      bodyEl.appendChild(counterEl);
+
+      textareaEl.addEventListener('input', function () {
+        counterEl.textContent = textareaEl.value.length + ' / ' + reviewMaxLength;
+      });
+    }
+
+    // Modal
+    var modal = window.Modal.create({
+      title: state.myRating
+        ? getLabel('academy_details.edit_review_title', 'تعديل التقييم')
+        : getLabel('academy_details.add_review_title', 'أضف تقييمك'),
+      subtitle: state.academy ? state.academy.name : '',
+      icon: 'star',
+      iconVariant: 'warning',
+      size: 'sm',
+      closable: true,
+      closeOnBackdrop: true,
+      closeOnEsc: true,
+      body: bodyEl,
+      buttons: [
+        {
+          label: getLabel('common.cancel', 'إلغاء'),
+          variant: 'secondary'
+        },
+        {
+          label: state.myRating
+            ? getLabel('common.update', 'تحديث')
+            : getLabel('common.submit', 'إرسال'),
+          variant: 'primary',
+          icon: 'check',
+          action: function () {
+            if (selectedStars < 1) {
+              showToast(getLabel('academy_details.review_stars_required', 'اختر عدد النجوم'), 'warning');
+              return false;
+            }
+            submitReview(selectedStars, textareaEl ? textareaEl.value : '');
+            return true;
+          }
+        }
+      ]
+    });
+
+    // Delete button (if existing review)
+    if (state.myRating) {
+      var footerEl = modal.el.querySelector('.itws-modal-foot');
+      if (footerEl) {
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'itws-modal-btn danger';
+        delBtn.innerHTML = icon('trash', 16) + '<span>' + escapeHtml(getLabel('common.delete', 'حذف')) + '</span>';
+        delBtn.style.cssText = 'margin-inline-end:auto;';
+        delBtn.addEventListener('click', function () {
+          var confirmed = window.confirm(getLabel('academy_details.delete_review_confirm', 'هل تريد حذف تقييمك؟'));
+          if (confirmed) {
+            deleteReview();
+            modal.close();
+          }
+        });
+        footerEl.insertBefore(delBtn, footerEl.firstChild);
+      }
+    }
+  }
+
+  /* ============================================================
+     15. SUBMIT / DELETE REVIEW
+     ============================================================ */
+
+  function submitReview(stars, review) {
+    var sb = getSb();
+    if (!sb || !state.currentUser || !state.academyId) {
+      showToast(getLabel('errors.generic', 'حدث خطأ'), 'error');
+      return;
+    }
+
+    var payload = {
+      academy_id: state.academyId,
+      rated_by: state.currentUser.id,
+      stars: Math.max(1, Math.min(5, parseInt(stars, 10) || 0)),
+      review: review ? String(review).trim().substring(0, 500) : null,
+      is_visible: getSetting('ratings.auto_publish', true) !== false
+    };
+
+    Promise.resolve()
+      .then(function () {
+        if (state.myRating) {
+          return sb.from('academy_ratings')
+            .update(payload)
+            .eq('id', state.myRating.id);
+        }
+        return sb.from('academy_ratings').insert(payload);
+      })
+      .then(function (res) {
+        if (res.error) {
+          if (res.error.code === '23505') {
+            throw new Error(getLabel('academy_details.already_reviewed', 'لقد قيّمت هذه الأكاديمية بالفعل'));
+          }
+          throw new Error(res.error.message);
+        }
+        showToast(
+          state.myRating
+            ? getLabel('academy_details.review_updated', 'تم تحديث تقييمك')
+            : getLabel('academy_details.review_added', 'تم إضافة تقييمك بنجاح'),
+          'success'
+        );
+        state.myRating = null;
+        return reloadData();
+      })
+      .catch(function (err) {
+        showToast(err.message || getLabel('errors.generic', 'حدث خطأ'), 'error');
+      });
+  }
+
+  function deleteReview() {
+    var sb = getSb();
+    if (!sb || !state.myRating) return;
+
+    Promise.resolve()
+      .then(function () {
+        return sb.from('academy_ratings').delete().eq('id', state.myRating.id);
+      })
+      .then(function (res) {
+        if (res.error) throw new Error(res.error.message);
+        showToast(getLabel('academy_details.review_deleted', 'تم حذف تقييمك'), 'success');
+        state.myRating = null;
+        return reloadData();
+      })
+      .catch(function (err) {
+        showToast(err.message || getLabel('errors.generic', 'حدث خطأ'), 'error');
+      });
+  }
+
+  /* ============================================================
+     16. RENDER — FULL PAGE
+     ============================================================ */
+
+  function render() {
+    var container = $('academyResult');
+    if (!container || !state.academy) return;
+
+    var html = ''
+      + renderProfileCard(state.academy)
+      + renderDescription(state.academy)
+      + renderContact(state.academy)
+      + renderBranches()
+      + renderCourses()
+      + renderReviewsSection(state.academy);
+
+    container.innerHTML = html;
+    bindLocalEvents();
+    showResult();
+  }
+
+  /* ============================================================
+     17. SHARE
+     ============================================================ */
+
+  function shareAcademy() {
+    var a = state.academy;
+    if (!a) return;
+
+    var url = window.location.href;
+    var title = a.name || '';
+    var text = getLabel('academy_details.share_text', 'تفقد هذه الأكاديمية المعتمدة: ') + title;
+
+    if (navigator.share) {
+      navigator.share({ title: title, text: text, url: url })
+        .catch(function (err) {
+          if (err && err.name !== 'AbortError') copyToClipboard(url);
+        });
+    } else {
+      copyToClipboard(url);
+    }
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(function () {
+          showToast(getLabel('common.link_copied', 'تم نسخ الرابط'), 'success');
+        })
+        .catch(function () { fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast(getLabel('common.link_copied', 'تم نسخ الرابط'), 'success');
+    } catch (e) {
+      showToast(getLabel('common.copy_failed', 'تعذر النسخ'), 'error');
+    }
+  }
+
+  /* ============================================================
+     18. LOCAL EVENT BINDING
+     ============================================================ */
+
+  function bindLocalEvents() {
+    var shareBtn = $('academyShareBtn');
+    if (shareBtn) shareBtn.addEventListener('click', shareAcademy);
+
+    var addReviewBtn = $('addReviewBtn');
+    if (addReviewBtn) addReviewBtn.addEventListener('click', openReviewModal);
+  }
+
+  /* ============================================================
+     19. RELOAD
+     ============================================================ */
+
+  function reloadData() {
+    var id = state.academyId;
+    if (!id) return Promise.resolve();
+
+    return fetchAcademy(id)
       .then(function (academy) {
-        // ✅ التحقق من وجود الأكاديمية
         if (!academy) {
-          throw new Error('الأكاديمية غير موجودة أو تم حذفها');
+          showNotFound();
+          return;
         }
-
-        // ✅ التحقق من حالة الاعتماد
-        if (academy.status !== 'approved') {
-          throw new Error('هذه الأكاديمية ليست معتمدة حالياً');
-        }
-
         state.academy = academy;
 
         return Promise.all([
-          loadCategory(academy.category_id),
-          loadBranches(state.academyId),
-          loadCourses(state.academyId),
-          countCertificates(state.academyId)
+          fetchCategory(academy.category_id),
+          fetchGovernorate(academy.governorate_id),
+          fetchBranches(id),
+          fetchCourses(id),
+          fetchRatings(id),
+          fetchMyRating(id, state.currentUser ? state.currentUser.id : null)
         ]).then(function (results) {
           state.category = results[0];
-          state.branches = results[1] || [];
-          state.courses = results[2] || [];
-          state.certificatesCount = results[3] || 0;
-
-          if (loader) loader.classList.remove('show');
-
-          renderHero();
-          renderInfoGrid();
-          renderBranches();
-          renderCourses();
-          updateSEO(academy);
-
-          logSearch(academy.name);
-
-          state.loading = false;
+          state.governorate = results[1];
+          state.branches = results[2] || [];
+          state.courses = results[3] || [];
+          state.ratings = results[4] || [];
+          state.myRating = results[5] || null;
+          render();
         });
       })
       .catch(function (err) {
-        showError(err.message || 'حدث خطأ في تحميل البيانات');
-        logDebug('Load error:', err.message);
-        state.loading = false;
+        showError(err.message);
       });
   }
 
+  /* ============================================================
+     20. REALTIME
+     ============================================================ */
+
+  function setupRealtime() {
+    if (!window.Realtime || typeof window.Realtime.subscribe !== 'function') return;
+    if (!state.academyId) return;
+
+    try {
+      var u1 = window.Realtime.subscribe('academies', function () {
+        reloadData();
+      }, {
+        filter: 'id=eq.' + state.academyId,
+        debounce: 800
+      });
+
+      var u2 = window.Realtime.subscribe('academy_ratings', function () {
+        reloadData();
+      }, {
+        filter: 'academy_id=eq.' + state.academyId,
+        debounce: 800
+      });
+
+      state.realtimeUnsubs = [u1, u2];
+    } catch (e) {
+      log('error', 'Realtime setup failed', e);
+    }
+  }
+
+  function cleanup() {
+    state.realtimeUnsubs.forEach(function (u) {
+      try { u(); } catch (e) {}
+    });
+    state.realtimeUnsubs = [];
+  }
+
+  /* ============================================================
+     21. INIT
+     ============================================================ */
+
   function init() {
-    if (state.initialized) return;
-    state.initialized = true;
+    if (state._initialized) return;
+    state._initialized = true;
+
+    log('debug', 'Academy details initializing');
 
     state.academyId = readAcademyId();
 
     if (!state.academyId) {
-      showError('لم يتم تحديد الأكاديمية. تأكد من الرابط.');
+      showNotFound();
+      log('debug', 'No academy id in URL');
       return;
     }
 
-    var shareBtn = $('shareBtn');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', shareAcademy);
+    showLoading();
+
+    loadCurrentUser()
+      .then(function () {
+        return reloadData();
+      })
+      .then(function () {
+        setupRealtime();
+      })
+      .catch(function (err) {
+        showError(err.message);
+      });
+
+    // Retry button
+    var retryBtn = $('retryBtn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', function () {
+        showLoading();
+        reloadData().then(setupRealtime);
+      });
     }
 
-    waitForSupabase(function () {
-      loadAll();
-    });
-
-    logDebug('Academy details page initialized. ID:', state.academyId);
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('beforeunload', cleanup);
+    }
   }
 
-  function waitForSupabase(cb) {
-    if (window.sb) { cb(); return; }
-    var w = 0;
-    var i = setInterval(function () {
-      w += 100;
-      if (window.sb || w >= 3000) {
-        clearInterval(i);
-        if (window.sb) cb();
-        else showError('تعذر الاتصال بالخادم');
-      }
-    }, 100);
-  }
+  /* ============================================================
+     22. EXPORT
+     ============================================================ */
 
   window.AcademyDetailsPage = {
-    initialized: true,
+    _initialized: true,
     init: init,
-    share: shareAcademy,
-    refresh: function () {
-      state.initialized = false;
-      init();
-    },
-    getState: function () { return state; }
+    refresh: reloadData,
+    getState: function () {
+      return {
+        academyId: state.academyId,
+        loading: state.loading,
+        error: state.error,
+        notFound: state.notFound,
+        academy: state.academy ? state.academy.name : null,
+        branches: state.branches.length,
+        courses: state.courses.length,
+        ratings: state.ratings.length,
+        myRating: !!state.myRating
+      };
+    }
   };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+
+  var cfg = window.ITWS_CONFIG || {};
+  if (cfg.DEBUG) {
+    try {
+      console.log('%c[AcademyDetailsPage]', 'color: #F59E0B; font-weight: bold;', 'Module ready');
+    } catch (e) {}
   }
 
 })();
