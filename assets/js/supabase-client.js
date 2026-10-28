@@ -1,10 +1,10 @@
 /* ============================================================
    ITWS Platform — Supabase Client V3 (Silent + ES5-safe)
    File: assets/js/supabase-client.js
-   
-   ⚠️ NO optional chaining (?.), NO arrow functions, NO template literals
-   ⚠️ Silent mode — no console.error if config missing
-   ⚠️ Falls back gracefully — page keeps working with defaults
+
+   ⚠️ NO console.error / NO console.warn
+   ⚠️ Silent mode — no errors even if config missing
+   ⚠️ ES5-safe (no ?., no ??, no =>, no template literals)
    ============================================================ */
 
 (function () {
@@ -13,19 +13,20 @@
   if (window.ITWS_SUPABASE_READY) return;
 
   /* ============================================================
-     1. SILENT FAIL
+     1. SILENT FAIL (no console output)
      ============================================================ */
 
   function fail(msg) {
-    // Silent — just set state, don't log
     window.ITWS_SUPABASE_ERROR = msg;
     try {
-      window.dispatchEvent(new CustomEvent('itws:supabase-error', { detail: { error: msg } }));
+      window.dispatchEvent(new CustomEvent('itws:supabase-error', {
+        detail: { error: msg }
+      }));
     } catch (e) {}
   }
 
   /* ============================================================
-     2. DEPENDENCY CHECKS (SILENT)
+     2. DEPENDENCY CHECKS
      ============================================================ */
 
   if (typeof window.supabase === 'undefined') {
@@ -34,7 +35,7 @@
   }
 
   if (typeof window.supabase.createClient !== 'function') {
-    fail('Supabase SDK is not v2');
+    fail('Supabase SDK v1 detected — v2 required');
     return;
   }
 
@@ -45,13 +46,13 @@
 
   var cfg = window.ITWS_CONFIG;
 
-  if (!cfg.SUPABASE_URL || cfg.SUPABASE_URL.indexOf('YOUR_PROJECT_REF') !== -1) {
-    fail('SUPABASE_URL not configured');
+  if (!cfg.SUPABASE_URL) {
+    fail('SUPABASE_URL missing');
     return;
   }
 
-  if (!cfg.SUPABASE_ANON_KEY || cfg.SUPABASE_ANON_KEY.indexOf('YOUR_ANON_KEY') !== -1) {
-    fail('SUPABASE_ANON_KEY not configured');
+  if (!cfg.SUPABASE_ANON_KEY) {
+    fail('SUPABASE_ANON_KEY missing');
     return;
   }
 
@@ -74,9 +75,17 @@
           flowType: 'pkce',
           storage: window.localStorage
         },
-        realtime: { params: { eventsPerSecond: 10 } },
-        global: { headers: { 'x-application-name': 'itws-platform-v2' } },
-        db: { schema: 'public' }
+        realtime: {
+          params: { eventsPerSecond: 10 }
+        },
+        global: {
+          headers: {
+            'x-application-name': 'itws-platform-v2'
+          }
+        },
+        db: {
+          schema: 'public'
+        }
       }
     );
   } catch (err) {
@@ -132,14 +141,17 @@
   window.sbHealthCheck = function () {
     return client.auth.getSession()
       .then(function (res) {
-        connState.lastCheck = Date.now();
         connState.isOnline = true;
+        connState.lastCheck = Date.now();
         connState.lastError = null;
-        return { ok: true, session: res && res.data ? res.data.session : null };
+        return {
+          ok: true,
+          session: res && res.data ? res.data.session : null
+        };
       })
       .catch(function (err) {
-        connState.lastCheck = Date.now();
         connState.isOnline = false;
+        connState.lastCheck = Date.now();
         connState.lastError = err && err.message ? err.message : String(err);
         return { ok: false, error: connState.lastError };
       });
@@ -195,14 +207,15 @@
       .then(function () {
         try {
           var keys = [];
-          for (var i = 0; i < localStorage.length; i++) {
+          var i;
+          for (i = 0; i < localStorage.length; i++) {
             var k = localStorage.key(i);
             if (k && (k.indexOf('itws_') === 0 || k.indexOf('supabase') === 0 || k.indexOf('sb-') === 0)) {
               keys.push(k);
             }
           }
-          for (var j = 0; j < keys.length; j++) {
-            try { localStorage.removeItem(keys[j]); } catch (e) {}
+          for (i = 0; i < keys.length; i++) {
+            try { localStorage.removeItem(keys[i]); } catch (e) {}
           }
         } catch (e) {}
         return true;
@@ -221,16 +234,23 @@
         session: session || null,
         user: (session && session.user) ? session.user : null
       };
+
       try {
         window.dispatchEvent(new CustomEvent('itws:auth-changed', { detail: payload }));
       } catch (e) {}
 
       if (event === 'SIGNED_IN') {
-        try { window.dispatchEvent(new CustomEvent('itws:signed-in', { detail: payload })); } catch (e) {}
+        try {
+          window.dispatchEvent(new CustomEvent('itws:signed-in', { detail: payload }));
+        } catch (e) {}
       } else if (event === 'SIGNED_OUT') {
-        try { window.dispatchEvent(new CustomEvent('itws:signed-out', { detail: payload })); } catch (e) {}
+        try {
+          window.dispatchEvent(new CustomEvent('itws:signed-out', { detail: payload }));
+        } catch (e) {}
       } else if (event === 'TOKEN_REFRESHED') {
-        try { window.dispatchEvent(new CustomEvent('itws:token-refreshed', { detail: payload })); } catch (e) {}
+        try {
+          window.dispatchEvent(new CustomEvent('itws:token-refreshed', { detail: payload }));
+        } catch (e) {}
       }
     });
   } catch (e) {}
@@ -241,14 +261,18 @@
 
   window.sbFetchOne = function (table, filters) {
     if (!table) return Promise.reject(new Error('table required'));
+
     var query = client.from(table).select('*');
+
     if (filters && typeof filters === 'object') {
-      for (var k in filters) {
+      var k;
+      for (k in filters) {
         if (filters.hasOwnProperty(k)) {
           query = query.eq(k, filters[k]);
         }
       }
     }
+
     return query.maybeSingle().then(function (res) {
       if (res.error) throw new Error(res.error.message);
       return res.data;
@@ -257,16 +281,21 @@
 
   window.sbFetchMany = function (table, options) {
     if (!table) return Promise.reject(new Error('table required'));
+
     options = options || {};
     var select = options.select || '*';
     var query = client.from(table).select(select);
 
     if (options.filters && typeof options.filters === 'object') {
-      for (var k in options.filters) {
+      var k;
+      for (k in options.filters) {
         if (options.filters.hasOwnProperty(k)) {
           var val = options.filters[k];
-          if (val === null) query = query.is(k, null);
-          else query = query.eq(k, val);
+          if (val === null) {
+            query = query.is(k, null);
+          } else {
+            query = query.eq(k, val);
+          }
         }
       }
     }
@@ -277,7 +306,10 @@
       });
     }
 
-    if (options.limit) query = query.limit(options.limit);
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+
     if (options.range && options.range.length === 2) {
       query = query.range(options.range[0], options.range[1]);
     }
@@ -293,7 +325,10 @@
      ============================================================ */
 
   window.sbUploadFile = function (bucket, path, file, options) {
-    if (!bucket || !path || !file) return Promise.reject(new Error('bucket, path, file required'));
+    if (!bucket || !path || !file) {
+      return Promise.reject(new Error('bucket, path, file required'));
+    }
+
     options = options || {};
 
     return client.storage.from(bucket).upload(path, file, {
@@ -305,13 +340,16 @@
       var urlRes = client.storage.from(bucket).getPublicUrl(path);
       return {
         path: path,
-        publicUrl: (urlRes && urlRes.data) ? urlRes.data.publicUrl : null
+        publicUrl: (urlRes && urlRes.data) ? urlRes.data.publicUrl : null,
+        fullPath: res.data ? res.data.path : path
       };
     });
   };
 
   window.sbDeleteFile = function (bucket, paths) {
-    if (!bucket || !paths) return Promise.reject(new Error('bucket and paths required'));
+    if (!bucket || !paths) {
+      return Promise.reject(new Error('bucket and paths required'));
+    }
     var arr = Array.isArray(paths) ? paths : [paths];
     return client.storage.from(bucket).remove(arr).then(function (res) {
       if (res.error) throw new Error(res.error.message);
@@ -320,23 +358,33 @@
   };
 
   /* ============================================================
-     10. MARK READY
+     10. REALTIME HELPERS
+     ============================================================ */
+
+  window.sbChannel = function (name) {
+    return client.channel(name);
+  };
+
+  /* ============================================================
+     11. MARK READY
      ============================================================ */
 
   window.ITWS_SUPABASE_READY = true;
   window.ITWS_SUPABASE_ERROR = null;
 
   try {
-    window.dispatchEvent(new CustomEvent('itws:sb-ready', { detail: { client: client } }));
+    window.dispatchEvent(new CustomEvent('itws:sb-ready', {
+      detail: { client: client }
+    }));
   } catch (e) {}
 
   /* ============================================================
-     11. DEBUG LOG (only if DEBUG enabled)
+     12. DEBUG (only if enabled)
      ============================================================ */
 
   if (cfg.DEBUG) {
     try {
-      console.log('%c[ITWS Supabase]', 'color: #10B981; font-weight: bold;', 'Ready');
+      console.log('%c[ITWS Supabase]', 'color: #10B981; font-weight: bold;', 'Client ready');
     } catch (e) {}
   }
 
