@@ -2,258 +2,264 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  
   <title>الرئيسية</title>
   <meta name="description" content="المنصة الرسمية لنقابة تكنولوجيا المعلومات والبرمجيات — التحقق من الشهادات، دليل الأكاديميات المعتمدة، وصفحة المتدرب">
   <meta name="theme-color" content="#0A0E14">
+  <meta name="color-scheme" content="dark light">
+  
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo.svg">
-
+  
   <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
-
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
+  
+  <!-- ═══ Core Scripts (Head — before CSS) ═══ -->
   <script src="assets/js/settings-defaults.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
-
-  <script>
-    (function () {
-      function syncThemeColor() {
-        try {
-          var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-          if (bg) {
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', bg);
-          }
-        } catch (e) {}
-      }
-      document.addEventListener('DOMContentLoaded', syncThemeColor);
-      window.addEventListener('load', syncThemeColor);
-      try {
-        new MutationObserver(syncThemeColor).observe(document.documentElement, {
-          attributes: true, attributeFilter: ['data-theme', 'class', 'style']
-        });
-      } catch (e) {}
-    })();
-  </script>
-
   <script src="assets/js/app-settings.js"></script>
-
+  <script src="assets/js/labels.js"></script>
+  
+  <!-- ═══ Core CSS ═══ -->
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/loader.css">
   <link rel="stylesheet" href="assets/css/layout.css">
-
+  <link rel="stylesheet" href="assets/css/pages.css">
+  
+  <!-- ═══ Home-Specific CSS ═══ -->
   <style>
-    /* ============================================
-       HOME PAGE — All content driven from settings
-       ============================================ */
-
-    .home-page { overflow-x: hidden; }
-
-    /* ============ HERO ============ */
+    /* ============================================================
+       HOME PAGE
+       ============================================================ */
+    
+    body {
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+    }
+    
+    .home-page {
+      overflow-x: hidden;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    
+    /* ============ HERO (overrides .page-hero padding) ============ */
+    
     .home-hero {
-      padding: 72px 20px 64px;
-      text-align: center;
-      background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
+      padding: clamp(56px, 8vw, 88px) clamp(16px, 3vw, 24px) clamp(48px, 7vw, 72px);
     }
-    .home-hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 60% 55% at 50% 25%, var(--primary-soft) 0%, transparent 60%);
-      pointer-events: none;
-    }
+    
     .home-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 880px;
-      margin: 0 auto;
+      max-width: 900px;
     }
-    .home-hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 18px;
-      background: var(--primary-soft);
-      border: 1px solid var(--primary);
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 20px;
-      letter-spacing: 0.3px;
-    }
-    .home-hero-badge[hidden] { display: none; }
-    .home-hero-title {
-      font-size: clamp(30px, 5vw, 48px);
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.25;
-      margin: 0 0 16px;
-      letter-spacing: 0;
-    }
-    .home-hero-subtitle {
-      font-size: clamp(15px, 2.2vw, 18px);
-      color: var(--text-secondary);
-      line-height: 1.75;
-      max-width: 640px;
-      margin: 0 auto 36px;
-    }
-
-    /* ============ SEARCH ============ */
+    
+    /* ============ SEARCH CARD ============ */
+    
     .home-search {
+      margin-top: clamp(24px, 4vw, 36px);
+      max-width: 720px;
+      margin-inline: auto;
       background: var(--surface-elevated);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px;
-      max-width: 680px;
-      margin: 0 auto;
+      border-radius: var(--radius-3xl, 20px);
+      padding: clamp(16px, 2.5vw, 22px);
       box-shadow: var(--shadow-lg);
     }
-    .home-search[hidden] { display: none; }
-
+    
     .home-search-tabs {
       display: flex;
       gap: 4px;
       background: var(--bg);
-      border-radius: 12px;
+      border-radius: var(--radius-xl, 12px);
       padding: 4px;
       margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    
+    .home-search-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    
     .home-search-tab {
       flex: 1;
+      min-width: 90px;
       padding: 10px 16px;
       background: transparent;
       border: none;
-      border-radius: 9px;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
+      border-radius: var(--radius-md, 8px);
       color: var(--text-muted);
+      font-family: inherit;
+      font-size: var(--fs-sm, 13px);
+      font-weight: var(--fw-semibold, 600);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      min-height: 40px;
     }
-    .home-search-tab:hover { color: var(--text); }
+    
+    .home-search-tab:hover {
+      color: var(--text);
+    }
+    
     .home-search-tab.is-active {
       background: var(--surface-elevated);
       color: var(--primary);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: var(--shadow-sm);
     }
-
+    
+    .home-search-tab:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
+    
     .home-search-form {
       display: flex;
       gap: 10px;
+      margin-bottom: 12px;
     }
+    
     .home-search-input {
       flex: 1;
+      min-width: 0;
       padding: 14px 18px;
       background: var(--bg);
       border: 2px solid var(--border);
-      border-radius: 12px;
+      border-radius: var(--radius-xl, 12px);
       color: var(--text);
       font-family: inherit;
-      font-size: 15px;
-      font-weight: 500;
-      transition: all 0.2s;
-      min-width: 0;
-    }
-    .home-search-input:focus {
+      font-size: var(--fs-md, 15px);
+      font-weight: var(--fw-medium, 500);
+      transition: all 0.15s ease;
       outline: none;
+      min-height: 52px;
+    }
+    
+    .home-search-input:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 4px var(--primary-soft);
     }
+    
+    .home-search-input::placeholder {
+      color: var(--text-muted);
+      font-weight: var(--fw-regular, 400);
+    }
+    
     .home-search-input[dir="ltr"] {
       text-align: left;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
     }
-    .home-search-input::placeholder {
-      color: var(--text-muted);
-      font-weight: 400;
-      letter-spacing: 0;
-    }
+    
     .home-search-btn {
-      padding: 14px 28px;
-      background: var(--primary);
-      color: var(--primary-text);
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      padding: 14px 28px;
+      background: var(--primary);
+      color: var(--primary-text);
+      border: none;
+      border-radius: var(--radius-xl, 12px);
+      font-family: inherit;
+      font-size: var(--fs-md, 15px);
+      font-weight: var(--fw-bold, 700);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      min-height: 52px;
     }
+    
     .home-search-btn:hover:not(:disabled) {
       background: var(--primary-hover);
       transform: translateY(-1px);
       box-shadow: 0 8px 24px var(--primary-soft);
     }
-    .home-search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    .home-search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .home-search-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    
     .home-search-hint {
-      font-size: 12px;
+      font-size: var(--fs-sm, 12px);
       color: var(--text-muted);
       text-align: center;
-      margin-top: 10px;
       line-height: 1.6;
       min-height: 18px;
     }
-
-    /* ============ SECTION COMMON ============ */
+    
+    /* ============ SECTIONS ============ */
+    
     .home-section {
-      padding: 64px 20px;
+      padding: clamp(48px, 7vw, 72px) clamp(16px, 3vw, 24px);
     }
-    .home-section[hidden] { display: none; }
-    .home-section--alt { background: var(--bg-alt, var(--surface)); }
+    
+    .home-section[hidden] {
+      display: none;
+    }
+    
+    .home-section--alt {
+      background: var(--bg-alt, var(--surface));
+    }
+    
     .home-section-inner {
       max-width: 1100px;
-      margin: 0 auto;
+      margin-inline: auto;
     }
+    
     .home-section-head {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: clamp(24px, 4vw, 40px);
+      max-width: 720px;
+      margin-inline: auto;
     }
+    
     .home-section-title {
-      font-size: clamp(24px, 3.5vw, 32px);
-      font-weight: 800;
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: var(--fw-extrabold, 800);
       color: var(--text);
       margin: 0 0 12px;
-      line-height: 1.35;
+      line-height: 1.3;
     }
+    
     .home-section-subtitle {
-      font-size: 15px;
+      font-size: var(--fs-md, 15px);
       color: var(--text-secondary);
       line-height: 1.7;
-      max-width: 640px;
-      margin: 0 auto;
+      margin: 0;
     }
-
+    
     /* ============ CUSTOM SECTION ============ */
+    
     .home-custom-content {
-      font-size: 15px;
+      font-size: var(--fs-md, 15px);
       color: var(--text-secondary);
       line-height: 1.8;
       margin-top: 24px;
       white-space: pre-wrap;
       word-wrap: break-word;
     }
-    .home-custom-content:empty { display: none; }
-    .home-custom-content p { margin: 0 0 12px; }
+    
+    .home-custom-content:empty {
+      display: none;
+    }
+    
     .home-custom-btn {
       display: inline-flex;
       align-items: center;
@@ -261,67 +267,83 @@
       padding: 14px 32px;
       background: var(--primary);
       color: var(--primary-text);
-      border-radius: 12px;
+      border-radius: var(--radius-xl, 12px);
       text-decoration: none;
-      font-weight: 700;
-      font-size: 15px;
+      font-weight: var(--fw-bold, 700);
+      font-size: var(--fs-md, 15px);
       margin-top: 24px;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
+      min-height: 48px;
     }
+    
     .home-custom-btn:hover {
       background: var(--primary-hover);
       transform: translateY(-2px);
       box-shadow: 0 10px 30px var(--primary-soft);
       color: var(--primary-text);
     }
-    .home-custom-btn[hidden] { display: none; }
-
+    
+    .home-custom-btn[hidden] {
+      display: none;
+    }
+    
     /* ============ ABOUT FEATURES ============ */
+    
     .home-about-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+      gap: clamp(16px, 2.5vw, 20px);
       margin-top: 32px;
     }
+    
     .home-about-card {
-      padding: 28px 24px;
+      padding: clamp(20px, 3vw, 28px);
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      transition: all 0.2s;
+      border-radius: var(--radius-2xl, 16px);
+      transition: all 0.2s ease;
     }
+    
     .home-about-card:hover {
       border-color: var(--primary);
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
     }
+    
     .home-about-icon {
       width: 48px;
       height: 48px;
-      border-radius: 12px;
+      border-radius: var(--radius-xl, 12px);
       background: var(--primary-soft);
       color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
-    .home-about-icon svg { width: 24px; height: 24px; }
+    
+    .home-about-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    
     .home-about-title {
-      font-size: 17px;
-      font-weight: 700;
+      font-size: var(--fs-lg, 17px);
+      font-weight: var(--fw-bold, 700);
       color: var(--text);
       margin: 0 0 8px;
       line-height: 1.4;
     }
+    
     .home-about-desc {
-      font-size: 13px;
+      font-size: var(--fs-sm, 13px);
       color: var(--text-secondary);
       line-height: 1.7;
       margin: 0;
     }
-
-    /* ============ ACADEMIES ============ */
+    
+    /* ============ RECENT ACADEMIES ============ */
+    
     .home-academies-head {
       display: flex;
       align-items: center;
@@ -330,6 +352,7 @@
       margin-bottom: 32px;
       flex-wrap: wrap;
     }
+    
     .home-see-all {
       display: inline-flex;
       align-items: center;
@@ -337,25 +360,32 @@
       padding: 10px 20px;
       background: transparent;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: var(--radius-lg, 10px);
       color: var(--text-secondary);
-      font-size: 13px;
-      font-weight: 600;
+      font-size: var(--fs-sm, 13px);
+      font-weight: var(--fw-semibold, 600);
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
+      min-height: 44px;
     }
+    
     .home-see-all:hover {
       border-color: var(--primary);
       color: var(--primary);
       background: var(--primary-soft);
     }
-    .home-see-all svg { width: 14px; height: 14px; }
-
+    
+    .home-see-all svg {
+      width: 14px;
+      height: 14px;
+    }
+    
     .home-academies-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: clamp(16px, 2.5vw, 20px);
     }
+    
     .academy-card {
       display: flex;
       flex-direction: column;
@@ -363,31 +393,33 @@
       padding: 24px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: var(--radius-2xl, 16px);
       text-decoration: none;
       color: inherit;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
     }
+    
     .academy-card:hover {
       border-color: var(--primary);
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
-      color: inherit;
     }
+    
     .academy-card-logo {
       width: 56px;
       height: 56px;
-      border-radius: 14px;
+      border-radius: var(--radius-xl, 14px);
       background: linear-gradient(135deg, var(--primary), var(--primary-hover));
       color: var(--primary-text);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
+      font-weight: var(--fw-extrabold, 800);
       font-size: 22px;
       overflow: hidden;
       flex-shrink: 0;
     }
+    
     .academy-card-logo img {
       width: 100%;
       height: 100%;
@@ -395,17 +427,23 @@
       padding: 6px;
       background: var(--bg);
     }
-    .academy-card-body { flex: 1; min-width: 0; }
+    
+    .academy-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+    
     .academy-card-title {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: var(--fs-md, 16px);
+      font-weight: var(--fw-bold, 700);
       color: var(--text);
       margin: 0 0 8px;
       line-height: 1.4;
       word-break: break-word;
     }
+    
     .academy-card-desc {
-      font-size: 13px;
+      font-size: var(--fs-sm, 13px);
       color: var(--text-muted);
       line-height: 1.6;
       margin: 0;
@@ -414,16 +452,16 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .home-academies-empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
+    
+    .home-academies-empty,
     .home-academies-loading {
       text-align: center;
       padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: var(--fs-base, 14px);
+      grid-column: 1 / -1;
     }
+    
     .home-academies-spinner {
       width: 32px;
       height: 32px;
@@ -433,44 +471,59 @@
       animation: homeSpin 0.8s linear infinite;
       margin: 0 auto;
     }
-    @keyframes homeSpin { to { transform: rotate(360deg); } }
-
+    
+    @keyframes homeSpin {
+      to { transform: rotate(360deg); }
+    }
+    
     /* ============ CTA ============ */
+    
     .home-cta {
-      padding: 72px 20px;
+      padding: clamp(56px, 8vw, 88px) clamp(16px, 3vw, 24px);
       background: linear-gradient(135deg, var(--surface), var(--surface-elevated));
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       text-align: center;
       position: relative;
       overflow: hidden;
+      isolation: isolate;
     }
+    
     .home-cta::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--primary-soft) 0%, transparent 60%);
+      background: radial-gradient(
+        ellipse 50% 50% at 50% 50%,
+        var(--primary-soft) 0%,
+        transparent 60%
+      );
       pointer-events: none;
+      z-index: -1;
     }
+    
     .home-cta-inner {
       position: relative;
-      z-index: 1;
       max-width: 640px;
-      margin: 0 auto;
+      margin-inline: auto;
+      z-index: 1;
     }
+    
     .home-cta-title {
-      font-size: clamp(24px, 4vw, 32px);
-      font-weight: 800;
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: var(--fw-extrabold, 800);
       color: var(--text);
       margin: 0 0 12px;
       line-height: 1.3;
     }
+    
     .home-cta-subtitle {
-      font-size: 15px;
+      font-size: var(--fs-md, 15px);
       color: var(--text-secondary);
       line-height: 1.7;
       margin: 0 0 28px;
     }
+    
     .home-cta-btn {
       display: inline-flex;
       align-items: center;
@@ -478,57 +531,76 @@
       padding: 16px 40px;
       background: var(--primary);
       color: var(--primary-text);
-      border-radius: 14px;
+      border-radius: var(--radius-xl, 14px);
       text-decoration: none;
-      font-weight: 700;
-      font-size: 16px;
-      transition: all 0.2s;
+      font-weight: var(--fw-bold, 700);
+      font-size: var(--fs-md, 16px);
+      transition: all 0.2s ease;
+      min-height: 56px;
     }
+    
     .home-cta-btn:hover {
       background: var(--primary-hover);
       transform: translateY(-2px);
       box-shadow: 0 12px 32px var(--primary-soft);
       color: var(--primary-text);
     }
-    .home-cta-btn svg { width: 18px; height: 18px; }
-
+    
+    .home-cta-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    
     /* ============ FOOTER ============ */
+    
     .home-footer {
       background: var(--bg-alt, var(--surface));
       border-top: 1px solid var(--border);
-      padding: 56px 20px 24px;
+      padding: clamp(40px, 6vw, 56px) clamp(16px, 3vw, 24px) 24px;
+      padding-bottom: max(24px, env(safe-area-inset-bottom, 0px) + 24px);
     }
+    
     .home-footer-inner {
       max-width: 1100px;
-      margin: 0 auto;
+      margin-inline: auto;
     }
+    
     .home-footer-top {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 40px;
+      grid-template-columns: 1fr;
+      gap: 32px;
       padding-bottom: 32px;
       border-bottom: 1px solid var(--border);
       margin-bottom: 24px;
     }
+    
+    @media (min-width: 768px) {
+      .home-footer-top {
+        grid-template-columns: 1.2fr 1fr;
+      }
+    }
+    
     .home-footer-brand {
       display: flex;
       align-items: flex-start;
       gap: 16px;
     }
+    
     .home-footer-logo {
       width: 56px;
       height: 56px;
-      border-radius: 12px;
+      border-radius: var(--radius-xl, 12px);
       background: linear-gradient(135deg, var(--primary), var(--primary-hover));
       color: var(--primary-text);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
+      font-weight: var(--fw-extrabold, 800);
       font-size: 20px;
       flex-shrink: 0;
       overflow: hidden;
     }
+    
     .home-footer-logo img {
       width: 100%;
       height: 100%;
@@ -536,42 +608,54 @@
       padding: 6px;
       background: var(--bg);
     }
+    
     .home-footer-union {
-      font-size: 15px;
-      font-weight: 700;
+      font-size: var(--fs-md, 15px);
+      font-weight: var(--fw-bold, 700);
       color: var(--text);
       margin-bottom: 4px;
       line-height: 1.4;
     }
+    
     .home-footer-committee {
-      font-size: 12px;
+      font-size: var(--fs-sm, 12px);
       color: var(--text-muted);
       line-height: 1.6;
     }
+    
     .home-footer-contact {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+    
     .home-footer-contact-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      font-size: var(--fs-sm, 13px);
       color: var(--text-secondary);
       text-decoration: none;
-      transition: color 0.2s;
+      transition: color 0.15s ease;
       word-break: break-word;
+      min-height: 32px;
     }
-    .home-footer-contact-item:hover { color: var(--primary); }
+    
+    .home-footer-contact-item:hover {
+      color: var(--primary);
+    }
+    
     .home-footer-contact-item svg {
       width: 16px;
       height: 16px;
       color: var(--primary);
       flex-shrink: 0;
     }
-    .home-footer-contact-item[hidden] { display: none; }
-
+    
+    .home-footer-contact-item[hidden] {
+      display: none;
+    }
+    
     .home-footer-social {
       display: flex;
       justify-content: center;
@@ -579,33 +663,49 @@
       padding: 20px 0;
       flex-wrap: wrap;
     }
-    .home-footer-social[hidden] { display: none; }
+    
+    .home-footer-social[hidden] {
+      display: none;
+    }
+    
     .home-footer-social a {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-lg, 10px);
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text-muted);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
     }
+    
     .home-footer-social a:hover {
       border-color: var(--primary);
       color: var(--primary);
       background: var(--primary-soft);
       transform: translateY(-2px);
     }
-    .home-footer-social a svg { width: 16px; height: 16px; }
-    .home-footer-social a[hidden] { display: none; }
-
+    
+    .home-footer-social a svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .home-footer-social a[hidden] {
+      display: none;
+    }
+    
     .home-footer-link-wrap {
       text-align: center;
       padding: 16px 0;
     }
-    .home-footer-link-wrap[hidden] { display: none; }
+    
+    .home-footer-link-wrap[hidden] {
+      display: none;
+    }
+    
     .home-footer-link {
       display: inline-flex;
       align-items: center;
@@ -613,18 +713,19 @@
       padding: 10px 24px;
       background: var(--primary-soft);
       border: 1px solid var(--primary);
-      border-radius: 10px;
+      border-radius: var(--radius-lg, 10px);
       color: var(--primary);
-      font-size: 13px;
-      font-weight: 600;
+      font-size: var(--fs-sm, 13px);
+      font-weight: var(--fw-semibold, 600);
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
     }
+    
     .home-footer-link:hover {
       background: var(--primary);
       color: var(--primary-text);
     }
-
+    
     .home-footer-bottom {
       display: flex;
       align-items: center;
@@ -632,21 +733,33 @@
       gap: 16px;
       padding-top: 24px;
       border-top: 1px solid var(--border);
-      font-size: 12px;
+      font-size: var(--fs-sm, 12px);
       color: var(--text-muted);
       flex-wrap: wrap;
     }
-    .home-footer-bottom span[hidden] { display: none; }
-    .home-footer-president { color: var(--primary); font-weight: 600; }
-
+    
+    .home-footer-bottom span[hidden] {
+      display: none;
+    }
+    
+    .home-footer-president {
+      color: var(--primary);
+      font-weight: var(--fw-semibold, 600);
+    }
+    
     /* ============ THEME FAB ============ */
+    
     .theme-fab-wrap {
       position: fixed;
-      left: 20px;
-      bottom: 20px;
+      inset-inline-end: 20px;
+      bottom: max(20px, env(safe-area-inset-bottom, 0px) + 20px);
       z-index: 900;
     }
-    .theme-fab-wrap[hidden] { display: none; }
+    
+    .theme-fab-wrap[hidden] {
+      display: none;
+    }
+    
     .theme-fab {
       width: 52px;
       height: 52px;
@@ -658,31 +771,43 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 24px var(--primary-soft), 0 4px 12px rgba(0,0,0,0.2);
-      transition: all 0.2s;
+      box-shadow: 0 8px 24px var(--primary-soft), 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: all 0.15s ease;
     }
+    
     .theme-fab:hover {
       background: var(--primary-hover);
       transform: scale(1.05);
     }
-    .theme-fab svg { width: 22px; height: 22px; }
+    
+    .theme-fab svg {
+      width: 22px;
+      height: 22px;
+    }
+    
     .theme-panel {
       position: absolute;
-      left: 0;
+      inset-inline-end: 0;
       bottom: 64px;
       width: 260px;
+      max-width: calc(100vw - 40px);
       background: var(--surface-elevated);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      border-radius: var(--radius-2xl, 16px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       overflow: hidden;
       animation: homeSlideUp 0.2s ease;
     }
-    .theme-panel[hidden] { display: none; }
+    
+    .theme-panel[hidden] {
+      display: none;
+    }
+    
     @keyframes homeSlideUp {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    
     .theme-panel-header {
       display: flex;
       align-items: center;
@@ -690,27 +815,37 @@
       padding: 14px 16px;
       border-bottom: 1px solid var(--border);
     }
+    
     .theme-panel-title {
-      font-size: 13px;
-      font-weight: 700;
+      font-size: var(--fs-sm, 13px);
+      font-weight: var(--fw-bold, 700);
       color: var(--text);
     }
+    
     .theme-panel-close {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-md, 8px);
       background: transparent;
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 18px;
-      line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
     }
-    .theme-panel-close:hover { background: var(--bg); color: var(--text); }
+    
+    .theme-panel-close:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+    
+    .theme-panel-close svg {
+      width: 16px;
+      height: 16px;
+    }
+    
     .theme-panel-body {
       padding: 12px;
       display: flex;
@@ -719,6 +854,7 @@
       max-height: 320px;
       overflow-y: auto;
     }
+    
     .theme-option {
       display: flex;
       align-items: center;
@@ -726,25 +862,29 @@
       padding: 10px 12px;
       background: transparent;
       border: 1px solid transparent;
-      border-radius: 10px;
+      border-radius: var(--radius-lg, 10px);
       color: var(--text);
       font-family: inherit;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: var(--fs-sm, 13px);
+      font-weight: var(--fw-medium, 500);
       cursor: pointer;
-      text-align: right;
-      transition: all 0.2s;
+      text-align: start;
+      transition: all 0.15s ease;
       width: 100%;
+      min-height: 44px;
     }
+    
     .theme-option:hover {
       background: var(--bg);
       border-color: var(--border);
     }
+    
     .theme-option.is-active {
       background: var(--primary-soft);
       border-color: var(--primary);
       color: var(--primary);
     }
+    
     .theme-swatch {
       width: 24px;
       height: 24px;
@@ -752,90 +892,135 @@
       border: 2px solid var(--border);
       flex-shrink: 0;
     }
-    .theme-option-name { flex: 1; }
+    
+    .theme-option-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
     .theme-option-check {
       width: 14px;
       height: 14px;
       color: var(--primary);
       display: none;
+      flex-shrink: 0;
     }
-    .theme-option.is-active .theme-option-check { display: block; }
+    
+    .theme-option.is-active .theme-option-check {
+      display: block;
+    }
+    
     .theme-panel-footer {
       padding: 12px;
       border-top: 1px solid var(--border);
     }
+    
     .theme-reset-btn {
       width: 100%;
       padding: 10px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: var(--radius-lg, 10px);
       color: var(--text-secondary);
       font-family: inherit;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: var(--fs-sm, 12px);
+      font-weight: var(--fw-semibold, 600);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
+      min-height: 40px;
     }
+    
     .theme-reset-btn:hover {
       border-color: var(--primary);
       color: var(--primary);
       background: var(--primary-soft);
     }
-
+    
     /* ============ NOSCRIPT ============ */
+    
     .noscript-banner {
       padding: 16px 20px;
       background: var(--error-soft, #fef2f2);
       color: var(--error, #991b1b);
       border-bottom: 2px solid var(--error, #991b1b);
       text-align: center;
+      font-family: 'Cairo', sans-serif;
       font-size: 14px;
       font-weight: 600;
     }
-
+    
     /* ============ RESPONSIVE ============ */
-    @media (max-width: 768px) {
-      .home-hero { padding: 48px 16px 40px; }
-      .home-section { padding: 48px 16px; }
-      .home-cta { padding: 48px 16px; }
-      .home-footer { padding: 40px 16px 20px; }
-      .home-footer-top {
-        grid-template-columns: 1fr;
-        gap: 28px;
+    
+    @media (max-width: 640px) {
+      .home-search-form {
+        flex-direction: column;
       }
-      .home-search-form { flex-direction: column; }
-      .home-search-btn { width: 100%; }
-      .home-academies-head { flex-direction: column; align-items: stretch; }
-      .home-see-all { justify-content: center; }
+      
+      .home-search-btn {
+        width: 100%;
+      }
+      
+      .home-academies-head {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      
+      .home-see-all {
+        justify-content: center;
+      }
+      
+      .home-academies-grid {
+        grid-template-columns: 1fr;
+      }
+      
       .home-footer-bottom {
         flex-direction: column;
         text-align: center;
-        gap: 8px;
       }
     }
+    
     @media (max-width: 480px) {
-      .home-search-tabs { gap: 2px; padding: 3px; }
-      .home-search-tab { padding: 8px 10px; font-size: 12px; }
-      .home-academies-grid { grid-template-columns: 1fr; }
-      .home-about-grid { grid-template-columns: 1fr; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
+      .home-search-tabs {
+        gap: 2px;
+        padding: 3px;
+      }
+      
+      .home-search-tab {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+      
+      .home-about-grid {
+        grid-template-columns: 1fr;
       }
     }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .home-search-btn:hover,
+      .home-about-card:hover,
+      .academy-card:hover,
+      .home-cta-btn:hover,
+      .home-footer-social a:hover,
+      .theme-fab:hover {
+        transform: none !important;
+      }
+    }
+    
     @media print {
-      .home-hero, .home-cta, .home-footer,
-      .theme-fab-wrap, .home-search,
-      #headerContainer { display: none !important; }
-      .home-section { padding: 20px !important; page-break-inside: avoid; }
-      body { background: #fff !important; }
+      .home-hero,
+      .home-cta,
+      .home-footer,
+      .theme-fab-wrap,
+      .home-search {
+        display: none !important;
+      }
     }
   </style>
 </head>
-<body>
+<body data-page="home">
 
   <noscript>
     <div class="noscript-banner">
@@ -843,45 +1028,36 @@
     </div>
   </noscript>
 
-  <div class="theme-boot-loader" id="themeBootLoader">
-    <div class="loader-logo">نت</div>
-    <div class="loader-spinner"></div>
-  </div>
-
-  <div class="page-wrapper home-page">
+  <div class="home-page">
 
     <div id="headerContainer"></div>
 
-    <!-- ============ HERO ============ -->
-    <section class="home-hero">
-      <div class="home-hero-inner">
-        <div class="home-hero-badge" data-home="hero-badge" hidden></div>
-        <h1 class="home-hero-title" data-home="hero-title"></h1>
-        <p class="home-hero-subtitle" data-home="hero-subtitle"></p>
+    <!-- ═══ HERO ═══ -->
+    <section class="page-hero home-hero">
+      <div class="page-hero-inner home-hero-inner">
+        <div class="page-hero-badge" data-home="hero-badge" hidden></div>
+        <h1 class="page-hero-title" data-home="hero-title"></h1>
+        <p class="page-hero-subtitle" data-home="hero-subtitle"></p>
 
         <div class="home-search" data-home="search">
           <div class="home-search-tabs" role="tablist">
-            <button type="button" role="tab" class="home-search-tab is-active" data-search-tab="certificate" aria-selected="true">شهادة</button>
-            <button type="button" role="tab" class="home-search-tab" data-search-tab="trainee" aria-selected="false">متدرب</button>
-            <button type="button" role="tab" class="home-search-tab" data-search-tab="academy" aria-selected="false">أكاديمية</button>
+            <button type="button" role="tab" class="home-search-tab is-active"
+                    data-search-tab="certificate" aria-selected="true"
+                    data-label="home.search.tab_cert">شهادة</button>
+            <button type="button" role="tab" class="home-search-tab"
+                    data-search-tab="trainee" aria-selected="false"
+                    data-label="home.search.tab_trainee">متدرب</button>
+            <button type="button" role="tab" class="home-search-tab"
+                    data-search-tab="academy" aria-selected="false"
+                    data-label="home.search.tab_academy">أكاديمية</button>
           </div>
           <form class="home-search-form" id="homeSearchForm" novalidate>
-            <input
-              type="text"
-              class="home-search-input"
-              id="homeSearchInput"
-              autocomplete="off"
-              autocapitalize="characters"
-              autocorrect="off"
-              spellcheck="false"
-              dir="ltr"
-            >
+            <input type="text" class="home-search-input" id="homeSearchInput"
+                   autocomplete="off" autocapitalize="characters"
+                   autocorrect="off" spellcheck="false">
             <button type="submit" class="home-search-btn" id="homeSearchBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <span data-home="search-btn-text">بحث</span>
+              <span data-icon="search"></span>
+              <span data-home="search-btn-text" data-label="home.search.button">بحث</span>
             </button>
           </form>
           <div class="home-search-hint" data-home="search-hint"></div>
@@ -889,7 +1065,7 @@
       </div>
     </section>
 
-    <!-- ============ CUSTOM SECTION ============ -->
+    <!-- ═══ CUSTOM SECTION ═══ -->
     <section class="home-section" data-home="custom-section" hidden>
       <div class="home-section-inner">
         <div class="home-section-head">
@@ -897,13 +1073,13 @@
           <p class="home-section-subtitle" data-home="custom-subtitle"></p>
         </div>
         <div class="home-custom-content" data-home="custom-content"></div>
-        <div style="text-align:center;">
+        <div style="text-align: center;">
           <a href="#" class="home-custom-btn" data-home="custom-btn" hidden></a>
         </div>
       </div>
     </section>
 
-    <!-- ============ ABOUT SECTION ============ -->
+    <!-- ═══ ABOUT SECTION ═══ -->
     <section class="home-section home-section--alt" data-home="about-section" hidden>
       <div class="home-section-inner">
         <div class="home-section-head">
@@ -914,39 +1090,33 @@
       </div>
     </section>
 
-    <!-- ============ RECENT ACADEMIES ============ -->
+    <!-- ═══ RECENT ACADEMIES ═══ -->
     <section class="home-section" data-home="recent-academies" hidden>
       <div class="home-section-inner">
         <div class="home-academies-head">
-          <h2 class="home-section-title" style="margin:0;" data-home="academies-title">أحدث الأكاديميات المعتمدة</h2>
+          <h2 class="home-section-title" style="margin: 0;" data-home="academies-title">أحدث الأكاديميات المعتمدة</h2>
           <a href="academies.html" class="home-see-all">
-            <span>عرض الكل</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
+            <span data-label="home.academies.see_all">عرض الكل</span>
+            <span data-icon="arrow-left"></span>
           </a>
         </div>
         <div class="home-academies-grid" id="homeAcademiesGrid"></div>
       </div>
     </section>
 
-    <!-- ============ CTA ============ -->
+    <!-- ═══ CTA ═══ -->
     <section class="home-cta">
       <div class="home-cta-inner">
         <h2 class="home-cta-title" data-home="cta-title"></h2>
         <p class="home-cta-subtitle" data-home="cta-subtitle"></p>
         <a href="academy-apply.html" class="home-cta-btn" data-home="cta-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
+          <span data-icon="briefcase"></span>
           <span data-home="cta-btn-text"></span>
         </a>
       </div>
     </section>
 
-    <!-- ============ FOOTER ============ -->
+    <!-- ═══ FOOTER ═══ -->
     <footer class="home-footer">
       <div class="home-footer-inner">
         <div class="home-footer-top">
@@ -959,24 +1129,15 @@
           </div>
           <div class="home-footer-contact" data-home="footer-contact">
             <a class="home-footer-contact-item" data-home="footer-email" href="#" hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
+              <span data-icon="mail"></span>
               <span data-home="footer-email-text"></span>
             </a>
             <a class="home-footer-contact-item" data-home="footer-phone" href="#" hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-              </svg>
+              <span data-icon="phone"></span>
               <span data-home="footer-phone-text"></span>
             </a>
             <a class="home-footer-contact-item" data-home="footer-website" href="#" target="_blank" rel="noopener" hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-              </svg>
+              <span data-icon="globe"></span>
               <span data-home="footer-website-text"></span>
             </a>
           </div>
@@ -984,24 +1145,16 @@
 
         <div class="home-footer-social" data-home="footer-social" hidden>
           <a data-home="footer-facebook" href="#" target="_blank" rel="noopener" aria-label="فيسبوك" hidden>
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M22 12a10 10 0 1 0-11.56 9.87v-6.98H7.9V12h2.54V9.8c0-2.5 1.5-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.98A10 10 0 0 0 22 12z"/>
-            </svg>
+            <span data-icon="facebook"></span>
           </a>
           <a data-home="footer-twitter" href="#" target="_blank" rel="noopener" aria-label="تويتر" hidden>
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M18.9 2H22l-7.06 8.07L23.3 22h-6.51l-5.1-6.67L5.83 22H2.7l7.55-8.63L1 2h6.68l4.61 6.09L18.9 2zm-1.14 18.02h1.81L6.4 3.87H4.46l13.3 16.15z"/>
-            </svg>
+            <span data-icon="twitter"></span>
           </a>
           <a data-home="footer-linkedin" href="#" target="_blank" rel="noopener" aria-label="لينكدإن" hidden>
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/>
-            </svg>
+            <span data-icon="linkedin"></span>
           </a>
           <a data-home="footer-youtube" href="#" target="_blank" rel="noopener" aria-label="يوتيوب" hidden>
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.7 31.7 0 0 0 0 12a31.7 31.7 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.7 31.7 0 0 0 24 12a31.7 31.7 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/>
-            </svg>
+            <span data-icon="youtube"></span>
           </a>
         </div>
 
@@ -1023,775 +1176,44 @@
 
   </div>
 
-  <!-- ============ THEME FAB ============ -->
+  <!-- ═══ THEME FAB ═══ -->
   <div class="theme-fab-wrap" id="themeFabWrap" hidden>
-    <button type="button" class="theme-fab" id="themeFab" aria-label="تغيير الثيم" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"></circle>
-        <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"></circle>
-      </svg>
+    <button type="button" class="theme-fab" id="themeFab"
+            aria-label="تغيير الثيم" aria-expanded="false" aria-haspopup="true">
+      <span data-icon="palette"></span>
     </button>
-    <div class="theme-panel" id="themePanel" hidden>
+    <div class="theme-panel" id="themePanel" hidden role="dialog" aria-label="اختيار الثيم">
       <div class="theme-panel-header">
-        <span class="theme-panel-title">اختر الثيم</span>
-        <button type="button" class="theme-panel-close" id="themePanelClose" aria-label="إغلاق">×</button>
+        <span class="theme-panel-title" data-label="theme.panel.title">اختر الثيم</span>
+        <button type="button" class="theme-panel-close" id="themePanelClose" aria-label="إغلاق">
+          <span data-icon="x"></span>
+        </button>
       </div>
       <div class="theme-panel-body" id="themePanelBody"></div>
       <div class="theme-panel-footer">
-        <button type="button" class="theme-reset-btn" id="themeResetBtn">إعادة تعيين الثيم الافتراضي</button>
+        <button type="button" class="theme-reset-btn" id="themeResetBtn"
+                data-label="theme.panel.reset">إعادة تعيين الثيم الافتراضي</button>
       </div>
     </div>
   </div>
 
-  <!-- ============ SCRIPTS ============ -->
+  <!-- ═══ SCRIPTS (Body end) ═══ -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/utils.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/permissions.js"></script>
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/app-title.js"></script>
+  <script src="assets/js/realtime.js"></script>
   <script src="assets/js/ui/header.js"></script>
-  <script src="assets/js/ui/sidebar.js"></script>
   <script src="assets/js/ui/modal.js"></script>
+  <script src="assets/js/ui/toast.js"></script>
+  <script src="assets/js/ui/dropdown.js"></script>
 
-  <script>
-    /* ============================================================
-       ITWS Platform — Home Page Logic
-       Inline script replaces assets/js/pages/home.js
-       All content is pulled from Supabase.settings via AppSettings.get
-       ============================================================ */
-    (function () {
-      'use strict';
-
-      if (window.HomePage && window.HomePage.initialized) return;
-
-      var state = {
-        initialized: false,
-        currentTab: 'certificate',
-        academiesLoaded: false,
-        sb: null
-      };
-
-      /* ---------------- Helpers ---------------- */
-      function $(sel, ctx) { return (ctx || document).querySelector(sel); }
-      function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
-      function byData(name, ctx) { return $('[data-home="' + name + '"]', ctx); }
-
-      function setText(el, v) {
-        if (!el) return;
-        el.textContent = (v == null ? '' : String(v));
-      }
-
-      function setHTML(el, v) {
-        if (!el) return;
-        el.innerHTML = v == null ? '' : String(v);
-      }
-
-      function setLink(el, url) {
-        if (!el) return;
-        if (url) {
-          el.href = url;
-          el.removeAttribute('hidden');
-        } else {
-          el.setAttribute('hidden', '');
-        }
-      }
-
-      function show(el) { if (el) el.removeAttribute('hidden'); }
-      function hide(el) { if (el) el.setAttribute('hidden', ''); }
-
-      function escapeHtml(s) {
-        if (s == null) return '';
-        return String(s)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#039;');
-      }
-
-      function getSetting(path, fallback) {
-        try {
-          if (window.AppSettings && typeof window.AppSettings.get === 'function') {
-            var v = window.AppSettings.get(path);
-            return (v === undefined || v === null) ? fallback : v;
-          }
-        } catch (e) {}
-        return fallback;
-      }
-
-      function getBool(path, fallback) {
-        var v = getSetting(path, fallback);
-        if (typeof v === 'boolean') return v;
-        if (v === 'true' || v === 1 || v === '1') return true;
-        if (v === 'false' || v === 0 || v === '0') return false;
-        return !!v;
-      }
-
-      function resolve(path) {
-        if (!path) return '#';
-        if (window.resolveUrl) return window.resolveUrl(path);
-        var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
-        if (base && base.charAt(base.length - 1) !== '/') base += '/';
-        return base + String(path).replace(/^\.?\//, '');
-      }
-
-      function getSb() {
-        return window.sb || window.supabaseClient || window.ITWS_SUPABASE || null;
-      }
-
-      function safe(url) {
-        if (!url) return '';
-        var u = String(url).trim();
-        if (u.indexOf('javascript:') === 0) return '';
-        if (u.indexOf('data:text/html') === 0) return '';
-        return u;
-      }
-
-      /* ---------------- Hero ---------------- */
-      function renderHero() {
-        var badge = byData('hero-badge');
-        var title = byData('hero-title');
-        var subtitle = byData('hero-subtitle');
-
-        var badgeText = getSetting('app_identity.hero_badge', '');
-        if (badge) {
-          if (badgeText) { setText(badge, badgeText); show(badge); }
-          else hide(badge);
-        }
-
-        var titleText = getSetting('app_identity.hero_title', '');
-        if (!titleText) {
-          var union = getSetting('app_identity.union_name', 'نقابة تكنولوجيا المعلومات والبرمجيات');
-          titleText = 'مرحباً بك في ' + union;
-        }
-        setText(title, titleText);
-
-        var subtitleText = getSetting('app_identity.hero_subtitle', '');
-        if (!subtitleText) {
-          subtitleText = 'منصة رسمية للتحقق من الشهادات التدريبية واكتشاف الأكاديميات المعتمدة';
-        }
-        setText(subtitle, subtitleText);
-      }
-
-      /* ---------------- Search ---------------- */
-      var SEARCH_CONFIG = {
-        certificate: {
-          id: 'certificate',
-          placeholderKey: 'behavior.search_certificate_placeholder',
-          placeholderDefault: 'NTI-2026-XXXXXX',
-          hintKey: 'behavior.search_certificate_hint',
-          hintDefault: 'أدخل كود الشهادة المطبوع عليها',
-          minChars: 3,
-          target: 'verify.html',
-          param: 'code',
-          dir: 'ltr'
-        },
-        trainee: {
-          id: 'trainee',
-          placeholderKey: 'behavior.search_trainee_placeholder',
-          placeholderDefault: 'الرقم القومي (14 رقم)',
-          hintKey: 'behavior.search_trainee_hint',
-          hintDefault: 'أدخل الرقم القومي المكون من 14 رقماً',
-          minChars: 14,
-          target: 'student.html',
-          param: 'q',
-          dir: 'ltr'
-        },
-        academy: {
-          id: 'academy',
-          placeholderKey: 'behavior.search_academy_placeholder',
-          placeholderDefault: 'اسم الأكاديمية أو التخصص',
-          hintKey: 'behavior.search_academy_hint',
-          hintDefault: 'ابحث عن أكاديمية معتمدة من النقابة',
-          minChars: 2,
-          target: 'academies.html',
-          param: 'q',
-          dir: 'rtl'
-        }
-      };
-
-      function applySearchTab(tabId) {
-        var cfg = SEARCH_CONFIG[tabId];
-        if (!cfg) return;
-
-        state.currentTab = tabId;
-
-        var tabs = $all('[data-search-tab]');
-        tabs.forEach(function (btn) {
-          var isActive = btn.getAttribute('data-search-tab') === tabId;
-          btn.classList.toggle('is-active', isActive);
-          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        });
-
-        var input = $('#homeSearchInput');
-        if (input) {
-          input.value = '';
-          input.setAttribute('dir', cfg.dir);
-          input.setAttribute('placeholder', getSetting(cfg.placeholderKey, cfg.placeholderDefault));
-          if (tabId === 'trainee') {
-            input.setAttribute('inputmode', 'numeric');
-            input.setAttribute('maxlength', '14');
-          } else {
-            input.removeAttribute('inputmode');
-            input.setAttribute('maxlength', '40');
-          }
-        }
-
-        var hint = byData('search-hint');
-        setText(hint, getSetting(cfg.hintKey, cfg.hintDefault));
-      }
-
-      function handleSearchSubmit(e) {
-        if (e) e.preventDefault();
-
-        var input = $('#homeSearchInput');
-        if (!input) return;
-
-        var value = (input.value || '').trim();
-        var cfg = SEARCH_CONFIG[state.currentTab];
-        if (!cfg) return;
-
-        if (value.length < cfg.minChars) {
-          var hint = byData('search-hint');
-          setText(hint, 'أدخل ' + (cfg.minChars === 14 ? '14 رقماً' : cfg.minChars + ' أحرف على الأقل'));
-          input.focus();
-          return;
-        }
-
-        var url;
-        if (cfg.id === 'trainee') {
-          url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value);
-        } else if (cfg.id === 'certificate') {
-          url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value.toUpperCase());
-        } else {
-          url = resolve(cfg.target) + '?' + cfg.param + '=' + encodeURIComponent(value);
-        }
-
-        window.location.href = url;
-      }
-
-      function initSearch() {
-        var enabled = getBool('behavior.enable_search', true);
-        var searchEl = byData('search');
-        if (!enabled) {
-          if (searchEl) hide(searchEl);
-          return;
-        }
-        if (searchEl) show(searchEl);
-
-        $all('[data-search-tab]').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            applySearchTab(btn.getAttribute('data-search-tab'));
-          });
-        });
-
-        var form = $('#homeSearchForm');
-        if (form) form.addEventListener('submit', handleSearchSubmit);
-
-        var submitBtn = $('#homeSearchBtn');
-        if (submitBtn) {
-          var btnText = getSetting('behavior.search_button_text', 'بحث');
-          var span = $('[data-home="search-btn-text"]', submitBtn);
-          setText(span, btnText);
-        }
-
-        applySearchTab('certificate');
-      }
-
-      /* ---------------- Custom Section ---------------- */
-      function renderCustomSection() {
-        var enabled = getBool('app_identity.custom_section.enabled', false) &&
-                      getBool('behavior.home_show_custom_section', true);
-        var section = byData('custom-section');
-        if (!section) return;
-        if (!enabled) { hide(section); return; }
-
-        var title = getSetting('app_identity.custom_section.title', '');
-        var subtitle = getSetting('app_identity.custom_section.subtitle', '');
-        var content = getSetting('app_identity.custom_section.content', '');
-        var btnText = getSetting('app_identity.custom_section.button_text', '');
-        var btnUrl = safe(getSetting('app_identity.custom_section.button_url', ''));
-
-        if (!title && !subtitle && !content && !btnText) { hide(section); return; }
-
-        setText(byData('custom-title'), title);
-        setText(byData('custom-subtitle'), subtitle);
-        setText(byData('custom-content'), content);
-
-        var btn = byData('custom-btn');
-        if (btn) {
-          if (btnText && btnUrl) {
-            btn.href = resolve(btnUrl);
-            btn.textContent = btnText;
-            show(btn);
-          } else {
-            hide(btn);
-          }
-        }
-
-        show(section);
-      }
-
-      /* ---------------- About Section ---------------- */
-      var ABOUT_ICONS = [
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>'
-      ];
-
-      function renderAboutSection() {
-        var enabled = getBool('app_identity.about_section.enabled', false) &&
-                      getBool('behavior.home_show_about_section', true);
-        var section = byData('about-section');
-        if (!section) return;
-        if (!enabled) { hide(section); return; }
-
-        var title = getSetting('app_identity.about_section.title', '');
-        var subtitle = getSetting('app_identity.about_section.subtitle', '');
-        var features = getSetting('app_identity.about_section.features', []) || [];
-
-        if (!title && !subtitle && (!features || !features.length)) { hide(section); return; }
-
-        setText(byData('about-title'), title);
-        setText(byData('about-subtitle'), subtitle);
-
-        var grid = byData('about-features');
-        if (grid) {
-          grid.innerHTML = '';
-          (features || []).forEach(function (f, idx) {
-            if (!f || (!f.title && !f.description)) return;
-            var card = document.createElement('div');
-            card.className = 'home-about-card';
-            var icon = ABOUT_ICONS[idx % ABOUT_ICONS.length];
-            card.innerHTML =
-              '<div class="home-about-icon">' + icon + '</div>' +
-              '<h3 class="home-about-title">' + escapeHtml(f.title || '') + '</h3>' +
-              '<p class="home-about-desc">' + escapeHtml(f.description || '') + '</p>';
-            grid.appendChild(card);
-          });
-        }
-
-        show(section);
-      }
-
-      /* ---------------- Recent Academies ---------------- */
-      function renderAcademyCard(academy) {
-        var card = document.createElement('a');
-        card.className = 'academy-card';
-        card.href = resolve('academy-details.html?id=' + encodeURIComponent(academy.id || ''));
-
-        var logoHtml;
-        if (academy.logo_url) {
-          logoHtml = '<div class="academy-card-logo"><img src="' + escapeHtml(academy.logo_url) + '" alt="' + escapeHtml(academy.name || '') + '" loading="lazy" onerror="this.parentNode.textContent=\'أ\';"></div>';
-        } else {
-          var initial = (academy.name || 'أ').trim().charAt(0);
-          logoHtml = '<div class="academy-card-logo">' + escapeHtml(initial) + '</div>';
-        }
-
-        var desc = academy.description || academy.short_description || '';
-        card.innerHTML =
-          logoHtml +
-          '<div class="academy-card-body">' +
-            '<h3 class="academy-card-title">' + escapeHtml(academy.name || 'أكاديمية') + '</h3>' +
-            '<p class="academy-card-desc">' + escapeHtml(desc) + '</p>' +
-          '</div>';
-
-        return card;
-      }
-
-      function loadRecentAcademies() {
-        var enabled = getBool('behavior.home_show_recent_academies', true);
-        var section = byData('recent-academies');
-        if (!section) return;
-        if (!enabled) { hide(section); return; }
-
-        var grid = $('#homeAcademiesGrid');
-        if (!grid) return;
-
-        // Loading
-        grid.innerHTML = '<div class="home-academies-loading" style="grid-column:1/-1;"><div class="home-academies-spinner"></div></div>';
-        show(section);
-
-        var sb = getSb();
-        if (!sb || typeof sb.from !== 'function') {
-          grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">تعذر الاتصال بالخادم</div>';
-          return;
-        }
-
-        var limit = parseInt(getSetting('behavior.home_stats_academies_count', 6), 10) || 6;
-
-        try {
-          sb.from('academies')
-            .select('id, name, description, logo_url, status, created_at')
-            .eq('status', 'approved')
-            .order('created_at', { ascending: false })
-            .limit(limit)
-            .then(function (res) {
-              if (res && res.error) throw res.error;
-              var list = (res && res.data) || [];
-
-              if (!list.length) {
-                grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">لا توجد أكاديميات معتمدة بعد</div>';
-                return;
-              }
-
-              grid.innerHTML = '';
-              list.forEach(function (a) {
-                grid.appendChild(renderAcademyCard(a));
-              });
-              state.academiesLoaded = true;
-            })
-            .catch(function (err) {
-              console.warn('[Home] load academies failed:', err && err.message);
-              grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">تعذر تحميل الأكاديميات</div>';
-            });
-        } catch (e) {
-          console.warn('[Home] academies query error:', e);
-          grid.innerHTML = '<div class="home-academies-empty" style="grid-column:1/-1;">خطأ في تحميل البيانات</div>';
-        }
-      }
-
-      /* ---------------- CTA ---------------- */
-      function renderCTA() {
-        var title = getSetting('app_identity.cta_title', '') ||
-                    'هل تدير أكاديمية تدريبية؟';
-        var subtitle = getSetting('app_identity.cta_subtitle', '') ||
-                       'قدم طلب الاعتماد وانضم إلى قائمة الأكاديميات المعتمدة من النقابة';
-        var btnText = getSetting('app_identity.cta_button_text', '') ||
-                      'قدم أكاديميتك';
-        var btnUrl = getSetting('app_identity.cta_button_url', '') ||
-                     'academy-apply.html';
-
-        setText(byData('cta-title'), title);
-        setText(byData('cta-subtitle'), subtitle);
-        setText(byData('cta-btn-text'), btnText);
-
-        var btn = byData('cta-btn');
-        if (btn) btn.href = resolve(btnUrl);
-      }
-
-      /* ---------------- Footer ---------------- */
-      function renderFooter() {
-        var unionName = getSetting('app_identity.union_name', '');
-        var committeeName = getSetting('app_identity.committee_name', '');
-        var logoUrl = getSetting('app_identity.logo_url', '');
-        var presidentName = getSetting('app_identity.president_name', '');
-        var presidentLabel = getSetting('app_identity.president_label', 'النقيب العام');
-
-        // Logo
-        var logo = byData('footer-logo');
-        if (logo) {
-          if (logoUrl) {
-            logo.innerHTML = '<img src="' + escapeHtml(logoUrl) + '" alt="logo">';
-          } else {
-            logo.textContent = (unionName || 'ن').trim().charAt(0);
-          }
-        }
-
-        setText(byData('footer-union'), unionName);
-        setText(byData('footer-committee'), committeeName);
-
-        // Contact
-        var email = getSetting('app_identity.contact_email', '');
-        var phone = getSetting('app_identity.contact_phone', '');
-        var website = getSetting('app_identity.website_url', '');
-
-        var emailEl = byData('footer-email');
-        if (email && emailEl) {
-          emailEl.href = 'mailto:' + email;
-          setText(byData('footer-email-text'), email);
-          show(emailEl);
-        } else if (emailEl) {
-          hide(emailEl);
-        }
-
-        var phoneEl = byData('footer-phone');
-        if (phone && phoneEl) {
-          phoneEl.href = 'tel:' + phone.replace(/[^0-9+]/g, '');
-          setText(byData('footer-phone-text'), phone);
-          show(phoneEl);
-        } else if (phoneEl) {
-          hide(phoneEl);
-        }
-
-        var websiteEl = byData('footer-website');
-        if (website && websiteEl) {
-          websiteEl.href = website;
-          setText(byData('footer-website-text'), website.replace(/^https?:\/\//, '').replace(/\/$/, ''));
-          show(websiteEl);
-        } else if (websiteEl) {
-          hide(websiteEl);
-        }
-
-        // Social
-        var showSocial = getBool('footer.show_social_links', false);
-        var socialWrap = byData('footer-social');
-        if (showSocial && socialWrap) {
-          var anyShown = false;
-          var socials = [
-            { key: 'footer.social_facebook', el: 'footer-facebook' },
-            { key: 'footer.social_twitter', el: 'footer-twitter' },
-            { key: 'footer.social_linkedin', el: 'footer-linkedin' },
-            { key: 'footer.social_youtube', el: 'footer-youtube' }
-          ];
-          socials.forEach(function (s) {
-            var el = byData(s.el);
-            var url = getSetting(s.key, '');
-            if (el) {
-              if (url) {
-                el.href = url;
-                show(el);
-                anyShown = true;
-              } else {
-                hide(el);
-              }
-            }
-          });
-          if (anyShown) show(socialWrap); else hide(socialWrap);
-        } else if (socialWrap) {
-          hide(socialWrap);
-        }
-
-        // Footer Link
-        var flEnabled = getBool('app_identity.footer_link.enabled', false);
-        var flText = getSetting('app_identity.footer_link.text', '');
-        var flUrl = safe(getSetting('app_identity.footer_link.url', ''));
-        var flWrap = byData('footer-link-wrap');
-        if (flWrap) {
-          if (flEnabled && flText && flUrl) {
-            setText(byData('footer-link-text'), flText);
-            var fl = byData('footer-link');
-            if (fl) fl.href = resolve(flUrl);
-            show(flWrap);
-          } else {
-            hide(flWrap);
-          }
-        }
-
-        // Copyright
-        var showCopyright = getBool('footer.show_copyright', true);
-        var copyrightText = getSetting('footer.copyright_text', '');
-        if (!copyrightText) {
-          var year = new Date().getFullYear();
-          copyrightText = '© ' + year + ' ' + (unionName || '');
-        }
-        var copyrightEl = byData('footer-copyright');
-        if (copyrightEl) {
-          if (showCopyright) {
-            setText(copyrightEl, copyrightText);
-            show(copyrightEl);
-          } else {
-            hide(copyrightEl);
-          }
-        }
-
-        // President
-        var showPresident = getBool('footer.show_president', true);
-        var presidentWrap = byData('footer-president-wrap');
-        if (presidentWrap) {
-          if (showPresident && presidentName) {
-            setText(byData('footer-president-label'), presidentLabel + ': ');
-            setText(byData('footer-president-name'), presidentName);
-            show(presidentWrap);
-          } else {
-            hide(presidentWrap);
-          }
-        }
-      }
-
-      /* ---------------- Theme FAB ---------------- */
-      function getThemes() {
-        if (window.ITWS_THEMES && Array.isArray(window.ITWS_THEMES)) {
-          return window.ITWS_THEMES;
-        }
-        return [
-          { id: 'watanii_dark', name: 'وطني داكن', colors: { primary: '#CE1126', bg: '#0A0E14', surface: '#131820' } },
-          { id: 'watanii_light', name: 'وطني فاتح', colors: { primary: '#CE1126', bg: '#F8FAFC', surface: '#FFFFFF' } },
-          { id: 'tech_blue', name: 'تكنولوجي', colors: { primary: '#3B82F6', bg: '#0F172A', surface: '#1E293B' } },
-          { id: 'light_formal', name: 'رسمي فاتح', colors: { primary: '#1E40AF', bg: '#FFFFFF', surface: '#F3F4F6' } },
-          { id: 'emerald', name: 'زمردي', colors: { primary: '#10B981', bg: '#0B1917', surface: '#122320' } },
-          { id: 'midnight_gold', name: 'ليلي ذهبي', colors: { primary: '#D4AF37', bg: '#0B0B12', surface: '#161623' } }
-        ];
-      }
-
-      function getCurrentTheme() {
-        try {
-          if (window.ITWSTheme && typeof window.ITWSTheme.getCurrent === 'function') {
-            return window.ITWSTheme.getCurrent();
-          }
-        } catch (e) {}
-
-        try {
-          var stored = localStorage.getItem('itws_theme');
-          if (stored) return stored;
-        } catch (e) {}
-
-        return document.documentElement.getAttribute('data-theme') || '';
-      }
-
-      function buildThemePanel() {
-        var body = $('#themePanelBody');
-        if (!body) return;
-        body.innerHTML = '';
-
-        var themes = getThemes();
-        var current = getCurrentTheme();
-
-        themes.forEach(function (t) {
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'theme-option' + (t.id === current ? ' is-active' : '');
-          btn.setAttribute('data-theme-option', t.id);
-
-          var swatchColor = (t.colors && t.colors.primary) ? t.colors.primary : '#CE1126';
-          var swatchBg = (t.colors && t.colors.bg) ? t.colors.bg : '#0A0E14';
-
-          btn.innerHTML =
-            '<span class="theme-swatch" style="background:linear-gradient(135deg,' + escapeHtml(swatchColor) + ' 50%,' + escapeHtml(swatchBg) + ' 50%);"></span>' +
-            '<span class="theme-option-name">' + escapeHtml(t.name || t.id) + '</span>' +
-            '<svg class="theme-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-
-          btn.addEventListener('click', function () {
-            try {
-              if (window.ITWSTheme && typeof window.ITWSTheme.change === 'function') {
-                window.ITWSTheme.change(t.id);
-              } else if (window.theme && typeof window.theme.change === 'function') {
-                window.theme.change(t.id);
-              } else if (typeof window.changeTheme === 'function') {
-                window.changeTheme(t.id);
-              } else {
-                localStorage.setItem('itws_theme', t.id);
-                document.documentElement.setAttribute('data-theme', t.id);
-              }
-            } catch (err) {
-              console.warn('[Home] theme change failed:', err);
-            }
-            // Refresh active states
-            $all('.theme-option', body).forEach(function (b) {
-              b.classList.toggle('is-active', b.getAttribute('data-theme-option') === t.id);
-            });
-          });
-
-          body.appendChild(btn);
-        });
-      }
-
-      function initThemeFab() {
-        var enabled = getBool('behavior.enable_theme_picker_for_visitors', true);
-        var wrap = $('#themeFabWrap');
-        if (!wrap) return;
-        if (!enabled) { hide(wrap); return; }
-        show(wrap);
-
-        var fab = $('#themeFab');
-        var panel = $('#themePanel');
-        var close = $('#themePanelClose');
-        var reset = $('#themeResetBtn');
-
-        buildThemePanel();
-
-        if (fab && panel) {
-          fab.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var isOpen = !panel.hasAttribute('hidden');
-            if (isOpen) {
-              panel.setAttribute('hidden', '');
-              fab.setAttribute('aria-expanded', 'false');
-            } else {
-              buildThemePanel();
-              panel.removeAttribute('hidden');
-              fab.setAttribute('aria-expanded', 'true');
-            }
-          });
-        }
-
-        if (close && panel) {
-          close.addEventListener('click', function () {
-            panel.setAttribute('hidden', '');
-            if (fab) fab.setAttribute('aria-expanded', 'false');
-          });
-        }
-
-        document.addEventListener('click', function (e) {
-          if (!wrap.contains(e.target) && panel && !panel.hasAttribute('hidden')) {
-            panel.setAttribute('hidden', '');
-            if (fab) fab.setAttribute('aria-expanded', 'false');
-          }
-        });
-
-        if (reset) {
-          reset.addEventListener('click', function () {
-            try {
-              var defaultTheme = getSetting('theme.default_theme', 'watanii_dark');
-              if (window.ITWSTheme && typeof window.ITWSTheme.change === 'function') {
-                window.ITWSTheme.change(defaultTheme);
-              } else {
-                localStorage.setItem('itws_theme', defaultTheme);
-                document.documentElement.setAttribute('data-theme', defaultTheme);
-              }
-              $all('.theme-option').forEach(function (b) {
-                b.classList.toggle('is-active', b.getAttribute('data-theme-option') === defaultTheme);
-              });
-            } catch (err) {
-              console.warn('[Home] theme reset failed:', err);
-            }
-          });
-        }
-      }
-
-      /* ---------------- Apply all ---------------- */
-      function applyAll() {
-        renderHero();
-        renderCustomSection();
-        renderAboutSection();
-        renderCTA();
-        renderFooter();
-      }
-
-      /* ---------------- Init ---------------- */
-      function init() {
-        if (state.initialized) return;
-        state.initialized = true;
-
-        state.sb = getSb();
-
-        applyAll();
-        initSearch();
-        initThemeFab();
-        loadRecentAcademies();
-
-        // Re-apply on settings changes
-        if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
-          try {
-            window.AppSettings.onChange(function () {
-              applyAll();
-            });
-          } catch (e) {}
-        }
-
-        // Fallback retries (in case AppSettings loads late)
-        setTimeout(applyAll, 600);
-        setTimeout(applyAll, 1800);
-        setTimeout(applyAll, 3500);
-        setTimeout(loadRecentAcademies, 1500);
-      }
-
-      window.HomePage = {
-        initialized: true,
-        init: init,
-        refresh: applyAll,
-        reloadAcademies: loadRecentAcademies,
-        getState: function () { return state; }
-      };
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
-    })();
-  </script>
+  <script src="assets/js/pages/home.js"></script>
 
 </body>
 </html>
