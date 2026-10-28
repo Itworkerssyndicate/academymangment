@@ -1,154 +1,785 @@
-/* ============================================
-   [10/50] ITWS Platform - Theme Variables
-   Path: assets/css/theme.css
-   ============================================ */
-/* 💡 القيم الافتراضية = "وطني داكن" 🇪🇬 */
-/* 💡 تُستبدل ديناميكياً من theme.js */
-/* 💡 الخط = Cairo فقط */
-/* ============================================ */
+/* ============================================================
+   ITWS Platform — Theme Base CSS V2
+   File: assets/css/theme.css
+   Description: CSS variables defaults + scales + fallbacks
+
+   Load order: FIRST CSS (before base.css, components.css, layout.css)
+
+   Purpose:
+   - Provides watanii_dark defaults so page renders before theme.js loads
+   - Defines design tokens (spacing, radius, z-index, transitions)
+   - Defines global focus/selection styles
+   - Provides print styles
+   - Respects prefers-color-scheme / prefers-reduced-motion
+   - Falls back gracefully if theme.js fails
+
+   Note:
+   - Actual theme values are INJECTED by theme.js via <style id="itws-theme-vars">
+   - This file only provides FALLBACKS (watanii_dark by default)
+   - All colors here are FALLBACKS — theme.js overrides them
+
+   Rules:
+   - R13: mobile-first, safe-area, no fixed widths
+   - No emoji
+   - RTL by default
+   - Cairo font only
+   - All colors as CSS variables
+   ============================================================ */
+
+
+/* ============================================================
+   1. COLOR TOKENS (DEFAULT: watanii_dark)
+   ⚠️ These are FALLBACKS — theme.js overrides them at runtime
+   ============================================================ */
 
 :root {
-
-  /* ===== Primary Colors - أحمر مصر ===== */
+  /* ===== PRIMARY (Egypt red) ===== */
   --primary: #CE1126;
   --primary-hover: #E63946;
   --primary-soft: rgba(206, 17, 38, 0.14);
   --primary-text: #FFFFFF;
 
-  /* ===== Accent Colors - أبيض ===== */
-  --accent: #FFFFFF;
-  --accent-hover: #E5E7EB;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-
-  /* ===== Backgrounds - أسود عميق ===== */
+  /* ===== BACKGROUNDS ===== */
   --bg: #0A0E14;
   --bg-alt: #05080D;
   --surface: #131820;
   --surface-elevated: #1C2430;
   --surface-hover: #252F3D;
 
-  /* ===== Text Colors ===== */
+  /* ===== TEXT ===== */
   --text: #F8FAFC;
   --text-secondary: #94A3B8;
   --text-muted: #64748B;
-  --text-inverse: #0A0E14;
 
-  /* ===== Borders ===== */
+  /* ===== BORDERS ===== */
   --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: #CE1126;
+  --border-strong: rgba(255, 255, 255, 0.15);
 
-  /* ===== Status Colors ===== */
+  /* ===== STATUS COLORS ===== */
   --success: #10B981;
-  --success-soft: rgba(16, 185, 129, 0.12);
-  --error: #EF4444;
-  --error-soft: rgba(239, 68, 68, 0.12);
+  --success-soft: rgba(16, 185, 129, 0.14);
+  --success-hover: #059669;
+
   --warning: #F59E0B;
-  --warning-soft: rgba(245, 158, 11, 0.12);
+  --warning-soft: rgba(245, 158, 11, 0.14);
+
+  --error: #EF4444;
+  --error-soft: rgba(239, 68, 68, 0.14);
+  --error-hover: #DC2626;
+
   --info: #3B82F6;
-  --info-soft: rgba(59, 130, 246, 0.12);
+  --info-soft: rgba(59, 130, 246, 0.14);
 
-  /* ===== Shadows ===== */
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+  /* ===== GRADE COLORS ===== */
+  --grade-excellent-bg: rgba(16, 185, 129, 0.15);
+  --grade-excellent-text: #10B981;
+  --grade-very-good-bg: rgba(59, 130, 246, 0.15);
+  --grade-very-good-text: #3B82F6;
+  --grade-good-bg: rgba(245, 158, 11, 0.15);
+  --grade-good-text: #F59E0B;
+  --grade-pass-bg: rgba(249, 115, 22, 0.15);
+  --grade-pass-text: #F97316;
+  --grade-fail-bg: rgba(239, 68, 68, 0.15);
+  --grade-fail-text: #EF4444;
 
-  /* ===== Radii ===== */
-  --radius: 10px;
-  --radius-sm: 6px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
+  /* ===== SHADOWS ===== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
 
-  /* ===== Typography - Cairo فقط ===== */
-  --font: 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
-  --font-mono: 'Courier New', 'Monaco', monospace;
-
-  --text-xs: 12px;
-  --text-sm: 13px;
-  --text-base: 14px;
-  --text-md: 16px;
-  --text-lg: 18px;
-  --text-xl: 22px;
-  --text-2xl: 28px;
-  --text-3xl: 36px;
-
-  --line-tight: 1.3;
-  --line-base: 1.6;
-  --line-relaxed: 1.8;
-
-  --weight-normal: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 700;
-  --weight-extrabold: 800;
-
-  /* ===== Spacing ===== */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
-
-  /* ===== Transitions ===== */
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.25s ease;
-  --transition-slow: 0.4s ease;
-
-  /* ===== Z-Index Layers ===== */
-  --z-base: 1;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-fixed: 300;
-  --z-overlay: 400;
-  --z-modal: 500;
-  --z-toast: 600;
-  --z-loader: 700;
+  /* Status-specific shadows (for badges/seals) */
+  --success-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+  --success-shadow-lg: 0 20px 60px rgba(16, 185, 129, 0.15);
+  --error-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+  --error-shadow-lg: 0 20px 60px rgba(239, 68, 68, 0.15);
 }
 
-/* ============================================
-   حالات خاصة
-   ============================================ */
 
-.theme-dark {
+/* ============================================================
+   2. TYPOGRAPHY TOKENS
+   ============================================================ */
+
+:root {
+  /* ===== FONT FAMILIES ===== */
+  --font-primary: 'Cairo', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Cairo', 'Courier New', monospace; /* Cairo with tabular-nums */
+
+  /* ===== FONT WEIGHTS ===== */
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+  --fw-black: 900;
+
+  /* ===== FONT SIZES (fluid / clamp) ===== */
+  --fs-xs: clamp(10px, 1.1vw, 11px);
+  --fs-sm: clamp(11px, 1.3vw, 12px);
+  --fs-base: clamp(13px, 1.6vw, 14px);
+  --fs-md: clamp(14px, 1.8vw, 15px);
+  --fs-lg: clamp(15px, 2vw, 16px);
+  --fs-xl: clamp(16px, 2.5vw, 18px);
+  --fs-2xl: clamp(18px, 3vw, 22px);
+  --fs-3xl: clamp(20px, 4vw, 28px);
+  --fs-4xl: clamp(24px, 5vw, 36px);
+  --fs-5xl: clamp(28px, 6vw, 48px);
+
+  /* ===== LINE HEIGHTS ===== */
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-normal: 1.55;
+  --lh-relaxed: 1.7;
+  --lh-loose: 1.85;
+
+  /* ===== LETTER SPACING ===== */
+  --ls-tight: -0.5px;
+  --ls-normal: 0;
+  --ls-wide: 0.5px;
+  --ls-wider: 1px;
+}
+
+
+/* ============================================================
+   3. SPACING SCALE (4px base)
+   ============================================================ */
+
+:root {
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-7: 1.75rem;   /* 28px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+}
+
+
+/* ============================================================
+   4. BORDER RADIUS SCALE
+   ============================================================ */
+
+:root {
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-full: 999px;
+  --radius-circle: 50%;
+}
+
+
+/* ============================================================
+   5. Z-INDEX SCALE
+   ============================================================ */
+
+:root {
+  --z-base: 1;
+  --z-dropdown: 800;
+  --z-sidebar: 800;
+  --z-header: 900;
+  --z-fab: 900;
+  --z-tooltip: 9500;
+  --z-modal-backdrop: 9999;
+  --z-modal: 10000;
+  --z-toast: 9998;
+  --z-max: 99999;
+}
+
+
+/* ============================================================
+   6. TRANSITIONS
+   ============================================================ */
+
+:root {
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  --transition-slower: 0.5s ease;
+
+  --transition-color: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  --transition-transform: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fade: opacity 0.2s ease;
+}
+
+
+/* ============================================================
+   7. LAYOUT TOKENS
+   ============================================================ */
+
+:root {
+  --header-height: 72px;
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 72px;
+  --container-max: 1280px;
+  --container-wide: 1440px;
+  --container-narrow: 960px;
+  --content-padding: clamp(16px, 3vw, 32px);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --header-height: 56px;
+    --sidebar-width: 280px;
+  }
+}
+
+
+/* ============================================================
+   8. COLOR SCHEME (tells the browser which mode is active)
+   ============================================================ */
+
+:root,
+[data-theme-mode="dark"] {
   color-scheme: dark;
 }
 
-.theme-light {
+[data-theme-mode="light"] {
   color-scheme: light;
 }
 
-/* ============================================
-   Print Override
-   ============================================ */
+
+/* ============================================================
+   9. GLOBAL RESETS (theme-specific only — base.css does the rest)
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  /* Apply theme-aware transitions to all theme-related properties */
+  /* Note: base.css handles box-sizing, so we don't duplicate */
+}
+
+html {
+  /* Prevent horizontal scroll on all screens */
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + 20px);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-primary);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  direction: rtl;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ============================================================
+   10. SELECTION & FOCUS (theme-aware)
+   ============================================================ */
+
+::selection {
+  background-color: var(--primary);
+  color: var(--primary-text);
+}
+
+::-moz-selection {
+  background-color: var(--primary);
+  color: var(--primary-text);
+}
+
+/* Global focus ring */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Remove outline for mouse clicks only */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+/* ============================================================
+   11. SCROLLBAR (custom — theme-aware)
+   ============================================================ */
+
+/* Webkit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-alt);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) var(--bg-alt);
+}
+
+
+/* ============================================================
+   12. LINKS (theme-aware)
+   ============================================================ */
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition-color);
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Auto-highlight internal links */
+a[href^="tel:"]::before {
+  /* No icon here — handled by icons.js */
+}
+
+
+/* ============================================================
+   13. FORM ELEMENTS (base theme — components.css refines)
+   ============================================================ */
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+/* Autofill override (Chrome yellow) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+
+/* ============================================================
+   14. IMAGES & MEDIA
+   ============================================================ */
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+img {
+  /* Prevent broken image icon from breaking layout */
+  background-color: var(--surface);
+  color: var(--text-muted);
+}
+
+
+/* ============================================================
+   15. UTILITY CLASSES (theme-specific)
+   ============================================================ */
+
+/* Text colors */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-error { color: var(--error); }
+.text-info { color: var(--info); }
+
+/* Background colors */
+.bg-surface { background-color: var(--surface); }
+.bg-elevated { background-color: var(--surface-elevated); }
+.bg-primary { background-color: var(--primary); color: var(--primary-text); }
+
+/* Border colors */
+.border-default { border: 1px solid var(--border); }
+.border-strong { border: 1px solid var(--border-strong); }
+.border-primary { border: 1px solid var(--primary); }
+
+
+/* ============================================================
+   16. THEME TRANSITION (smooth theme switch)
+   ============================================================ */
+
+html,
+body {
+  transition: background-color var(--transition-base),
+              color var(--transition-base);
+}
+
+/* Add transition to key components when switching theme */
+.theme-transition,
+.theme-transition * {
+  transition: background-color 0.2s ease,
+              color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease !important;
+}
+
+/* Don't add transition on first load (prevents flash) */
+.itws-no-transition,
+.itws-no-transition * {
+  transition: none !important;
+}
+
+
+/* ============================================================
+   17. BRAND LOGO (theme-aware background)
+   ============================================================ */
+
+.brand-logo,
+.brand-logo img {
+  background-color: var(--bg);
+}
+
+
+/* ============================================================
+   18. GLASS EFFECT (used in header, cards)
+   ============================================================ */
+
+.glass {
+  background-color: rgba(19, 24, 32, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme-mode="light"] .glass {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+
+/* ============================================================
+   19. GRADIENT OVERLAYS (used in hero sections)
+   ============================================================ */
+
+.gradient-overlay-top {
+  position: relative;
+}
+
+.gradient-overlay-top::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gradient-overlay-radial {
+  position: relative;
+}
+
+.gradient-overlay-radial::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 30%,
+              var(--primary-soft) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ============================================================
+   20. FALLBACK FOR NO-THEME STATE
+   (if theme.js fails to load, page still looks correct)
+   ============================================================ */
+
+[data-theme-mode="light"] {
+  --bg: #FFFFFF;
+  --bg-alt: #F8FAFC;
+  --surface: #F1F5F9;
+  --surface-elevated: #FFFFFF;
+  --surface-hover: #E2E8F0;
+  --text: #0A0E14;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ============================================================
+   21. PRINT STYLES
+   ============================================================ */
 
 @media print {
+  /* Force light mode for print (saves ink, improves readability) */
   :root {
-    --bg: #ffffff;
-    --bg-alt: #ffffff;
-    --surface: #ffffff;
-    --surface-elevated: #ffffff;
-    --text: #000000;
-    --text-secondary: #333333;
-    --text-muted: #666666;
-    --border: #e5e5e5;
-    --border-strong: #cccccc;
-    --shadow: none;
-    --shadow-lg: none;
+    --bg: #FFFFFF !important;
+    --bg-alt: #F8FAFC !important;
+    --surface: #FFFFFF !important;
+    --surface-elevated: #FFFFFF !important;
+    --text: #000000 !important;
+    --text-secondary: #333333 !important;
+    --text-muted: #666666 !important;
+    --border: rgba(0, 0, 0, 0.2) !important;
+    --border-strong: rgba(0, 0, 0, 0.3) !important;
+    --primary: #CE1126 !important;
+    --primary-soft: #FFE5E8 !important;
+    --primary-text: #FFFFFF !important;
+    --shadow: none !important;
+    --shadow-lg: none !important;
+    --shadow-xl: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html,
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Hide interactive elements */
+  .no-print,
+  .itws-header,
+  .itws-sidebar,
+  .theme-fab-wrap,
+  .itws-mobile-drawer,
+  .itws-mobile-backdrop,
+  .itws-toast-root,
+  .itws-dd-root,
+  .itws-modal-backdrop,
+  nav,
+  button:not(.print-keep) {
+    display: none !important;
+  }
+
+  /* Preserve links */
+  a {
+    color: #000000 !important;
+    text-decoration: underline !important;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666666;
+  }
+
+  /* Table styles */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  th, td {
+    border: 1px solid #333 !important;
+    padding: 6pt !important;
+    color: #000 !important;
+  }
+
+  th {
+    background: #EEEEEE !important;
+    font-weight: bold !important;
+  }
+
+  /* Cards keep visible */
+  .card,
+  .itws-table-card {
+    border: 1px solid #333 !important;
+    page-break-inside: avoid;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .page-break-avoid {
+    page-break-inside: avoid;
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Specific print styles for certificates */
+  .print-certificate {
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+
+  .print-certificate:last-child {
+    page-break-after: auto;
   }
 }
 
-/* ============================================
-   Reduce Motion
-   ============================================ */
 
-@media (prefers-reduced-motion: reduce) {
+/* ============================================================
+   22. ACCESSIBILITY — High Contrast Mode
+   ============================================================ */
+
+@media (prefers-contrast: more) {
   :root {
-    --transition-fast: 0s;
-    --transition-base: 0s;
-    --transition-slow: 0s;
+    --border: rgba(255, 255, 255, 0.3);
+    --border-strong: rgba(255, 255, 255, 0.5);
+    --text-secondary: #B8C1CC;
+    --text-muted: #8B95A3;
+  }
+
+  [data-theme-mode="light"] {
+    --border: rgba(0, 0, 0, 0.3);
+    --border-strong: rgba(0, 0, 0, 0.5);
+    --text-secondary: #1A1A1A;
+    --text-muted: #333333;
+  }
+
+  a,
+  button {
+    text-decoration: underline;
   }
 }
+
+
+/* ============================================================
+   23. SMALL SCREEN ADJUSTMENTS
+   ============================================================ */
+
+@media (max-width: 480px) {
+  :root {
+    /* Reduce radii on very small screens (feel more compact) */
+    --radius-2xl: 14px;
+    --radius-3xl: 16px;
+
+    /* Slightly tighter spacing */
+    --space-8: 1.75rem;
+    --space-10: 2rem;
+  }
+}
+
+
+/* ============================================================
+   24. LARGE SCREEN ADJUSTMENTS
+   ============================================================ */
+
+@media (min-width: 1440px) {
+  :root {
+    --container-max: 1320px;
+    --container-wide: 1480px;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --container-max: 1440px;
+    --container-wide: 1680px;
+    --fs-base: 15px;
+  }
+}
+
+
+/* ============================================================
+   25. THEME DEBUG HELPER (only when DEBUG=1 in URL)
+   ============================================================ */
+
+[data-theme] {
+  /* Just a marker — allows JS to check data-theme presence */
+}
+
+
+/* ============================================================
+   END OF THEME.CSS
+   ============================================================ */
