@@ -2,14 +2,13 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   
-  <title>التحقق من الشهادة</title>
+  <title>التحقق من شهادة</title>
   <meta name="description" content="تحقق من صحة الشهادات التدريبية الصادرة عن الأكاديميات المعتمدة">
   <meta name="theme-color" content="#0A0E14">
+  <meta name="color-scheme" content="dark light">
   
-  <meta property="og:title" content="التحقق من الشهادة">
-  <meta property="og:description" content="تحقق من صحة الشهادات التدريبية المعتمدة">
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo.svg">
   
@@ -19,275 +18,42 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
+  <!-- ═══ Core Scripts (Head) ═══ -->
   <script src="assets/js/settings-defaults.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/themes-data.js"></script>
   <script src="assets/js/theme.js"></script>
-  
-  <script>
-    (function () {
-      function syncThemeColor() {
-        try {
-          var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-          if (bg) {
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', bg);
-          }
-        } catch (e) {}
-      }
-      document.addEventListener('DOMContentLoaded', syncThemeColor);
-      window.addEventListener('load', syncThemeColor);
-      try {
-        new MutationObserver(syncThemeColor).observe(document.documentElement, {
-          attributes: true, attributeFilter: ['data-theme', 'class', 'style']
-        });
-      } catch (e) {}
-    })();
-  </script>
-  
   <script src="assets/js/app-settings.js"></script>
+  <script src="assets/js/labels.js"></script>
   
+  <!-- ═══ Core CSS ═══ -->
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/loader.css">
   <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
   
+  <!-- ═══ Verify-Specific CSS (Cert Card) ═══ -->
   <style>
-    .verify-hero {
-      padding: 56px 20px 40px;
-      text-align: center;
-      background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
+    /* ============================================================
+       VERIFY PAGE — Certificate Card Only
+       (Hero + Search + Info from pages.css)
+       ============================================================ */
     
-    .verify-hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 60% 50% at 50% 30%, var(--primary-soft) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    
-    .verify-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .verify-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
-      background: var(--primary-soft);
-      border: 1px solid var(--primary);
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 16px;
-    }
-    
-    .verify-title {
-      font-size: clamp(26px, 4vw, 38px);
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.3;
-      margin: 0 0 12px;
-    }
-    
-    .verify-title-accent { color: var(--primary); }
-    
-    .verify-subtitle {
-      font-size: clamp(14px, 2vw, 16px);
-      color: var(--text-secondary);
-      line-height: 1.7;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    
-    .verify-main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 40px 20px 64px;
-    }
-    
-    .verify-search-card {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: var(--shadow-lg);
-      margin-bottom: 32px;
-    }
-    
-    .verify-search-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 12px;
-    }
-    
-    .verify-search-form {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    
-    .verify-search-input {
-      flex: 1;
-      padding: 16px 20px;
+    body {
       background: var(--bg);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 16px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      transition: all 0.2s;
-      min-width: 0;
-      direction: ltr;
-      text-align: left;
-      font-variant-numeric: tabular-nums;
-    }
-    
-    .verify-search-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px var(--primary-soft);
-    }
-    
-    .verify-search-input::placeholder {
-      color: var(--text-muted);
-      font-weight: 400;
-      letter-spacing: 0;
-    }
-    
-    .verify-search-btn {
-      padding: 16px 32px;
-      background: var(--primary);
-      color: var(--primary-text);
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    
-    .verify-search-btn:hover:not(:disabled) {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px var(--primary-soft);
-    }
-    
-    .verify-search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    
-    .verify-search-hint {
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0 4px;
-    }
-    
-    .verify-loader {
-      display: none;
-      text-align: center;
-      padding: 48px 20px;
-    }
-    
-    .verify-loader.show {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-    
-    .verify-loader-spinner {
-      width: 48px;
-      height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
-    }
-    
-    .verify-loader-text { color: var(--text-muted); font-size: 14px; }
-    
-    @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .verify-result { display: none; }
-    
-    .verify-result.show {
-      display: block;
-      animation: slideUp 0.5s ease;
-    }
-    
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    .verify-message {
-      display: none;
-      text-align: center;
-      padding: 48px 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-    }
-    
-    .verify-message.show { display: block; animation: slideUp 0.4s ease; }
-    
-    .verify-message.error {
-      border-color: var(--error);
-      background: var(--error-soft);
-    }
-    
-    .verify-message-icon {
-      font-size: 56px;
-      margin-bottom: 16px;
-      opacity: 0.8;
-      font-weight: 700;
-      color: var(--error);
-    }
-    
-    .verify-message-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--error);
-      margin: 0 0 8px;
-    }
-    
-    .verify-message-text {
-      font-size: 14px;
-      color: var(--text-secondary);
-      line-height: 1.7;
       margin: 0;
     }
+    
+    /* ═══ CERTIFICATE RESULT CARD ═══ */
     
     .cert-card {
       background: var(--surface);
       border: 2px solid var(--success);
-      border-radius: 20px;
+      border-radius: var(--radius-3xl, 20px);
       overflow: hidden;
       box-shadow: 0 20px 60px var(--success-shadow-lg, rgba(16, 185, 129, 0.15));
+      animation: page-result-fadein 0.4s ease;
     }
     
     .cert-card.invalid {
@@ -295,8 +61,9 @@
       box-shadow: 0 20px 60px var(--error-shadow-lg, rgba(239, 68, 68, 0.15));
     }
     
+    /* Header */
     .cert-header {
-      padding: 24px 28px;
+      padding: clamp(20px, 3vw, 28px);
       background: linear-gradient(135deg, var(--success-soft), transparent);
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -314,6 +81,7 @@
       display: flex;
       align-items: center;
       gap: 16px;
+      min-width: 0;
     }
     
     .cert-seal {
@@ -321,67 +89,87 @@
       height: 64px;
       border-radius: 50%;
       background: var(--success);
-      color: #fff;
+      color: #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
-      font-weight: 700;
       flex-shrink: 0;
-      box-shadow: 0 0 0 6px var(--success-soft),
-                  0 8px 24px var(--success-shadow, rgba(16, 185, 129, 0.3));
-      animation: sealPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow:
+        0 0 0 6px var(--success-soft),
+        0 8px 24px var(--success-shadow, rgba(16, 185, 129, 0.3));
+      animation: certSealPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
     .cert-header.invalid .cert-seal {
       background: var(--error);
-      box-shadow: 0 0 0 6px var(--error-soft),
-                  0 8px 24px var(--error-shadow, rgba(239, 68, 68, 0.3));
+      box-shadow:
+        0 0 0 6px var(--error-soft),
+        0 8px 24px var(--error-shadow, rgba(239, 68, 68, 0.3));
     }
     
-    @keyframes sealPop {
+    .cert-seal svg {
+      width: 28px;
+      height: 28px;
+      stroke-width: 3;
+    }
+    
+    @keyframes certSealPop {
       0% { opacity: 0; transform: scale(0.5) rotate(-180deg); }
       100% { opacity: 1; transform: scale(1) rotate(0deg); }
     }
     
     .cert-header-title {
-      font-size: 20px;
-      font-weight: 800;
+      font-size: clamp(18px, 2.5vw, 20px);
+      font-weight: var(--fw-extrabold, 800);
       color: var(--text);
       margin: 0 0 4px;
       line-height: 1.3;
     }
     
     .cert-header-subtitle {
-      font-size: 13px;
+      font-size: var(--fs-sm, 13px);
       color: var(--text-muted);
-      font-family: inherit;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
     
     .cert-status {
       padding: 8px 20px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
+      border-radius: var(--radius-full);
+      font-size: var(--fs-sm, 13px);
+      font-weight: var(--fw-bold, 700);
       display: inline-flex;
       align-items: center;
       gap: 6px;
       flex-shrink: 0;
     }
     
-    .cert-status.valid { background: var(--success); color: #fff; }
-    .cert-status.invalid { background: var(--error); color: #fff; }
+    .cert-status.valid {
+      background: var(--success);
+      color: #FFFFFF;
+    }
     
-    .cert-body { padding: 28px; }
+    .cert-status.invalid {
+      background: var(--error);
+      color: #FFFFFF;
+    }
     
-    .cert-section { margin-bottom: 24px; }
-    .cert-section:last-child { margin-bottom: 0; }
+    /* Body */
+    .cert-body {
+      padding: clamp(20px, 3vw, 28px);
+    }
+    
+    .cert-section {
+      margin-bottom: 24px;
+    }
+    
+    .cert-section:last-child {
+      margin-bottom: 0;
+    }
     
     .cert-section-title {
       font-size: 12px;
-      font-weight: 700;
+      font-weight: var(--fw-bold, 700);
       color: var(--text-muted);
       letter-spacing: 1px;
       margin-bottom: 12px;
@@ -389,7 +177,7 @@
     
     .cert-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
       gap: 12px;
     }
     
@@ -397,11 +185,13 @@
       padding: 14px 16px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      transition: all 0.2s;
+      border-radius: var(--radius-xl, 12px);
+      transition: border-color 0.15s ease;
     }
     
-    .cert-item:hover { border-color: var(--border-strong); }
+    .cert-item:hover {
+      border-color: var(--border-strong);
+    }
     
     .cert-item-label {
       font-size: 11px;
@@ -410,53 +200,58 @@
     }
     
     .cert-item-value {
-      font-size: 15px;
-      font-weight: 600;
+      font-size: var(--fs-md, 15px);
+      font-weight: var(--fw-semibold, 600);
       color: var(--text);
       line-height: 1.4;
       word-break: break-word;
     }
     
     .cert-item-value.mono {
-      font-family: inherit;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.5px;
-      font-size: 13px;
+      font-size: var(--fs-sm, 13px);
     }
     
+    /* Grade badges */
     .cert-grade {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 4px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 14px;
+      border-radius: var(--radius-full);
+      font-weight: var(--fw-bold, 700);
+      font-size: var(--fs-md, 14px);
     }
     
     .cert-grade.excellent {
       background: var(--grade-excellent-bg, rgba(16, 185, 129, 0.15));
       color: var(--grade-excellent-text, #10B981);
     }
+    
     .cert-grade.very-good {
       background: var(--grade-very-good-bg, rgba(59, 130, 246, 0.15));
       color: var(--grade-very-good-text, #3B82F6);
     }
+    
     .cert-grade.good {
       background: var(--grade-good-bg, rgba(245, 158, 11, 0.15));
       color: var(--grade-good-text, #F59E0B);
     }
+    
     .cert-grade.pass {
       background: var(--grade-pass-bg, rgba(249, 115, 22, 0.15));
       color: var(--grade-pass-text, #F97316);
     }
+    
     .cert-grade.fail {
       background: var(--grade-fail-bg, rgba(239, 68, 68, 0.15));
       color: var(--grade-fail-text, #EF4444);
     }
     
+    /* Actions */
     .cert-actions {
-      padding: 20px 28px 24px;
+      padding: clamp(16px, 2vw, 20px) clamp(20px, 3vw, 28px) clamp(20px, 3vw, 24px);
       border-top: 1px solid var(--border);
       display: flex;
       gap: 10px;
@@ -470,17 +265,18 @@
       background: var(--bg);
       color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: var(--radius-xl, 12px);
       font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: var(--fs-sm, 13px);
+      font-weight: var(--fw-semibold, 600);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       text-decoration: none;
+      min-height: 48px;
     }
     
     .cert-action-btn:hover {
@@ -504,62 +300,38 @@
     .cert-action-btn.success {
       background: var(--success);
       border-color: var(--success);
-      color: #fff;
+      color: #FFFFFF;
     }
     
     .cert-action-btn.success:hover {
       background: var(--success-hover, #059669);
       border-color: var(--success-hover, #059669);
-      color: #fff;
+      color: #FFFFFF;
     }
     
+    .cert-action-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    
+    /* Footer */
     .cert-footer {
-      padding: 16px 28px;
-      background: var(--bg);
+      padding: 14px clamp(20px, 3vw, 28px);
+      background: var(--bg-alt, var(--bg));
       border-top: 1px solid var(--border);
       text-align: center;
-      font-size: 11px;
+      font-size: var(--fs-xs, 11px);
       color: var(--text-muted);
       line-height: 1.6;
     }
     
-    .cert-footer strong { color: var(--primary); font-weight: 600; }
-    
-    .verify-info {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 40px;
+    .cert-footer strong {
+      color: var(--primary);
+      font-weight: var(--fw-semibold, 600);
     }
     
-    .verify-info-card {
-      padding: 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    
-    .verify-info-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-2px);
-    }
-    
-    .verify-info-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin: 0 0 6px;
-    }
-    
-    .verify-info-text {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin: 0;
-    }
-    
+    /* ═══ NOSCRIPT ═══ */
     .noscript-banner {
       padding: 16px 20px;
       background: var(--error-soft, #fef2f2);
@@ -571,38 +343,77 @@
       font-weight: 600;
     }
     
+    /* ═══ RESPONSIVE ═══ */
     @media (max-width: 640px) {
-      .verify-search-form { flex-direction: column; }
-      .verify-search-btn { width: 100%; justify-content: center; }
-      .verify-search-card, .verify-main { padding: 20px 16px; }
-      .cert-header { padding: 20px; }
-      .cert-body { padding: 20px; }
-      .cert-actions { padding: 16px 20px 20px; flex-direction: column; }
-      .cert-action-btn { width: 100%; }
-      .cert-seal { width: 52px; height: 52px; font-size: 22px; }
-      .cert-header-title { font-size: 17px; }
-      .cert-grid { grid-template-columns: 1fr; }
+      .cert-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      
+      .cert-header-left {
+        justify-content: center;
+      }
+      
+      .cert-seal {
+        width: 52px;
+        height: 52px;
+      }
+      
+      .cert-seal svg {
+        width: 22px;
+        height: 22px;
+      }
+      
+      .cert-actions {
+        flex-direction: column;
+      }
+      
+      .cert-action-btn {
+        width: 100%;
+      }
+      
+      .cert-grid {
+        grid-template-columns: 1fr;
+      }
     }
     
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
+      .cert-seal {
+        animation: none !important;
       }
     }
     
     @media print {
-      body { background: #fff !important; }
-      .verify-hero, .verify-search-card, .verify-info, .cert-actions,
-      #headerContainer, .theme-fab, .theme-panel,
-      .home-footer, #verifyLoader, #verifyInfo { display: none !important; }
-      .cert-card { border-width: 2px; box-shadow: none; page-break-inside: avoid; }
-      .cert-header { background: transparent !important; }
-      .cert-footer { background: transparent !important; }
+      .page-hero,
+      .page-search-card,
+      .page-info-grid,
+      .page-result-actions,
+      .cert-actions,
+      #headerContainer,
+      .theme-fab-wrap {
+        display: none !important;
+      }
+      
+      .page-result-wrapper {
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      
+      .cert-card {
+        border-width: 2px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+      
+      .cert-header,
+      .cert-footer {
+        background: transparent !important;
+      }
     }
   </style>
 </head>
-<body>
+<body data-page="verify">
 
   <noscript>
     <div class="noscript-banner">
@@ -610,96 +421,113 @@
     </div>
   </noscript>
 
-  <div class="theme-boot-loader" id="themeBootLoader">
-    <div class="loader-logo">نت</div>
-    <div class="loader-spinner"></div>
-  </div>
-
   <div class="page-wrapper">
-
+    
     <div id="headerContainer"></div>
 
-    <section class="verify-hero">
-      <div class="verify-hero-inner">
-        <div class="verify-badge" data-dynamic="verify_badge">التحقق الرسمي من الشهادات</div>
-        <h1 class="verify-title" data-dynamic="verify_title">
-          تحقق من <span class="verify-title-accent">صحة الشهادة</span>
+    <!-- ═══ HERO ═══ -->
+    <section class="page-hero">
+      <div class="page-hero-inner">
+        <div class="page-hero-badge" data-dynamic="verify_badge">التحقق الرسمي من الشهادات</div>
+        <h1 class="page-hero-title" data-dynamic="verify_title">
+          تحقق من <span class="page-hero-title-accent">صحة الشهادة</span>
         </h1>
-        <p class="verify-subtitle" data-dynamic="verify_subtitle">
+        <p class="page-hero-subtitle" data-dynamic="verify_subtitle">
           أدخل كود الشهادة المطبوع عليها للتحقق من صحتها بشكل فوري
         </p>
       </div>
     </section>
 
-    <main class="verify-main">
+    <!-- ═══ MAIN ═══ -->
+    <main class="page-main">
+      <div class="page-main-inner">
 
-      <div class="verify-search-card">
-        <div class="verify-search-label" data-dynamic="verify_search_label">كود الشهادة</div>
-        
-        <form class="verify-search-form" id="verifyForm" onsubmit="return false;">
-          <input
-            type="text"
-            class="verify-search-input"
-            id="certCodeInput"
-            placeholder="NTI-2026-XXXXXX"
-            data-dynamic-placeholder="certificates.code_pattern"
-            autocomplete="off"
-            autocapitalize="characters"
-            autocorrect="off"
-            spellcheck="false"
-            maxlength="40"
-            inputmode="text"
-            dir="ltr"
-            style="text-align: left;"
-            required
-          >
-          <button type="submit" class="verify-search-btn" id="verifyBtn" data-dynamic="verify_btn">تحقق</button>
-        </form>
-        
-        <div class="verify-search-hint" data-dynamic="verify_hint">
-          أدخل الكود المطبوع على الشهادة (مثال: NTI-2026-A7B3C9)
+        <!-- SEARCH -->
+        <div class="page-search-card">
+          <div class="page-search-label" data-dynamic="verify_search_label">كود الشهادة</div>
+          
+          <form class="page-search-form" id="verifyForm" onsubmit="return false;">
+            <input
+              type="text"
+              class="page-search-input"
+              id="certCodeInput"
+              placeholder="NTI-2026-XXXXXX"
+              data-dynamic-placeholder="certificates.code_pattern"
+              autocomplete="off"
+              autocapitalize="characters"
+              autocorrect="off"
+              spellcheck="false"
+              maxlength="40"
+              inputmode="text"
+              dir="ltr"
+              aria-label="كود الشهادة"
+              required
+            >
+            <button type="submit" class="page-search-btn" id="verifyBtn"
+                    data-dynamic="verify_btn">تحقق</button>
+          </form>
+          
+          <div class="page-search-hint" data-dynamic="verify_hint">
+            أدخل الكود المطبوع على الشهادة (مثال: NTI-2026-A7B3C9)
+          </div>
         </div>
-      </div>
 
-      <div class="verify-loader" id="verifyLoader" role="status" aria-live="polite" aria-busy="true">
-        <div class="verify-loader-spinner" aria-hidden="true"></div>
-        <div class="verify-loader-text">جاري التحقق من الشهادة...</div>
-      </div>
-
-      <div class="verify-message error" id="verifyError" role="alert" aria-live="assertive">
-        <div class="verify-message-icon" aria-hidden="true">&#10005;</div>
-        <h2 class="verify-message-title" id="errorTitle">لم يتم العثور على الشهادة</h2>
-        <p class="verify-message-text" id="errorText">
-          تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الأكاديمية المسؤولة
-        </p>
-      </div>
-
-      <div class="verify-result" id="verifyResult" role="region" aria-live="polite" aria-label="نتيجة التحقق"></div>
-
-      <div class="verify-info" id="verifyInfo">
-        <div class="verify-info-card">
-          <h3 class="verify-info-title">تحقق فوري</h3>
-          <p class="verify-info-text">النتيجة تظهر مباشرة من قاعدة البيانات الرسمية</p>
+        <!-- LOADING -->
+        <div class="page-loading" id="verifyLoader" role="status" aria-live="polite" aria-busy="true">
+          <div class="page-loading-spinner" aria-hidden="true"></div>
+          <div class="page-loading-text" data-label="verify.loading">جاري التحقق من الشهادة...</div>
         </div>
-        <div class="verify-info-card">
-          <h3 class="verify-info-title">موثوق 100%</h3>
-          <p class="verify-info-text">الشهادات صادرة عن أكاديميات معتمدة من النقابة</p>
-        </div>
-        <div class="verify-info-card">
-          <h3 class="verify-info-title">QR Code</h3>
-          <p class="verify-info-text">امسح الكود على الشهادة للتحقق السريع</p>
-        </div>
-      </div>
 
+        <!-- ERROR -->
+        <div class="page-error" id="verifyError" role="alert" aria-live="assertive">
+          <div class="page-error-icon" aria-hidden="true">
+            <span data-icon="x-circle"></span>
+          </div>
+          <h2 class="page-error-title" id="errorTitle">لم يتم العثور على الشهادة</h2>
+          <p class="page-error-text" id="errorText">
+            تأكد من كتابة الكود بشكل صحيح، أو تواصل مع الأكاديمية المسؤولة
+          </p>
+        </div>
+
+        <!-- RESULT -->
+        <div class="page-result-wrapper" id="verifyResult" hidden></div>
+
+        <!-- INFO GRID -->
+        <div class="page-info-grid" id="verifyInfo">
+          <div class="page-info-card">
+            <div class="page-info-card-icon" aria-hidden="true">
+              <span data-icon="zap"></span>
+            </div>
+            <h3 class="page-info-card-title" data-label="verify.info.instant_title">تحقق فوري</h3>
+            <p class="page-info-card-text" data-label="verify.info.instant_text">النتيجة تظهر مباشرة من قاعدة البيانات الرسمية</p>
+          </div>
+          <div class="page-info-card">
+            <div class="page-info-card-icon" aria-hidden="true">
+              <span data-icon="shield"></span>
+            </div>
+            <h3 class="page-info-card-title" data-label="verify.info.trust_title">موثوق 100%</h3>
+            <p class="page-info-card-text" data-label="verify.info.trust_text">الشهادات صادرة عن أكاديميات معتمدة من النقابة</p>
+          </div>
+          <div class="page-info-card">
+            <div class="page-info-card-icon" aria-hidden="true">
+              <span data-icon="globe"></span>
+            </div>
+            <h3 class="page-info-card-title" data-label="verify.info.qr_title">QR Code</h3>
+            <p class="page-info-card-text" data-label="verify.info.qr_text">امسح الكود على الشهادة للتحقق السريع</p>
+          </div>
+        </div>
+
+      </div>
     </main>
 
+    <!-- ═══ FOOTER ═══ -->
     <footer class="home-footer">
       <div class="home-footer-inner">
-        <div class="footer-bottom">
-          <span id="footerCopyright" data-dynamic="footer_copyright"></span>
-          <span>
-            <span id="footerPresidentLabel" data-dynamic="president_label"></span>
-            <span class="footer-president" id="footerPresidentName" data-dynamic="president_name"></span>
+        <div class="home-footer-bottom" style="padding-top: 24px; border-top: none;">
+          <span data-home="footer-copyright"></span>
+          <span data-home="footer-president-wrap" hidden>
+            <span data-home="footer-president-label"></span>
+            <span class="home-footer-president" data-home="footer-president-name"></span>
           </span>
         </div>
       </div>
@@ -707,44 +535,23 @@
 
   </div>
 
+  <!-- ═══ SCRIPTS (Body end) ═══ -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/utils.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/permissions.js"></script>
   <script src="assets/js/session.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/app-title.js"></script>
+  <script src="assets/js/realtime.js"></script>
   <script src="assets/js/ui/header.js"></script>
   <script src="assets/js/ui/modal.js"></script>
-  <script src="assets/js/pages/verify.js"></script>
+  <script src="assets/js/ui/toast.js"></script>
+  <script src="assets/js/ui/dropdown.js"></script>
 
-  <script>
-    (function () {
-      function populateFooter() {
-        try {
-          if (!window.AppSettings || typeof AppSettings.get !== 'function') return;
-          var c = document.getElementById('footerCopyright');
-          if (c && !c.textContent.trim()) {
-            var un = AppSettings.get('app_identity.union_name');
-            if (un) c.textContent = '© ' + new Date().getFullYear() + ' ' + un;
-          }
-          var l = document.getElementById('footerPresidentLabel');
-          if (l && !l.textContent.trim()) {
-            var pl = AppSettings.get('app_identity.president_label');
-            if (pl) l.textContent = pl;
-          }
-          var n = document.getElementById('footerPresidentName');
-          if (n && !n.textContent.trim()) {
-            var pn = AppSettings.get('app_identity.president_name');
-            if (pn) n.textContent = pn;
-          }
-        } catch (e) {}
-      }
-      populateFooter();
-      setTimeout(populateFooter, 600);
-      setTimeout(populateFooter, 1800);
-      setTimeout(populateFooter, 3500);
-    })();
-  </script>
+  <script src="assets/js/pages/verify.js"></script>
 
 </body>
 </html>
