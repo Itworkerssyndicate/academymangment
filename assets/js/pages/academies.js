@@ -1,43 +1,88 @@
-// ============================================
-// [27/50] ITWS Platform - Academies Directory Logic
-// Path: assets/js/pages/academies.js
-// ============================================
-// منطق صفحة دليل الأكاديميات
-// بدون إيموجي
-// مسارات نسبية
-// ============================================
+/* ============================================================
+   ITWS Platform — Academies Directory Page Logic V2
+   File: assets/js/pages/academies.js
+   Description: Fetch + filter + search + sort + paginate academies
+
+   Load order: AFTER all core modules + AFTER academies.html markup
+
+   Features:
+   - Fetches approved academies from Supabase
+   - Joins academy_categories + governorates
+   - Populates category & governorate filters dynamically
+   - Debounced search (350ms)
+   - Sort: latest / rating / name
+   - Client-side pagination (pageSize from settings)
+   - Active filter chips (removable)
+   - Clear all filters button
+   - URL state sync (?q= &category= &gov= &sort= &page=)
+   - Realtime updates (new/updated/deleted academies)
+   - Loading / error / empty states
+   - All strings from Labels.t() with fallbacks
+   - Uses SVG icons via Icons.get()
+   - RTL aware, R13 responsive
+   - No emoji
+
+   Rules:
+   - No emoji
+   - ES5-style IIFE
+   - window.sb only
+   - Never exposes national_id or sensitive data
+   - Resets page to 1 when filters change
+   ============================================================ */
 
 (function () {
   'use strict';
 
-  if (window.AcademiesPage && window.AcademiesPage.initialized) return;
+  if (window.AcademiesPage && window.AcademiesPage._initialized) {
+    return;
+  }
 
-  var ITEMS_PER_PAGE = 12;
+  /* ============================================================
+     1. HELPERS
+     ============================================================ */
 
-  var state = {
-    allAcademies: [],
-    allCategories: [],
-    allGovernorates: [],
-    filteredAcademies: [],
-    currentPage: 1,
-    filters: {
-      search: '',
-      category: '',
-      governorate: '',
-      sort: 'newest'
-    },
-    loading: false,
-    initialized: false
-  };
+  function log(level, msg, data) {
+    var cfg = window.ITWS_CONFIG || {};
+    if (level === 'error' || (cfg.DEBUG && level === 'debug')) {
+      try {
+        var args = ['[AcademiesPage]', msg];
+        if (data !== undefined) args.push(data);
+        if (level === 'error') console.error.apply(console, args);
+        else console.log.apply(console, args);
+      } catch (e) {}
+    }
+  }
 
-  // ============================================
-  // 1. Helpers
-  // ============================================
-  function $(id) { return document.getElementById(id); }
+  function getSb() {
+    return window.sb || window.supabaseClient || window.ITWS_SUPABASE || null;
+  }
 
-  function setText(id, t) {
-    var el = $(id);
-    if (el) el.textContent = t;
+  function getLabel(key, fallback) {
+    try {
+      if (window.Labels && typeof window.Labels.t === 'function') {
+        var v = window.Labels.t(key);
+        if (v && v !== key) return v;
+      }
+    } catch (e) {}
+    return fallback;
+  }
+
+  function getSetting(path, fallback) {
+    try {
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        var v = window.AppSettings.get(path);
+        return (v === undefined || v === null) ? fallback : v;
+      }
+    } catch (e) {}
+    return fallback;
+  }
+
+  function resolve(path) {
+    if (!path) return '#';
+    if (window.resolveUrl) return window.resolveUrl(path);
+    var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '/';
+    if (base.charAt(base.length - 1) !== '/') base += '/';
+    return base + String(path).replace(/^\.?\//, '');
   }
 
   function escapeHtml(s) {
@@ -50,669 +95,950 @@
       .replace(/'/g, '&#039;');
   }
 
-  function getSetting(p, f) {
-    if (window.AppSettings && window.AppSettings.get) {
-      return window.AppSettings.get(p, f);
-    }
-    if (window.ITWS_SETTINGS_DEFAULTS) {
-      var parts = p.split('.');
-      var value = window.ITWS_SETTINGS_DEFAULTS;
-      for (var i = 0; i < parts.length; i++) {
-        if (value && typeof value === 'object') value = value[parts[i]];
-        else { value = undefined; break; }
+  function icon(name, size) {
+    try {
+      if (window.Icons && typeof window.Icons.get === 'function') {
+        return window.Icons.get(name, { size: size || 16 });
       }
-      if (value !== undefined) return value;
+    } catch (e) {}
+    return '';
+  }
+
+  function debounce(fn, wait) {
+    var timer = null;
+    return function () {
+      var ctx = this;
+      var args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function () { fn.apply(ctx, args); }, wait || 350);
+    };
+  }
+
+  function dispatchEvent(name, detail) {
+    try {
+      window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+    } catch (e) {}
+  }
+
+  function showToast(msg, type) {
+    try {
+      if (window.Toast && typeof window.Toast.show === 'function') {
+        window.Toast.show({ type: type || 'info', message: msg });
+      } else if (window.Utils && typeof window.Utils.showToast === 'function') {
+        window.Utils.showToast(msg, type);
+      }
+    } catch (e) {}
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  function show(el) { if (el) el.classList.add('is-visible'); }
+  function hide(el) { if (el) el.classList.remove('is-visible'); }
+  function showFlex(el) { if (el) el.classList.add('is-visible'); }
+
+  /* ============================================================
+     2. STATE
+     ============================================================ */
+
+  var state = {
+    _initialized: false,
+    loading: false,
+    error: null,
+    academies: [],
+    categories: [],
+    governorates: [],
+    filtered: [],
+    page: 1,
+    pageSize: 12,
+    filters: {
+      search: '',
+      category: '',
+      governorate: '',
+      sort: 'latest'
+    },
+    realtimeUnsub: null
+  };
+
+  var DEFAULTS = {
+    pageSize: 12
+  };
+
+  /* ============================================================
+     3. READ URL STATE
+     ============================================================ */
+
+  function readUrlState() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+
+      var q = params.get('q');
+      if (q) state.filters.search = String(q).trim();
+
+      var cat = params.get('category');
+      if (cat) state.filters.category = String(cat).trim();
+
+      var gov = params.get('gov');
+      if (gov) state.filters.governorate = String(gov).trim();
+
+      var sort = params.get('sort');
+      if (sort && ['latest', 'rating', 'name'].indexOf(sort) !== -1) {
+        state.filters.sort = sort;
+      }
+
+      var page = parseInt(params.get('page'), 10);
+      if (isFinite(page) && page > 0) state.page = page;
+    } catch (e) {}
+  }
+
+  /* ============================================================
+     4. WRITE URL STATE
+     ============================================================ */
+
+  function writeUrlState() {
+    try {
+      var url = new URL(window.location.href);
+
+      if (state.filters.search) url.searchParams.set('q', state.filters.search);
+      else url.searchParams.delete('q');
+
+      if (state.filters.category) url.searchParams.set('category', state.filters.category);
+      else url.searchParams.delete('category');
+
+      if (state.filters.governorate) url.searchParams.set('gov', state.filters.governorate);
+      else url.searchParams.delete('gov');
+
+      if (state.filters.sort && state.filters.sort !== 'latest') {
+        url.searchParams.set('sort', state.filters.sort);
+      } else {
+        url.searchParams.delete('sort');
+      }
+
+      if (state.page > 1) url.searchParams.set('page', String(state.page));
+      else url.searchParams.delete('page');
+
+      window.history.replaceState({}, '', url.toString());
+    } catch (e) {}
+  }
+
+  /* ============================================================
+     5. FETCH — ACADEMIES
+     ============================================================ */
+
+  function fetchAcademies() {
+    var sb = getSb();
+    if (!sb) {
+      return Promise.reject(new Error(getLabel('errors.network', 'تعذر الاتصال بالخادم')));
     }
-    return f;
-  }
 
-  function toast(msg, type) {
-    if (window.Utils && window.Utils.showToast) {
-      window.Utils.showToast(msg, type || 'info');
-    } else if (type === 'error') {
-      alert(msg);
-    }
-  }
-
-  function logDebug() {
-    if (window.ITWS_CONFIG && window.ITWS_CONFIG.DEBUG) {
-      console.log.apply(console, ['[AcademiesPage]'].concat(Array.prototype.slice.call(arguments)));
-    }
-  }
-
-  function resolve(path) {
-    if (!path) return '#';
-    if (window.resolveUrl) return window.resolveUrl(path);
-    var base = (window.ITWS_CONFIG && window.ITWS_CONFIG.BASE_PATH) || '';
-    return base + String(path).replace(/^\.?\//, '');
-  }
-
-  // ============================================
-  // 2. Dynamic content
-  // ============================================
-  function applyDynamicContent() {
-    setText('footerCopyright', getSetting('app_identity.footer_text', '© 2026 نقابة تكنولوجيا المعلومات والبرمجيات'));
-    setText('footerPresidentLabel', getSetting('app_identity.president_label', 'النقيب العام:'));
-    setText('footerPresidentName', getSetting('app_identity.president_name', 'المحاسب / محمود جميل'));
-  }
-
-  // ============================================
-  // 3. Load categories (للفلترة)
-  // ============================================
-  function loadCategories() {
-    if (!window.sb) return Promise.resolve([]);
-
-    return window.sb
-      .from('academy_categories')
-      .select('id, name, name_en, color, sort_order')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true })
+    return sb.from('academies')
+      .select('id, name, description, logo_url, cover_url, category_id, governorate_id, city, status, is_deleted, rating_avg, rating_count, is_rating_visible, created_at, approved_at')
+      .eq('status', 'approved')
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false })
       .then(function (res) {
-        if (res.error || !res.data) return [];
-        return res.data;
+        if (res.error) throw new Error(res.error.message);
+        return res.data || [];
+      });
+  }
+
+  function fetchCategories() {
+    var sb = getSb();
+    if (!sb) return Promise.resolve([]);
+
+    return sb.from('academy_categories')
+      .select('id, name_ar')
+      .eq('is_active', true)
+      .order('order_index', { ascending: true })
+      .then(function (res) {
+        if (res.error) return [];
+        return res.data || [];
       })
       .catch(function () { return []; });
   }
 
-  // ============================================
-  // 4. Load academies + branches (bulk)
-  // ============================================
-  function loadAcademies() {
-    if (!window.sb) return Promise.reject(new Error('Supabase not available'));
+  function fetchGovernorates() {
+    var sb = getSb();
+    if (!sb) return Promise.resolve([]);
 
-    return window.sb
-      .from('academies')
-      .select('id, name, license_number, category_id, logo_url, description, created_at, branches:academy_branches(id, governorate, address, is_main)')
-      .eq('status', 'approved')
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: false });
+    return sb.from('governorates')
+      .select('id, name_ar, code')
+      .eq('is_active', true)
+      .order('order_index', { ascending: true })
+      .then(function (res) {
+        if (res.error) return [];
+        return res.data || [];
+      })
+      .catch(function () { return []; });
   }
 
-  // ============================================
-  // 5. Populate filter dropdowns
-  // ============================================
-  function populateFilters() {
-    // Categories
-    var categoryFilter = $('categoryFilter');
-    if (categoryFilter && state.allCategories.length > 0) {
-      var currentVal = categoryFilter.value;
-      var html = '<option value="">جميع التصنيفات</option>';
-      state.allCategories.forEach(function (cat) {
-        html += '<option value="' + escapeHtml(cat.id) + '">' + escapeHtml(cat.name) + '</option>';
-      });
-      categoryFilter.innerHTML = html;
-      categoryFilter.value = currentVal;
+  /* ============================================================
+     6. POPULATE FILTERS
+     ============================================================ */
+
+  function populateCategoryFilter() {
+    var select = $('filterCategory');
+    if (!select) return;
+
+    // Keep first option ("كل التصنيفات")
+    var firstOption = select.querySelector('option');
+    select.innerHTML = '';
+
+    if (firstOption) select.appendChild(firstOption);
+    else {
+      var allOpt = document.createElement('option');
+      allOpt.value = '';
+      allOpt.textContent = getLabel('academies.filter.all_categories', 'كل التصنيفات');
+      select.appendChild(allOpt);
     }
 
-    // Governorates
-    var govFilter = $('governorateFilter');
-    if (govFilter) {
-      var govSet = {};
-      state.allAcademies.forEach(function (a) {
-        if (a.branches && a.branches.length) {
-          a.branches.forEach(function (b) {
-            if (b.governorate) govSet[b.governorate] = true;
-          });
-        }
-      });
-      var govs = Object.keys(govSet).sort();
-      state.allGovernorates = govs;
+    state.categories.forEach(function (cat) {
+      var opt = document.createElement('option');
+      opt.value = String(cat.id);
+      opt.textContent = cat.name_ar || 'تصنيف';
+      select.appendChild(opt);
+    });
 
-      var currentVal2 = govFilter.value;
-      var html2 = '<option value="">جميع المحافظات</option>';
-      govs.forEach(function (g) {
-        html2 += '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>';
-      });
-      govFilter.innerHTML = html2;
-      govFilter.value = currentVal2;
+    if (state.filters.category) {
+      select.value = String(state.filters.category);
     }
   }
 
-  // ============================================
-  // 6. Apply filters
-  // ============================================
+  function populateGovernorateFilter() {
+    var select = $('filterGovernorate');
+    if (!select) return;
+
+    var firstOption = select.querySelector('option');
+    select.innerHTML = '';
+
+    if (firstOption) select.appendChild(firstOption);
+    else {
+      var allOpt = document.createElement('option');
+      allOpt.value = '';
+      allOpt.textContent = getLabel('academies.filter.all_governorates', 'كل المحافظات');
+      select.appendChild(allOpt);
+    }
+
+    state.governorates.forEach(function (gov) {
+      var opt = document.createElement('option');
+      opt.value = String(gov.id);
+      opt.textContent = gov.name_ar || 'محافظة';
+      select.appendChild(opt);
+    });
+
+    if (state.filters.governorate) {
+      select.value = String(state.filters.governorate);
+    }
+  }
+
+  /* ============================================================
+     7. APPLY FILTERS + SORT
+     ============================================================ */
+
   function applyFilters() {
-    var search = state.filters.search.trim().toLowerCase();
-    var categoryId = state.filters.category;
-    var governorate = state.filters.governorate;
-    var sortBy = state.filters.sort;
+    var search = (state.filters.search || '').toLowerCase().trim();
+    var catId = state.filters.category ? parseInt(state.filters.category, 10) : null;
+    var govId = state.filters.governorate ? parseInt(state.filters.governorate, 10) : null;
 
-    var filtered = state.allAcademies.filter(function (a) {
-      // Search filter
+    var result = state.academies.filter(function (a) {
+      // Search
       if (search) {
-        var nameMatch = (a.name || '').toLowerCase().indexOf(search) !== -1;
-        var licenseMatch = (a.license_number || '').toLowerCase().indexOf(search) !== -1;
-        if (!nameMatch && !licenseMatch) return false;
+        var haystack = ((a.name || '') + ' ' + (a.description || '') + ' ' + (a.city || '')).toLowerCase();
+        if (haystack.indexOf(search) === -1) return false;
       }
 
-      // Category filter
-      if (categoryId && a.category_id !== categoryId) return false;
+      // Category
+      if (catId && a.category_id !== catId) return false;
 
-      // Governorate filter
-      if (governorate) {
-        var hasGov = false;
-        if (a.branches && a.branches.length) {
-          for (var i = 0; i < a.branches.length; i++) {
-            if (a.branches[i].governorate === governorate) {
-              hasGov = true;
-              break;
-            }
-          }
-        }
-        if (!hasGov) return false;
-      }
+      // Governorate
+      if (govId && a.governorate_id !== govId) return false;
 
       return true;
     });
 
     // Sort
-    filtered.sort(function (a, b) {
-      if (sortBy === 'newest') {
-        return new Date(b.created_at) - new Date(a.created_at);
-      }
-      if (sortBy === 'oldest') {
-        return new Date(a.created_at) - new Date(b.created_at);
-      }
-      if (sortBy === 'name') {
-        return (a.name || '').localeCompare(b.name || '', 'ar');
-      }
-      if (sortBy === 'branches') {
-        var aCount = (a.branches && a.branches.length) || 0;
-        var bCount = (b.branches && b.branches.length) || 0;
-        return bCount - aCount;
-      }
-      return 0;
-    });
-
-    state.filteredAcademies = filtered;
-    state.currentPage = 1;
-  }
-
-  // ============================================
-  // 7. Get category color
-  // ============================================
-  function getCategoryById(id) {
-    for (var i = 0; i < state.allCategories.length; i++) {
-      if (state.allCategories[i].id === id) return state.allCategories[i];
+    var sort = state.filters.sort || 'latest';
+    if (sort === 'rating') {
+      result.sort(function (a, b) {
+        var ra = Number(a.rating_avg) || 0;
+        var rb = Number(b.rating_avg) || 0;
+        if (rb !== ra) return rb - ra;
+        return (Number(b.rating_count) || 0) - (Number(a.rating_count) || 0);
+      });
+    } else if (sort === 'name') {
+      result.sort(function (a, b) {
+        return String(a.name || '').localeCompare(String(b.name || ''), 'ar');
+      });
+    } else {
+      // latest
+      result.sort(function (a, b) {
+        var da = new Date(a.approved_at || a.created_at || 0).getTime();
+        var db = new Date(b.approved_at || b.created_at || 0).getTime();
+        return db - da;
+      });
     }
-    return null;
+
+    state.filtered = result;
+
+    // Reset page if out of range
+    var maxPage = Math.max(1, Math.ceil(result.length / state.pageSize));
+    if (state.page > maxPage) state.page = maxPage;
   }
 
-  // ============================================
-  // 8. Render academies grid
-  // ============================================
-  function renderAcademies() {
-    var grid = $('academiesGrid');
-    var empty = $('acadEmpty');
-    var loader = $('acadLoader');
-    var resultsHeader = $('resultsHeader');
-    var pagination = $('pagination');
+  /* ============================================================
+     8. RENDER CARDS
+     ============================================================ */
 
+  function renderStars(ratingAvg, ratingCount) {
+    var rating = Number(ratingAvg) || 0;
+    if (rating > 5) rating = 5;
+    if (rating < 0) rating = 0;
+
+    var count = Number(ratingCount) || 0;
+    var fullStars = Math.floor(rating);
+    var hasHalf = (rating - fullStars) >= 0.5;
+    var emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+
+    var html = '<span class="academy-dir-card-stars" aria-hidden="true">';
+    for (var i = 0; i < fullStars; i++) {
+      html += icon('star-filled', 13);
+    }
+    if (hasHalf) {
+      // Approximate half with full star — can be refined
+      html += icon('star-filled', 13);
+      emptyStars = 5 - fullStars - 1;
+    }
+    for (var j = 0; j < emptyStars; j++) {
+      html += icon('star', 13).replace('class="', 'class="star-empty ');
+    }
+    html += '</span>';
+
+    var displayRating = rating.toFixed(1);
+    html += '<span class="academy-dir-card-rating-count">'
+      + '<strong>' + escapeHtml(displayRating) + '</strong>'
+      + ' (' + count + ')</span>';
+
+    return html;
+  }
+
+  function renderCard(academy) {
+    var logoHtml = '';
+    if (academy.logo_url) {
+      logoHtml = '<img src="' + escapeHtml(academy.logo_url) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + escapeHtml((academy.name || 'أ').charAt(0)) + '\';">';
+    } else {
+      logoHtml = escapeHtml((academy.name || 'أ').charAt(0));
+    }
+
+    var categoryName = '';
+    if (academy.category_id) {
+      var cat = state.categories.find(function (c) { return c.id === academy.category_id; });
+      if (cat) categoryName = cat.name_ar || '';
+    }
+
+    var govName = '';
+    if (academy.governorate_id) {
+      var gov = state.governorates.find(function (g) { return g.id === academy.governorate_id; });
+      if (gov) govName = gov.name_ar || '';
+    }
+
+    var city = academy.city || '';
+    var location = govName && city ? (govName + ' — ' + city) : (govName || city || '');
+
+    var metaHtml = '';
+    if (location) {
+      metaHtml += '<span class="academy-dir-card-meta-item">'
+        + icon('map-pin', 14)
+        + '<span>' + escapeHtml(location) + '</span>'
+        + '</span>';
+    }
+
+    var ratingHtml = '';
+    if (academy.is_rating_visible !== false && (Number(academy.rating_count) > 0)) {
+      ratingHtml = '<div class="academy-dir-card-rating">'
+        + renderStars(academy.rating_avg, academy.rating_count)
+        + '</div>';
+    }
+
+    var badgeHtml = '<span class="academy-dir-card-badge">'
+      + icon('check-circle', 11)
+      + '<span>' + escapeHtml(getLabel('academies.card.verified', 'معتمدة')) + '</span>'
+      + '</span>';
+
+    return ''
+      + '<a href="' + escapeHtml(resolve('academy-details.html?id=' + encodeURIComponent(academy.id))) + '" '
+      +   'class="academy-dir-card" role="listitem" '
+      +   'aria-label="' + escapeHtml(academy.name || '') + '">'
+      +   badgeHtml
+      +   '<div class="academy-dir-card-header">'
+      +     '<div class="academy-dir-card-logo">' + logoHtml + '</div>'
+      +     '<div class="academy-dir-card-info">'
+      +       '<h3 class="academy-dir-card-name">' + escapeHtml(academy.name || '') + '</h3>'
+      +       (categoryName ? '<div class="academy-dir-card-category">' + icon('tag', 12) + '<span>' + escapeHtml(categoryName) + '</span></div>' : '')
+      +     '</div>'
+      +   '</div>'
+      +   (academy.description ? '<p class="academy-dir-card-desc">' + escapeHtml(academy.description) + '</p>' : '<p class="academy-dir-card-desc"></p>')
+      +   '<div class="academy-dir-card-meta">'
+      +     metaHtml
+      +     ratingHtml
+      +   '</div>'
+      + '</a>';
+  }
+
+  /* ============================================================
+     9. RENDER GRID + PAGINATION
+     ============================================================ */
+
+  function renderGrid() {
+    var grid = $('academiesGrid');
     if (!grid) return;
 
-    // Hide loader
-    if (loader) loader.classList.remove('show');
+    var total = state.filtered.length;
+    var start = (state.page - 1) * state.pageSize;
+    var end = start + state.pageSize;
+    var pageItems = state.filtered.slice(start, end);
 
-    var total = state.filteredAcademies.length;
-
-    // Show header
-    if (resultsHeader) {
-      resultsHeader.style.display = 'flex';
-      var countEl = $('resultsCount');
-      if (countEl) {
-        countEl.innerHTML = '<strong>' + total + '</strong> أكاديمية';
-      }
-    }
-
-    // Empty state
     if (total === 0) {
-      grid.style.display = 'none';
-      if (empty) empty.classList.add('show');
-      if (pagination) pagination.style.display = 'none';
+      grid.innerHTML = '';
       return;
     }
 
-    grid.style.display = 'grid';
-    if (empty) empty.classList.remove('show');
+    grid.innerHTML = pageItems.map(renderCard).join('');
+  }
 
-    // Pagination
-    var startIndex = (state.currentPage - 1) * ITEMS_PER_PAGE;
-    var endIndex = startIndex + ITEMS_PER_PAGE;
-    var pageItems = state.filteredAcademies.slice(startIndex, endIndex);
+  function computePageNumbers(current, total) {
+    if (total <= 7) {
+      var all = [];
+      for (var i = 1; i <= total; i++) all.push(i);
+      return all;
+    }
+    var result = [1];
+    if (current > 3) result.push('...');
+    var start = Math.max(2, current - 1);
+    var end = Math.min(total - 1, current + 1);
+    for (var j = start; j <= end; j++) result.push(j);
+    if (current < total - 2) result.push('...');
+    result.push(total);
+    return result;
+  }
 
-    // Build cards
-    var html = pageItems.map(function (a) {
-      var cat = getCategoryById(a.category_id);
-      var branches = a.branches || [];
-      var initial = escapeHtml((a.name || '?').charAt(0));
+  function renderPagination() {
+    var el = $('academiesPagination');
+    if (!el) return;
 
-      var logoHtml = a.logo_url
-        ? '<img src="' + escapeHtml(a.logo_url) + '" alt="">'
-        : initial;
+    var total = state.filtered.length;
+    var totalPages = Math.max(1, Math.ceil(total / state.pageSize));
 
-      // preview فروع (أول 3)
-      var branchPreview = '';
-      if (branches.length > 0) {
-        var shown = branches.slice(0, 3);
-        branchPreview = shown.map(function (b) {
-          return '<span class="academy-branch-tag">' + escapeHtml(b.governorate || '—') + '</span>';
-        }).join('');
-        if (branches.length > 3) {
-          branchPreview += '<span class="academy-branch-tag">+' + (branches.length - 3) + '</span>';
-        }
+    if (total === 0) {
+      el.innerHTML = '';
+      return;
+    }
+
+    var prevDisabled = state.page <= 1;
+    var nextDisabled = state.page >= totalPages;
+
+    var html = '<button type="button" class="academies-page-btn" data-page="prev" '
+      + (prevDisabled ? 'disabled' : '')
+      + ' aria-label="' + escapeHtml(getLabel('common.previous', 'السابق')) + '">'
+      + icon('chevron-right', 16)
+      + '</button>';
+
+    computePageNumbers(state.page, totalPages).forEach(function (p) {
+      if (p === '...') {
+        html += '<span class="academies-page-ellipsis">…</span>';
+      } else {
+        html += '<button type="button" class="academies-page-btn'
+          + (p === state.page ? ' is-active' : '')
+          + '" data-page="' + p + '">' + p + '</button>';
       }
+    });
 
-      return '' +
-        '<div class="academy-card" data-academy-id="' + escapeHtml(a.id) + '" role="button" tabindex="0">' +
-          '<div class="academy-header">' +
-            '<div class="academy-logo">' + logoHtml + '</div>' +
-            '<div class="academy-info">' +
-              '<h3 class="academy-name">' + escapeHtml(a.name || 'أكاديمية') + '</h3>' +
-              '<span class="academy-badge">' +
-                '<span class="academy-badge-dot"></span>' +
-                'معتمدة' +
-              '</span>' +
-            '</div>' +
-          '</div>' +
-          '<div class="academy-body">' +
-            (cat ? 
-              '<div class="academy-category">' +
-                '<span class="academy-category-dot"></span>' +
-                escapeHtml(cat.name) +
-              '</div>' 
-              : '') +
-            '<div class="academy-license">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>' +
-                '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>' +
-              '</svg>' +
-              '<span>' + escapeHtml(a.license_number || '—') + '</span>' +
-            '</div>' +
-            (branchPreview ? 
-              '<div class="academy-branches-preview">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                  '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>' +
-                  '<circle cx="12" cy="10" r="3"></circle>' +
-                '</svg>' +
-                branchPreview +
-              '</div>' 
-              : '') +
-          '</div>' +
-          '<div class="academy-footer">' +
-            '<span style="font-size:12px;color:var(--text-muted);">' + branches.length + ' فرع</span>' +
-            '<span class="academy-arrow">' +
-              '<span>عرض التفاصيل</span>' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                '<line x1="19" y1="12" x2="5" y2="12"></line>' +
-                '<polyline points="12 19 5 12 12 5"></polyline>' +
-              '</svg>' +
-            '</span>' +
-          '</div>' +
-        '</div>';
+    html += '<button type="button" class="academies-page-btn" data-page="next" '
+      + (nextDisabled ? 'disabled' : '')
+      + ' aria-label="' + escapeHtml(getLabel('common.next', 'التالي')) + '">'
+      + icon('chevron-left', 16)
+      + '</button>';
+
+    el.innerHTML = html;
+
+    // Bind pagination
+    el.querySelectorAll('[data-page]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        var target = btn.getAttribute('data-page');
+        if (target === 'prev') state.page = Math.max(1, state.page - 1);
+        else if (target === 'next') state.page = Math.min(totalPages, state.page + 1);
+        else state.page = parseInt(target, 10);
+        writeUrlState();
+        renderGrid();
+        renderPagination();
+        // Scroll to grid top
+        try {
+          grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) {}
+      });
+    });
+  }
+
+  /* ============================================================
+     10. RENDER COUNTER + CLEAR BTN
+     ============================================================ */
+
+  function renderCounters() {
+    var count = $('academiesFiltersCount');
+    if (count) {
+      var total = state.filtered.length;
+      var totalAll = state.academies.length;
+      var text;
+      if (total === totalAll) {
+        text = getLabel('academies.filters.count_all', 'عرض {n} أكاديمية').replace('{n}', String(total));
+      } else {
+        text = getLabel('academies.filters.count_filtered', 'عرض {n} من {total} أكاديمية')
+          .replace('{n}', String(total))
+          .replace('{total}', String(totalAll));
+      }
+      count.textContent = text;
+    }
+
+    var clearBtn = $('clearFiltersBtn');
+    if (clearBtn) {
+      var hasFilters = !!(
+        state.filters.search ||
+        state.filters.category ||
+        state.filters.governorate ||
+        (state.filters.sort && state.filters.sort !== 'latest')
+      );
+      if (hasFilters) clearBtn.removeAttribute('hidden');
+      else clearBtn.setAttribute('hidden', '');
+    }
+  }
+
+  /* ============================================================
+     11. RENDER ACTIVE FILTERS CHIPS
+     ============================================================ */
+
+  function renderActiveFilters() {
+    var container = $('academiesActiveFilters');
+    if (!container) return;
+
+    var chips = [];
+
+    if (state.filters.search) {
+      chips.push({
+        type: 'search',
+        label: getLabel('academies.chip.search', 'بحث') + ': ' + state.filters.search
+      });
+    }
+
+    if (state.filters.category) {
+      var cat = state.categories.find(function (c) { return String(c.id) === String(state.filters.category); });
+      chips.push({
+        type: 'category',
+        label: cat ? cat.name_ar : state.filters.category
+      });
+    }
+
+    if (state.filters.governorate) {
+      var gov = state.governorates.find(function (g) { return String(g.id) === String(state.filters.governorate); });
+      chips.push({
+        type: 'governorate',
+        label: gov ? gov.name_ar : state.filters.governorate
+      });
+    }
+
+    if (state.filters.sort && state.filters.sort !== 'latest') {
+      var sortLabel = state.filters.sort === 'rating'
+        ? getLabel('academies.sort.rating', 'الأعلى تقييماً')
+        : getLabel('academies.sort.name', 'الأبجدي');
+      chips.push({ type: 'sort', label: sortLabel });
+    }
+
+    if (chips.length === 0) {
+      container.setAttribute('hidden', '');
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = chips.map(function (c) {
+      return '<span class="chip" data-filter-type="' + escapeHtml(c.type) + '">'
+        + '<span>' + escapeHtml(c.label) + '</span>'
+        + '<button type="button" data-clear="' + escapeHtml(c.type) + '" '
+        + 'aria-label="' + escapeHtml(getLabel('common.remove', 'إزالة')) + '">'
+        + icon('x', 12)
+        + '</button>'
+        + '</span>';
     }).join('');
 
-    grid.innerHTML = html;
+    container.removeAttribute('hidden');
 
-    // Bind click
-    grid.querySelectorAll('[data-academy-id]').forEach(function (card) {
-      var id = card.getAttribute('data-academy-id');
-
-      card.addEventListener('click', function () {
-        window.location.href = resolve('academy-details.html?id=' + encodeURIComponent(id));
-      });
-
-      card.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          window.location.href = resolve('academy-details.html?id=' + encodeURIComponent(id));
+    // Bind chips clear buttons
+    container.querySelectorAll('[data-clear]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var type = btn.getAttribute('data-clear');
+        if (type === 'search') {
+          state.filters.search = '';
+          var input = $('academiesSearchInput');
+          if (input) input.value = '';
+        } else if (type === 'category') {
+          state.filters.category = '';
+          var catSel = $('filterCategory');
+          if (catSel) catSel.value = '';
+        } else if (type === 'governorate') {
+          state.filters.governorate = '';
+          var govSel = $('filterGovernorate');
+          if (govSel) govSel.value = '';
+        } else if (type === 'sort') {
+          state.filters.sort = 'latest';
+          var sortSel = $('filterSort');
+          if (sortSel) sortSel.value = 'latest';
         }
+        state.page = 1;
+        writeUrlState();
+        applyFilters();
+        renderGrid();
+        renderPagination();
+        renderCounters();
+        renderActiveFilters();
+        updateStates();
       });
     });
-
-    // Render pagination
-    renderPagination(total);
   }
 
-  // ============================================
-  // 9. Render pagination
-  // ============================================
-  function renderPagination(total) {
-    var pagination = $('pagination');
-    var pageNumbers = $('pageNumbers');
-    var prevBtn = $('prevBtn');
-    var nextBtn = $('nextBtn');
+  /* ============================================================
+     12. UPDATE VISIBILITY STATES
+     ============================================================ */
 
-    if (!pagination || !pageNumbers) return;
+  function updateStates() {
+    var loader = $('academiesLoader');
+    var errorEl = $('academiesError');
+    var emptyEl = $('academiesEmpty');
+    var grid = $('academiesGrid');
+    var pag = $('academiesPagination');
+    var filters = $('academiesFilters');
 
-    var totalPages = Math.ceil(total / ITEMS_PER_PAGE);
-
-    if (totalPages <= 1) {
-      pagination.style.display = 'none';
+    if (state.loading) {
+      if (loader) loader.classList.add('is-visible');
+      if (errorEl) errorEl.classList.remove('is-visible');
+      if (emptyEl) emptyEl.classList.remove('is-visible');
+      if (grid) grid.style.display = 'none';
+      if (pag) pag.style.display = 'none';
       return;
     }
 
-    pagination.style.display = 'flex';
+    if (loader) loader.classList.remove('is-visible');
 
-    // Page numbers (smart: 1, ..., current-1, current, current+1, ..., last)
-    var current = state.currentPage;
-    var pages = [];
-
-    function addPage(n) {
-      if (pages.indexOf(n) === -1) pages.push(n);
+    if (state.error) {
+      if (errorEl) errorEl.classList.add('is-visible');
+      if (emptyEl) emptyEl.classList.remove('is-visible');
+      if (grid) grid.style.display = 'none';
+      if (pag) pag.style.display = 'none';
+      return;
     }
 
-    addPage(1);
-    for (var i = current - 1; i <= current + 1; i++) {
-      if (i > 1 && i < totalPages) addPage(i);
-    }
-    if (totalPages > 1) addPage(totalPages);
+    if (errorEl) errorEl.classList.remove('is-visible');
 
-    pages.sort(function (a, b) { return a - b; });
+    if (state.filtered.length === 0) {
+      // Empty state
+      if (emptyEl) emptyEl.classList.add('is-visible');
 
-    var html = '';
-    var prevPage = 0;
-    pages.forEach(function (n) {
-      if (prevPage && n - prevPage > 1) {
-        html += '<span style="padding:0 8px;color:var(--text-muted);">...</span>';
+      // Customize empty text based on filters
+      var emptyText = $('academiesEmptyText');
+      if (emptyText) {
+        var hasFilters = !!(
+          state.filters.search ||
+          state.filters.category ||
+          state.filters.governorate
+        );
+        if (hasFilters) {
+          emptyText.textContent = getLabel('academies.empty.filtered',
+            'لم يتم العثور على أكاديميات مطابقة لبحثك. جرّب مسح الفلاتر');
+        } else {
+          emptyText.textContent = getLabel('academies.empty.none',
+            'لم تتم إضافة أي أكاديميات معتمدة بعد');
+        }
       }
-      html += '<button class="pagination-btn' + (n === current ? ' active' : '') + '" data-page="' + n + '" type="button">' + n + '</button>';
-      prevPage = n;
-    });
 
-    pageNumbers.innerHTML = html;
-
-    // Bind page buttons
-    pageNumbers.querySelectorAll('[data-page]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var page = parseInt(btn.getAttribute('data-page'), 10);
-        if (page && page !== state.currentPage) {
-          state.currentPage = page;
-          renderAcademies();
-          scrollToResults();
-        }
-      });
-    });
-
-    // Prev/Next
-    if (prevBtn) prevBtn.disabled = current <= 1;
-    if (nextBtn) nextBtn.disabled = current >= totalPages;
-  }
-
-  function scrollToResults() {
-    var filters = document.querySelector('.acad-filters');
-    if (filters) {
-      var offset = filters.getBoundingClientRect().top + window.pageYOffset - 20;
-      window.scrollTo({ top: offset, behavior: 'smooth' });
+      if (grid) grid.style.display = 'none';
+      if (pag) pag.style.display = 'none';
+      return;
     }
+
+    // Has results
+    if (emptyEl) emptyEl.classList.remove('is-visible');
+    if (grid) grid.style.display = '';
+    if (pag) pag.style.display = '';
   }
 
-  // ============================================
-  // 10. Update URL params
-  // ============================================
-  function updateURL() {
-    try {
-      var params = new URLSearchParams();
-      if (state.filters.search) params.set('q', state.filters.search);
-      if (state.filters.category) params.set('cat', state.filters.category);
-      if (state.filters.governorate) params.set('gov', state.filters.governorate);
-      if (state.filters.sort && state.filters.sort !== 'newest') params.set('sort', state.filters.sort);
-      if (state.currentPage > 1) params.set('page', state.currentPage);
+  /* ============================================================
+     13. FULL REFRESH PIPELINE
+     ============================================================ */
 
-      var qs = params.toString();
-      var url = window.location.pathname + (qs ? '?' + qs : '');
-      window.history.replaceState({}, '', url);
-    } catch (e) {}
-  }
-
-  // ============================================
-  // 11. Read URL params
-  // ============================================
-  function readURL() {
-    try {
-      var params = new URLSearchParams(window.location.search);
-      state.filters.search = params.get('q') || params.get('search') || '';
-      state.filters.category = params.get('cat') || '';
-      state.filters.governorate = params.get('gov') || '';
-      state.filters.sort = params.get('sort') || 'newest';
-      var page = parseInt(params.get('page'), 10);
-      state.currentPage = page && page > 0 ? page : 1;
-
-      // Update UI
-      var searchInput = $('searchInput');
-      if (searchInput && state.filters.search) searchInput.value = state.filters.search;
-
-      var sortFilter = $('sortFilter');
-      if (sortFilter) sortFilter.value = state.filters.sort;
-    } catch (e) {}
-  }
-
-  // ============================================
-  // 12. Sync filters from UI
-  // ============================================
-  function syncFiltersFromUI() {
-    var searchInput = $('searchInput');
-    var categoryFilter = $('categoryFilter');
-    var govFilter = $('governorateFilter');
-    var sortFilter = $('sortFilter');
-
-    state.filters.search = searchInput ? searchInput.value.trim() : '';
-    state.filters.category = categoryFilter ? categoryFilter.value : '';
-    state.filters.governorate = govFilter ? govFilter.value : '';
-    state.filters.sort = sortFilter ? sortFilter.value : 'newest';
-  }
-
-  // ============================================
-  // 13. Apply changes + update
-  // ============================================
-  function applyAndRender() {
-    syncFiltersFromUI();
+  function refreshRendering() {
     applyFilters();
-    renderAcademies();
-    updateURL();
+    renderGrid();
+    renderPagination();
+    renderCounters();
+    renderActiveFilters();
+    updateStates();
   }
 
-  // ============================================
-  // 14. Reset all filters
-  // ============================================
-  function resetFilters() {
-    var searchInput = $('searchInput');
-    var categoryFilter = $('categoryFilter');
-    var govFilter = $('governorateFilter');
-    var sortFilter = $('sortFilter');
+  function loadData(initialLoad) {
+    state.loading = true;
+    state.error = null;
+    updateStates();
 
-    if (searchInput) searchInput.value = '';
-    if (categoryFilter) categoryFilter.value = '';
-    if (govFilter) govFilter.value = '';
-    if (sortFilter) sortFilter.value = 'newest';
+    var promises = [fetchAcademies()];
 
-    state.filters = { search: '', category: '', governorate: '', sort: 'newest' };
-    state.currentPage = 1;
-
-    applyFilters();
-    renderAcademies();
-    updateURL();
-    scrollToResults();
-  }
-
-  // ============================================
-  // 15. Bind UI events
-  // ============================================
-  function bindEvents() {
-    // Search button
-    var searchBtn = $('searchBtn');
-    if (searchBtn) {
-      searchBtn.addEventListener('click', function () {
-        applyAndRender();
-      });
+    if (initialLoad) {
+      promises.push(fetchCategories());
+      promises.push(fetchGovernorates());
+    } else {
+      promises.push(Promise.resolve(state.categories));
+      promises.push(Promise.resolve(state.governorates));
     }
 
-    // Search input (Enter)
-    var searchInput = $('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          applyAndRender();
+    Promise.all(promises)
+      .then(function (results) {
+        state.academies = results[0] || [];
+        state.categories = results[1] || [];
+        state.governorates = results[2] || [];
+
+        if (initialLoad) {
+          populateCategoryFilter();
+          populateGovernorateFilter();
         }
-      });
-    }
 
-    // Category filter
-    var categoryFilter = $('categoryFilter');
-    if (categoryFilter) {
-      categoryFilter.addEventListener('change', function () {
-        applyAndRender();
-      });
-    }
+        state.loading = false;
+        refreshRendering();
 
-    // Governorate filter
-    var govFilter = $('governorateFilter');
-    if (govFilter) {
-      govFilter.addEventListener('change', function () {
-        applyAndRender();
-      });
-    }
-
-    // Sort filter
-    var sortFilter = $('sortFilter');
-    if (sortFilter) {
-      sortFilter.addEventListener('change', function () {
-        applyAndRender();
-      });
-    }
-
-    // Reset button
-    var resetBtn = $('resetBtn');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', resetFilters);
-    }
-
-    // Empty state reset
-    var emptyResetBtn = $('emptyResetBtn');
-    if (emptyResetBtn) {
-      emptyResetBtn.addEventListener('click', resetFilters);
-    }
-
-    // Prev/Next
-    var prevBtn = $('prevBtn');
-    if (prevBtn) {
-      prevBtn.addEventListener('click', function () {
-        if (state.currentPage > 1) {
-          state.currentPage--;
-          renderAcademies();
-          scrollToResults();
-          updateURL();
-        }
-      });
-    }
-
-    var nextBtn = $('nextBtn');
-    if (nextBtn) {
-      nextBtn.addEventListener('click', function () {
-        var totalPages = Math.ceil(state.filteredAcademies.length / ITEMS_PER_PAGE);
-        if (state.currentPage < totalPages) {
-          state.currentPage++;
-          renderAcademies();
-          scrollToResults();
-          updateURL();
-        }
-      });
-    }
-  }
-
-  // ============================================
-  // 16. Init
-  // ============================================
-  function init() {
-    if (state.initialized) return;
-    state.initialized = true;
-
-    applyDynamicContent();
-    readURL();
-    bindEvents();
-
-    // AppSettings changes
-    if (window.AppSettings && window.AppSettings.onChange) {
-      window.AppSettings.onChange(function (cache, key) {
-        if (!key || key === 'app_identity') applyDynamicContent();
-      });
-    }
-
-    // Load data
-    waitForSupabase(function () {
-      var loader = $('acadLoader');
-      if (loader) loader.classList.add('show');
-
-      Promise.all([loadCategories(), loadAcademies()])
-        .then(function (results) {
-          var categories = results[0] || [];
-          var academiesRes = results[1];
-
-          if (academiesRes && academiesRes.error) {
-            throw new Error(academiesRes.error.message);
-          }
-
-          state.allCategories = categories;
-          state.allAcademies = (academiesRes && academiesRes.data) || [];
-
-          populateFilters();
-
-          // Restore filter values from URL
-          var categoryFilter = $('categoryFilter');
-          if (categoryFilter && state.filters.category) categoryFilter.value = state.filters.category;
-          var govFilter = $('governorateFilter');
-          if (govFilter && state.filters.governorate) govFilter.value = state.filters.governorate;
-          var searchInput = $('searchInput');
-          if (searchInput && state.filters.search) searchInput.value = state.filters.search;
-
-          applyFilters();
-          renderAcademies();
-
-          logDebug('Loaded academies:', state.allAcademies.length);
-        })
-        .catch(function (err) {
-          if (loader) loader.classList.remove('show');
-          toast('حدث خطأ في تحميل الأكاديميات', 'error');
-          logDebug('Load error:', err.message);
-
-          var empty = $('acadEmpty');
-          if (empty) empty.classList.add('show');
+        dispatchEvent('itws:academies-loaded', {
+          count: state.academies.length
         });
-    });
 
-    logDebug('Academies page initialized');
+        log('debug', 'Loaded academies', {
+          count: state.academies.length,
+          filtered: state.filtered.length
+        });
+      })
+      .catch(function (err) {
+        state.loading = false;
+        state.error = (err && err.message) || getLabel('errors.network', 'تعذر الاتصال بالخادم');
+        updateStates();
+
+        var errorText = $('errorText');
+        if (errorText) errorText.textContent = state.error;
+
+        log('error', 'Load failed', err);
+      });
   }
 
-  function waitForSupabase(cb) {
-    if (window.sb) { cb(); return; }
-    var w = 0;
-    var i = setInterval(function () {
-      w += 100;
-      if (window.sb || w >= 3000) {
-        clearInterval(i);
-        if (window.sb) cb();
-      }
-    }, 100);
+  /* ============================================================
+     14. BIND FILTERS
+     ============================================================ */
+
+  function bindFilters() {
+    // Search
+    var searchInput = $('academiesSearchInput');
+    if (searchInput) {
+      if (state.filters.search) searchInput.value = state.filters.search;
+
+      var debouncedSearch = debounce(function (value) {
+        state.filters.search = value;
+        state.page = 1;
+        writeUrlState();
+        refreshRendering();
+      }, 350);
+
+      searchInput.addEventListener('input', function (e) {
+        debouncedSearch(e.target.value || '');
+      });
+    }
+
+    // Category
+    var catSelect = $('filterCategory');
+    if (catSelect) {
+      catSelect.addEventListener('change', function (e) {
+        state.filters.category = e.target.value || '';
+        state.page = 1;
+        writeUrlState();
+        refreshRendering();
+      });
+    }
+
+    // Governorate
+    var govSelect = $('filterGovernorate');
+    if (govSelect) {
+      govSelect.addEventListener('change', function (e) {
+        state.filters.governorate = e.target.value || '';
+        state.page = 1;
+        writeUrlState();
+        refreshRendering();
+      });
+    }
+
+    // Sort
+    var sortSelect = $('filterSort');
+    if (sortSelect) {
+      sortSelect.value = state.filters.sort || 'latest';
+      sortSelect.addEventListener('change', function (e) {
+        state.filters.sort = e.target.value || 'latest';
+        state.page = 1;
+        writeUrlState();
+        refreshRendering();
+      });
+    }
+
+    // Clear filters
+    var clearBtn = $('clearFiltersBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function () {
+        state.filters.search = '';
+        state.filters.category = '';
+        state.filters.governorate = '';
+        state.filters.sort = 'latest';
+        state.page = 1;
+
+        if (searchInput) searchInput.value = '';
+        if (catSelect) catSelect.value = '';
+        if (govSelect) govSelect.value = '';
+        if (sortSelect) sortSelect.value = 'latest';
+
+        writeUrlState();
+        refreshRendering();
+      });
+    }
+
+    // Retry
+    var retryBtn = $('retryBtn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', function () {
+        loadData(true);
+      });
+    }
   }
 
-  // ============================================
-  // 17. Public API
-  // ============================================
+  /* ============================================================
+     15. REALTIME
+     ============================================================ */
+
+  function setupRealtime() {
+    if (!window.Realtime || typeof window.Realtime.subscribe !== 'function') {
+      return;
+    }
+
+    try {
+      state.realtimeUnsub = window.Realtime.subscribe(
+        'academies',
+        function () {
+          // Re-fetch on any change (debounced by realtime.js)
+          loadData(false);
+        },
+        { debounce: 800, events: ['INSERT', 'UPDATE', 'DELETE'] }
+      );
+    } catch (e) {
+      log('error', 'Realtime subscribe failed', e);
+    }
+  }
+
+  function cleanupRealtime() {
+    if (state.realtimeUnsub) {
+      try { state.realtimeUnsub(); } catch (e) {}
+      state.realtimeUnsub = null;
+    }
+  }
+
+  /* ============================================================
+     16. PAGE SIZE FROM SETTINGS
+     ============================================================ */
+
+  function readPageSize() {
+    var size = parseInt(getSetting('behavior.pagination_public_size', DEFAULTS.pageSize), 10);
+    if (!isFinite(size) || size < 3) size = DEFAULTS.pageSize;
+    if (size > 50) size = 50;
+    state.pageSize = size;
+  }
+
+  /* ============================================================
+     17. INIT
+     ============================================================ */
+
+  function init() {
+    if (state._initialized) return;
+    state._initialized = true;
+
+    log('debug', 'Academies page initializing');
+
+    readPageSize();
+    readUrlState();
+    bindFilters();
+    loadData(true);
+    setupRealtime();
+
+    // Cleanup
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('beforeunload', cleanupRealtime);
+    }
+
+    log('debug', 'Academies page ready');
+  }
+
+  /* ============================================================
+     18. EXPORT
+     ============================================================ */
+
   window.AcademiesPage = {
-    initialized: true,
+    _initialized: true,
     init: init,
-    refresh: function () {
-      state.initialized = false;
-      init();
+    refresh: function () { return loadData(false); },
+    getState: function () {
+      return {
+        loading: state.loading,
+        error: state.error,
+        total: state.academies.length,
+        filtered: state.filtered.length,
+        page: state.page,
+        pageSize: state.pageSize,
+        filters: {
+          search: state.filters.search,
+          category: state.filters.category,
+          governorate: state.filters.governorate,
+          sort: state.filters.sort
+        }
+      };
     },
-    resetFilters: resetFilters,
-    getState: function () { return state; }
+    setFilter: function (type, value) {
+      if (type === 'search' || type === 'category' || type === 'governorate' || type === 'sort') {
+        state.filters[type] = value || '';
+        state.page = 1;
+        writeUrlState();
+        refreshRendering();
+      }
+    },
+    clearFilters: function () {
+      state.filters.search = '';
+      state.filters.category = '';
+      state.filters.governorate = '';
+      state.filters.sort = 'latest';
+      state.page = 1;
+      writeUrlState();
+      refreshRendering();
+    }
   };
 
+  // Boot
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+
+  /* ============================================================
+     19. DEBUG
+     ============================================================ */
+
+  var cfg = window.ITWS_CONFIG || {};
+  if (cfg.DEBUG) {
+    try {
+      console.log('%c[AcademiesPage]', 'color: #F59E0B; font-weight: bold;', 'Module ready');
+    } catch (e) {}
   }
 
 })();
