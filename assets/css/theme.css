@@ -1,110 +1,112 @@
 /* ============================================================
-   ITWS Platform — Theme Base CSS V2
+   ITWS Platform — Official Theme CSS V3
    File: assets/css/theme.css
-   Description: CSS variables defaults + scales + fallbacks
+   Description: Egyptian Government Portal Design Tokens
 
-   Load order: FIRST CSS (before base.css, components.css, layout.css)
+   Load order: FIRST CSS
 
-   Purpose:
-   - Provides watanii_dark defaults so page renders before theme.js loads
-   - Defines design tokens (spacing, radius, z-index, transitions)
-   - Defines global focus/selection styles
-   - Provides print styles
-   - Respects prefers-color-scheme / prefers-reduced-motion
-   - Falls back gracefully if theme.js fails
-
-   Note:
-   - Actual theme values are INJECTED by theme.js via <style id="itws-theme-vars">
-   - This file only provides FALLBACKS (watanii_dark by default)
-   - All colors here are FALLBACKS — theme.js overrides them
-
-   Rules:
-   - R13: mobile-first, safe-area, no fixed widths
-   - No emoji
-   - RTL by default
+   🎨 OFFICIAL DESIGN:
+   - Navy backgrounds (#0A1628)
+   - Gold accents (#D4A843)
+   - Egyptian Red CTAs (#C8102E)
    - Cairo font only
-   - All colors as CSS variables
+   - Sharp corners (2-10px, not 16-20px)
+   - Defined shadows (not soft glows)
+
+   ⚠️ These are FALLBACKS — theme.js injects actual values at runtime
+   If theme.js fails, page still renders in official dark mode
+
    ============================================================ */
 
 
 /* ============================================================
-   1. COLOR TOKENS (DEFAULT: watanii_dark)
-   ⚠️ These are FALLBACKS — theme.js overrides them at runtime
+   1. OFFICIAL COLOR PALETTE — watanii_dark (default)
    ============================================================ */
 
 :root {
-  /* ===== PRIMARY (Egypt red) ===== */
-  --primary: #CE1126;
-  --primary-hover: #E63946;
-  --primary-soft: rgba(206, 17, 38, 0.14);
+  /* ===== PRIMARY (Egyptian Red) ===== */
+  --primary: #C8102E;
+  --primary-hover: #A50D26;
+  --primary-soft: rgba(200, 16, 46, 0.12);
   --primary-text: #FFFFFF;
 
-  /* ===== BACKGROUNDS ===== */
-  --bg: #0A0E14;
-  --bg-alt: #05080D;
-  --surface: #131820;
-  --surface-elevated: #1C2430;
-  --surface-hover: #252F3D;
+  /* ===== GOLD (Official Accent) ===== */
+  --gold: #D4A843;
+  --gold-hover: #E8BE5C;
+  --gold-soft: rgba(212, 168, 67, 0.15);
+  --gold-text: #0A1628;
 
-  /* ===== TEXT ===== */
-  --text: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  /* ===== BACKGROUNDS (Navy) ===== */
+  --bg: #0A1628;
+  --bg-alt: #0F1E33;
+  --surface: #142540;
+  --surface-elevated: #1B2F4D;
+  --surface-hover: #22375A;
+
+  /* ===== TEXT (Warm White) ===== */
+  --text: #F5F3EE;
+  --text-secondary: #B8C4D6;
+  --text-muted: #7A8BA5;
 
   /* ===== BORDERS ===== */
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.15);
+  --border-gold: rgba(212, 168, 67, 0.4);
 
   /* ===== STATUS COLORS ===== */
   --success: #10B981;
-  --success-soft: rgba(16, 185, 129, 0.14);
+  --success-soft: rgba(16, 185, 129, 0.12);
   --success-hover: #059669;
 
   --warning: #F59E0B;
-  --warning-soft: rgba(245, 158, 11, 0.14);
+  --warning-soft: rgba(245, 158, 11, 0.12);
 
   --error: #EF4444;
-  --error-soft: rgba(239, 68, 68, 0.14);
+  --error-soft: rgba(239, 68, 68, 0.12);
   --error-hover: #DC2626;
 
   --info: #3B82F6;
-  --info-soft: rgba(59, 130, 246, 0.14);
+  --info-soft: rgba(59, 130, 246, 0.12);
 
   /* ===== GRADE COLORS ===== */
   --grade-excellent-bg: rgba(16, 185, 129, 0.15);
-  --grade-excellent-text: #10B981;
+  --grade-excellent-text: #34D399;
   --grade-very-good-bg: rgba(59, 130, 246, 0.15);
-  --grade-very-good-text: #3B82F6;
+  --grade-very-good-text: #60A5FA;
   --grade-good-bg: rgba(245, 158, 11, 0.15);
-  --grade-good-text: #F59E0B;
+  --grade-good-text: #FBBF24;
   --grade-pass-bg: rgba(249, 115, 22, 0.15);
-  --grade-pass-text: #F97316;
+  --grade-pass-text: #FB923C;
   --grade-fail-bg: rgba(239, 68, 68, 0.15);
-  --grade-fail-text: #EF4444;
+  --grade-fail-text: #F87171;
 
-  /* ===== SHADOWS ===== */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  /* ===== SHADOWS (Defined, not soft) ===== */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
 
-  /* Status-specific shadows (for badges/seals) */
-  --success-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-  --success-shadow-lg: 0 20px 60px rgba(16, 185, 129, 0.15);
-  --error-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
-  --error-shadow-lg: 0 20px 60px rgba(239, 68, 68, 0.15);
+  /* ===== GOLD SHADOWS (for accents) ===== */
+  --gold-glow: 0 0 24px rgba(212, 168, 67, 0.3);
+  --gold-glow-strong: 0 0 40px rgba(212, 168, 67, 0.4);
+
+  /* ===== STATUS SHADOWS ===== */
+  --success-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+  --success-shadow-lg: 0 12px 40px rgba(16, 185, 129, 0.15);
+  --error-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+  --error-shadow-lg: 0 12px 40px rgba(239, 68, 68, 0.15);
 }
 
 
 /* ============================================================
-   2. TYPOGRAPHY TOKENS
+   2. TYPOGRAPHY
    ============================================================ */
 
 :root {
-  /* ===== FONT FAMILIES ===== */
+  /* ===== FONT FAMILY ===== */
   --font-primary: 'Cairo', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Cairo', 'Courier New', monospace; /* Cairo with tabular-nums */
+  --font-mono: 'Cairo', 'Courier New', monospace;
 
   /* ===== FONT WEIGHTS ===== */
   --fw-light: 300;
@@ -115,30 +117,31 @@
   --fw-extrabold: 800;
   --fw-black: 900;
 
-  /* ===== FONT SIZES (fluid / clamp) ===== */
-  --fs-xs: clamp(10px, 1.1vw, 11px);
-  --fs-sm: clamp(11px, 1.3vw, 12px);
-  --fs-base: clamp(13px, 1.6vw, 14px);
-  --fs-md: clamp(14px, 1.8vw, 15px);
-  --fs-lg: clamp(15px, 2vw, 16px);
-  --fs-xl: clamp(16px, 2.5vw, 18px);
-  --fs-2xl: clamp(18px, 3vw, 22px);
-  --fs-3xl: clamp(20px, 4vw, 28px);
-  --fs-4xl: clamp(24px, 5vw, 36px);
-  --fs-5xl: clamp(28px, 6vw, 48px);
+  /* ===== FONT SIZES ===== */
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 30px;
+  --fs-4xl: 38px;
+  --fs-5xl: 48px;
 
-  /* ===== LINE HEIGHTS ===== */
-  --lh-tight: 1.2;
-  --lh-snug: 1.35;
-  --lh-normal: 1.55;
-  --lh-relaxed: 1.7;
-  --lh-loose: 1.85;
+  /* ===== LINE HEIGHTS (Tighter for official) ===== */
+  --lh-tight: 1.15;
+  --lh-snug: 1.3;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.65;
+  --lh-loose: 1.8;
 
   /* ===== LETTER SPACING ===== */
-  --ls-tight: -0.5px;
+  --ls-tight: -0.3px;
   --ls-normal: 0;
-  --ls-wide: 0.5px;
+  --ls-wide: 0.3px;
   --ls-wider: 1px;
+  --ls-widest: 1.5px;
 }
 
 
@@ -148,34 +151,35 @@
 
 :root {
   --space-0: 0;
-  --space-1: 0.25rem;   /* 4px */
-  --space-2: 0.5rem;    /* 8px */
-  --space-3: 0.75rem;   /* 12px */
-  --space-4: 1rem;      /* 16px */
-  --space-5: 1.25rem;   /* 20px */
-  --space-6: 1.5rem;    /* 24px */
-  --space-7: 1.75rem;   /* 28px */
-  --space-8: 2rem;      /* 32px */
-  --space-10: 2.5rem;   /* 40px */
-  --space-12: 3rem;     /* 48px */
-  --space-16: 4rem;     /* 64px */
-  --space-20: 5rem;     /* 80px */
-  --space-24: 6rem;     /* 96px */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
 }
 
 
 /* ============================================================
-   4. BORDER RADIUS SCALE
+   4. BORDER RADIUS (SHARP — Official)
    ============================================================ */
 
 :root {
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
-  --radius-3xl: 20px;
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
+  --radius-3xl: 12px;
   --radius-full: 999px;
   --radius-circle: 50%;
 }
@@ -220,7 +224,7 @@
    ============================================================ */
 
 :root {
-  --header-height: 72px;
+  --header-height: 76px;
   --sidebar-width: 260px;
   --sidebar-width-collapsed: 72px;
   --container-max: 1280px;
@@ -236,14 +240,14 @@
 
 @media (max-width: 767px) {
   :root {
-    --header-height: 56px;
+    --header-height: 64px;
     --sidebar-width: 280px;
   }
 }
 
 
 /* ============================================================
-   8. COLOR SCHEME (tells the browser which mode is active)
+   8. COLOR SCHEME
    ============================================================ */
 
 :root,
@@ -257,23 +261,19 @@
 
 
 /* ============================================================
-   9. GLOBAL RESETS (theme-specific only — base.css does the rest)
+   9. GLOBAL RESET
    ============================================================ */
 
 *,
 *::before,
 *::after {
-  /* Apply theme-aware transitions to all theme-related properties */
-  /* Note: base.css handles box-sizing, so we don't duplicate */
+  box-sizing: border-box;
 }
 
 html {
-  /* Prevent horizontal scroll on all screens */
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
-
-  /* Smooth scrolling */
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-height) + 20px);
 }
@@ -290,12 +290,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Reduced motion — respect user preference */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
+  html { scroll-behavior: auto; }
   *,
   *::before,
   *::after {
@@ -308,37 +304,34 @@ body {
 
 
 /* ============================================================
-   10. SELECTION & FOCUS (theme-aware)
+   10. SELECTION & FOCUS
    ============================================================ */
 
 ::selection {
-  background-color: var(--primary);
-  color: var(--primary-text);
+  background-color: var(--gold);
+  color: var(--bg);
 }
 
 ::-moz-selection {
-  background-color: var(--primary);
-  color: var(--primary-text);
+  background-color: var(--gold);
+  color: var(--bg);
 }
 
-/* Global focus ring */
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--gold);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 
-/* Remove outline for mouse clicks only */
 :focus:not(:focus-visible) {
   outline: none;
 }
 
 
 /* ============================================================
-   11. SCROLLBAR (custom — theme-aware)
+   11. SCROLLBAR
    ============================================================ */
 
-/* Webkit browsers (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -350,15 +343,14 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--border-strong);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   border: 2px solid var(--bg-alt);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: var(--gold);
 }
 
-/* Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) var(--bg-alt);
@@ -366,33 +358,28 @@ body {
 
 
 /* ============================================================
-   12. LINKS (theme-aware)
+   12. LINKS
    ============================================================ */
 
 a {
-  color: var(--primary);
+  color: var(--gold);
   text-decoration: none;
   transition: var(--transition-color);
 }
 
 a:hover {
-  color: var(--primary-hover);
+  color: var(--gold-hover);
 }
 
 a:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--gold);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 
-/* Auto-highlight internal links */
-a[href^="tel:"]::before {
-  /* No icon here — handled by icons.js */
-}
-
 
 /* ============================================================
-   13. FORM ELEMENTS (base theme — components.css refines)
+   13. FORM ELEMENTS
    ============================================================ */
 
 input,
@@ -409,7 +396,6 @@ textarea::placeholder {
   opacity: 1;
 }
 
-/* Autofill override (Chrome yellow) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -435,7 +421,6 @@ canvas {
 }
 
 img {
-  /* Prevent broken image icon from breaking layout */
   background-color: var(--surface);
   color: var(--text-muted);
 }
@@ -447,6 +432,7 @@ img {
 
 /* Text colors */
 .text-primary { color: var(--primary); }
+.text-gold { color: var(--gold); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
 .text-success { color: var(--success); }
@@ -458,15 +444,17 @@ img {
 .bg-surface { background-color: var(--surface); }
 .bg-elevated { background-color: var(--surface-elevated); }
 .bg-primary { background-color: var(--primary); color: var(--primary-text); }
+.bg-gold { background-color: var(--gold); color: var(--gold-text); }
 
 /* Border colors */
 .border-default { border: 1px solid var(--border); }
 .border-strong { border: 1px solid var(--border-strong); }
 .border-primary { border: 1px solid var(--primary); }
+.border-gold { border: 1px solid var(--gold); }
 
 
 /* ============================================================
-   16. THEME TRANSITION (smooth theme switch)
+   16. THEME TRANSITION
    ============================================================ */
 
 html,
@@ -475,7 +463,6 @@ body {
               color var(--transition-base);
 }
 
-/* Add transition to key components when switching theme */
 .theme-transition,
 .theme-transition * {
   transition: background-color 0.2s ease,
@@ -484,7 +471,6 @@ body {
               box-shadow 0.2s ease !important;
 }
 
-/* Don't add transition on first load (prevents flash) */
 .itws-no-transition,
 .itws-no-transition * {
   transition: none !important;
@@ -492,7 +478,7 @@ body {
 
 
 /* ============================================================
-   17. BRAND LOGO (theme-aware background)
+   17. BRAND ELEMENTS
    ============================================================ */
 
 .brand-logo,
@@ -500,13 +486,32 @@ body {
   background-color: var(--bg);
 }
 
+/* Gold divider line */
+.gold-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  border-radius: var(--radius-xs);
+  margin: 16px auto;
+}
+
+.gold-divider-start {
+  margin-inline-start: 0;
+}
+
+/* Gold accent bar */
+.gold-accent {
+  border-inline-start: 3px solid var(--gold);
+  padding-inline-start: 16px;
+}
+
 
 /* ============================================================
-   18. GLASS EFFECT (used in header, cards)
+   18. GLASS EFFECT
    ============================================================ */
 
 .glass {
-  background-color: rgba(19, 24, 32, 0.7);
+  background-color: rgba(10, 22, 40, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -517,7 +522,7 @@ body {
 
 
 /* ============================================================
-   19. GRADIENT OVERLAYS (used in hero sections)
+   19. GRADIENT OVERLAYS
    ============================================================ */
 
 .gradient-overlay-top {
@@ -542,39 +547,63 @@ body {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse 60% 50% at 50% 30%,
-              var(--primary-soft) 0%, transparent 60%);
+              var(--gold-soft) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
 
 
 /* ============================================================
-   20. FALLBACK FOR NO-THEME STATE
-   (if theme.js fails to load, page still looks correct)
+   20. HEXAGON PATTERN (Egyptian motif)
    ============================================================ */
 
-[data-theme-mode="light"] {
-  --bg: #FFFFFF;
-  --bg-alt: #F8FAFC;
-  --surface: #F1F5F9;
-  --surface-elevated: #FFFFFF;
-  --surface-hover: #E2E8F0;
-  --text: #0A0E14;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.15);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+.hexagon-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.hexagon-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 0L45 8.66v17.32L30 34.64 15 25.98V8.66z M30 34.64L45 43.3v17.32M30 34.64L15 43.3v17.32' stroke='%23D4A843' stroke-width='0.6' fill='none' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hexagon-bg > * {
+  position: relative;
+  z-index: 1;
 }
 
 
 /* ============================================================
-   21. PRINT STYLES
+   21. LIGHT MODE FALLBACK
+   ============================================================ */
+
+[data-theme-mode="light"] {
+  --bg: #FAFBFC;
+  --bg-alt: #F0F3F7;
+  --surface: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --surface-hover: #E8EEF5;
+  --text: #0A1628;
+  --text-secondary: #455568;
+  --text-muted: #7A8BA5;
+  --border: rgba(10, 22, 40, 0.08);
+  --border-strong: rgba(10, 22, 40, 0.15);
+  --shadow-sm: 0 1px 3px rgba(10, 22, 40, 0.08);
+  --shadow: 0 2px 6px rgba(10, 22, 40, 0.1);
+  --shadow-lg: 0 8px 28px rgba(10, 22, 40, 0.12);
+}
+
+
+/* ============================================================
+   22. PRINT
    ============================================================ */
 
 @media print {
-  /* Force light mode for print (saves ink, improves readability) */
   :root {
     --bg: #FFFFFF !important;
     --bg-alt: #F8FAFC !important;
@@ -585,12 +614,15 @@ body {
     --text-muted: #666666 !important;
     --border: rgba(0, 0, 0, 0.2) !important;
     --border-strong: rgba(0, 0, 0, 0.3) !important;
-    --primary: #CE1126 !important;
-    --primary-soft: #FFE5E8 !important;
+    --primary: #C8102E !important;
+    --gold: #A88833 !important;
+    --primary-soft: #FFE8EB !important;
+    --gold-soft: #F5EDD3 !important;
     --primary-text: #FFFFFF !important;
     --shadow: none !important;
     --shadow-lg: none !important;
     --shadow-xl: none !important;
+    --gold-glow: none !important;
   }
 
   *,
@@ -609,10 +641,10 @@ body {
     line-height: 1.4 !important;
   }
 
-  /* Hide interactive elements */
   .no-print,
   .itws-header,
   .itws-sidebar,
+  .off-theme-fab-wrap,
   .theme-fab-wrap,
   .itws-mobile-drawer,
   .itws-mobile-backdrop,
@@ -624,7 +656,6 @@ body {
     display: none !important;
   }
 
-  /* Preserve links */
   a {
     color: #000000 !important;
     text-decoration: underline !important;
@@ -636,7 +667,6 @@ body {
     color: #666666;
   }
 
-  /* Table styles */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -648,9 +678,7 @@ body {
     page-break-after: auto;
   }
 
-  thead {
-    display: table-header-group;
-  }
+  thead { display: table-header-group; }
 
   th, td {
     border: 1px solid #333 !important;
@@ -663,40 +691,28 @@ body {
     font-weight: bold !important;
   }
 
-  /* Cards keep visible */
   .card,
+  .off-academy-card,
   .itws-table-card {
     border: 1px solid #333 !important;
     page-break-inside: avoid;
   }
 
-  /* Page breaks */
-  .page-break-before {
-    page-break-before: always;
-  }
+  .page-break-before { page-break-before: always; }
+  .page-break-after { page-break-after: always; }
+  .page-break-avoid { page-break-inside: avoid; }
 
-  .page-break-after {
-    page-break-after: always;
-  }
-
-  .page-break-avoid {
-    page-break-inside: avoid;
-  }
-
-  /* Images */
   img {
     max-width: 100% !important;
     page-break-inside: avoid;
   }
 
-  /* Headings */
   h1, h2, h3, h4, h5, h6 {
     color: #000 !important;
     page-break-after: avoid;
     page-break-inside: avoid;
   }
 
-  /* Specific print styles for certificates */
   .print-certificate {
     page-break-after: always;
     page-break-inside: avoid;
@@ -709,15 +725,15 @@ body {
 
 
 /* ============================================================
-   22. ACCESSIBILITY — High Contrast Mode
+   23. HIGH CONTRAST MODE
    ============================================================ */
 
 @media (prefers-contrast: more) {
   :root {
     --border: rgba(255, 255, 255, 0.3);
     --border-strong: rgba(255, 255, 255, 0.5);
-    --text-secondary: #B8C1CC;
-    --text-muted: #8B95A3;
+    --text-secondary: #D8E2F0;
+    --text-muted: #A0B0C5;
   }
 
   [data-theme-mode="light"] {
@@ -727,32 +743,28 @@ body {
     --text-muted: #333333;
   }
 
-  a,
-  button {
+  a, button {
     text-decoration: underline;
   }
 }
 
 
 /* ============================================================
-   23. SMALL SCREEN ADJUSTMENTS
+   24. RESPONSIVE — SMALL
    ============================================================ */
 
 @media (max-width: 480px) {
   :root {
-    /* Reduce radii on very small screens (feel more compact) */
-    --radius-2xl: 14px;
-    --radius-3xl: 16px;
-
-    /* Slightly tighter spacing */
-    --space-8: 1.75rem;
-    --space-10: 2rem;
+    --radius-2xl: 8px;
+    --radius-3xl: 10px;
+    --space-8: 28px;
+    --space-10: 32px;
   }
 }
 
 
 /* ============================================================
-   24. LARGE SCREEN ADJUSTMENTS
+   25. RESPONSIVE — LARGE
    ============================================================ */
 
 @media (min-width: 1440px) {
@@ -772,14 +784,5 @@ body {
 
 
 /* ============================================================
-   25. THEME DEBUG HELPER (only when DEBUG=1 in URL)
-   ============================================================ */
-
-[data-theme] {
-  /* Just a marker — allows JS to check data-theme presence */
-}
-
-
-/* ============================================================
-   END OF THEME.CSS
+   END OF THEME.CSS V3
    ============================================================ */
