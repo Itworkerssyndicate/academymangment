@@ -1,543 +1,616 @@
-// ============================================
-// [6/50] ITWS Platform - Theme Manager
-// Path: assets/js/theme.js
-// ============================================
-// إصلاح: يقرأ من 'theme' key (بدل general)
-// إصلاح: يعتمد على AppSettings كأولوية
-// إصلاح: Event delegation للـ theme picker
-// إصلاح: بدون إيموجي
-// ============================================
+/* ============================================================
+   ITWS Platform — Theme Manager V2
+   File: assets/js/theme.js
+   Description: Apply themes with FOUC prevention + localStorage
+                + system detection + realtime sync
+
+   Load order: In <head> BEFORE any CSS, AFTER themes-data.js
+   ⚠️ CRITICAL: Must run synchronously — cannot wait for DOMContentLoaded
+
+   Features:
+   - Applies theme immediately (before CSS paints)
+   - FOUC prevention
+   - Reads user override from localStorage
+   - Falls back to AppSettings default
+   - Falls back to ITWS_DEFAULT_THEME
+   - System theme (prefers-color-scheme) with live updates
+   - Realtime sync from settings changes
+   - Public API: change, reset, getCurrent, getDefault, isUserOverride
+   - Events: itws:theme-changed, itws:theme-mode-changed
+   - Applies to <html> via data-theme + data-theme-mode
+
+   Rules:
+   - No emoji
+   - ES5-style IIFE
+   - Synchronous on load (FOUC prevention)
+   - No external dependencies
+   ============================================================ */
 
 (function () {
   'use strict';
 
-  if (window.ThemeManager && window.ThemeManager.booted) return;
+  if (window.ITWSTheme && window.ITWSTheme._initialized) {
+    return;
+  }
 
-  var cfg = window.ITWS_CONFIG;
-  var STORAGE_KEY = (cfg && cfg.STORAGE_KEYS && cfg.STORAGE_KEYS.THEME) || 'itws_theme';
-  var root = document.documentElement;
+  /* ============================================================
+     1. DEPENDENCIES CHECK
+     ============================================================ */
+
+  var H = window.ITWS_THEMES_HELPERS;
+
+  if (!H || !window.ITWS_THEMES_MAP) {
+    // themes-data.js not loaded — fail silently, will retry
+    try {
+      console.error('[ITWS Theme] themes-data.js must be loaded before theme.js');
+    } catch (e) {}
+    return;
+  }
+
+  /* ============================================================
+     2. HELPERS
+     ============================================================ */
+
+  function log(level, msg, data) {
+    var cfg = window.ITWS_CONFIG || {};
+    if (level === 'error' || (cfg.DEBUG && level === 'debug')) {
+      try {
+        var args = ['[ITWS Theme]', msg];
+        if (data !== undefined) args.push(data);
+        if (level === 'error') console.error.apply(console, args);
+        else console.log.apply(console, args);
+      } catch (e) {}
+    }
+  }
+
+  function getConfig() {
+    return window.ITWS_CONFIG || {};
+  }
+
+  function getStorageKey() {
+    var cfg = getConfig();
+    if (cfg.STORAGE_KEYS && cfg.STORAGE_KEYS.THEME) {
+      return cfg.STORAGE_KEYS.THEME;
+    }
+    return 'itws_theme';
+  }
+
+  function safeStorageGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  function safeStorageSet(key, value) {
+    try { localStorage.setItem(key, value); return true; }
+    catch (e) { return false; }
+  }
+
+  function safeStorageRemove(key) {
+    try { localStorage.removeItem(key); return true; } catch (e) { return false; }
+  }
+
+  function dispatchEvent(name, detail) {
+    try {
+      window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+    } catch (e) {}
+  }
+
+  function getHtmlElement() {
+    return document.documentElement || document.getElementsByTagName('html')[0];
+  }
+
+  /* ============================================================
+     3. STATE
+     ============================================================ */
 
   var state = {
-    currentThemeId: null,
-    currentColors: null,
-    source: 'none',
-    channel: null,
+    currentId: null,         // active theme ID (user override or default)
+    defaultId: null,         // system default from settings
+    isUserOverride: false,   // user picked explicitly
+    resolvedId: null,        // actual theme applied (system resolved)
+    isDark: true,
+    isSystemTheme: false,
+    listeners: [],
+    modeListeners: [],
     initialized: false,
-    currentFont: null,
-    realtimeSubscribed: false
+    systemThemeUnsubscribe: null,
+    settingsUnsubscribe: null,
+    settingsApplied: false
   };
 
-  // ============================================
-  // 1. تطبيق الألوان على DOM
-  // ============================================
-  function applyColors(colors) {
-    if (!colors || typeof colors !== 'object') return;
-    Object.keys(colors).forEach(function (key) {
-      var value = colors[key];
-      if (value != null) {
-        root.style.setProperty('--' + key, value);
-      }
+  /* ============================================================
+     4. INJECT STYLE TAG (for dynamic CSS vars)
+     ============================================================ */
+
+  var styleElementId = 'itws-theme-vars';
+
+  function getOrCreateStyleElement() {
+    var el = document.getElementById(styleElementId);
+    if (el) return el;
+
+    el = document.createElement('style');
+    el.id = styleElementId;
+    el.setAttribute('data-generated', 'true');
+
+    // Insert at very top of head — before any linked CSS
+    var head = document.head || document.getElementsByTagName('head')[0];
+    if (head) {
+      head.insertBefore(el, head.firstChild);
+    } else {
+      document.documentElement.appendChild(el);
+    }
+    return el;
+  }
+
+  /* ============================================================
+     5. APPLY THEME — CORE
+     ============================================================ */
+
+  function buildCssVarsBlock(theme, scopeSelector) {
+    if (!theme || !theme.colors) return '';
+
+    var lines = [];
+    Object.keys(theme.colors).forEach(function (key) {
+      var val = theme.colors[key];
+      if (val === null || val === undefined) return;
+      lines.push('  ' + key + ': ' + val + ';');
     });
+
+    if (lines.length === 0) return '';
+
+    return scopeSelector + ' {\n' + lines.join('\n') + '\n}\n';
   }
 
-  // ============================================
-  // 2. تطبيق class الثيم (light/dark)
-  // ============================================
-  function applyThemeClass(themeObj) {
-    if (!themeObj) return;
-    var isLight = themeObj.is_light === true;
-    root.classList.toggle('theme-light', isLight);
-    root.classList.toggle('theme-dark', !isLight);
-    root.setAttribute('data-theme', themeObj.id || '');
-  }
+  function applyTheme(themeId, options) {
+    options = options || {};
 
-  // ============================================
-  // 3. تطبيق الخط ديناميكياً
-  // ============================================
-  function applyFont(fontFamily) {
-    if (!fontFamily) fontFamily = 'Cairo';
-    if (state.currentFont === fontFamily) return;
-    state.currentFont = fontFamily;
-
-    root.style.setProperty('--font', "'" + fontFamily + "', 'Segoe UI', 'Tahoma', sans-serif");
-
-    if (fontFamily !== 'Cairo' && fontFamily !== 'system') {
-      injectFontLink(fontFamily);
+    var theme = H.getTheme(themeId);
+    if (!theme) {
+      log('error', 'Theme not found: ' + themeId);
+      return false;
     }
-  }
 
-  function injectFontLink(fontFamily) {
-    var id = 'itws-font-' + fontFamily.replace(/\s+/g, '-').toLowerCase();
-    if (document.getElementById(id)) return;
+    var html = getHtmlElement();
+    if (!html) return false;
 
-    var link = document.createElement('link');
-    link.id = id;
-    link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=' +
-      encodeURIComponent(fontFamily) +
-      ':wght@300;400;500;600;700;800;900&display=swap';
-    document.head.appendChild(link);
-  }
+    // Determine if this is the system theme
+    var isSystem = theme.is_system === true;
+    var resolvedTheme = isSystem ? theme.resolved_theme : theme;
+    var resolvedId = isSystem ? theme.resolved_id : themeId;
 
-  // ============================================
-  // 4. قراءة الثيم المحلي
-  // ============================================
-  function readLocalTheme() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      var parsed = JSON.parse(raw);
-      if (!parsed || !parsed.id || !parsed.colors) return null;
-      return parsed;
-    } catch (e) {
-      return null;
+    if (!resolvedTheme) {
+      log('error', 'Could not resolve theme: ' + themeId);
+      return false;
     }
-  }
 
-  function writeLocalTheme(themeId, colors) {
+    // Apply data-theme (what user chose) + data-theme-mode (dark/light)
+    var mode = resolvedTheme.is_dark === true ? 'dark' : 'light';
+    html.setAttribute('data-theme', themeId);
+    html.setAttribute('data-theme-mode', mode);
+    html.setAttribute('data-theme-resolved', resolvedId);
+
+    // Inject CSS vars
+    var styleEl = getOrCreateStyleElement();
+    var cssText = ':root,\n[data-theme="' + resolvedId + '"]';
+    var block = buildCssVarsBlock(resolvedTheme, cssText);
+    styleEl.textContent = block;
+
+    // Update state
+    var previousResolvedId = state.resolvedId;
+    var previousIsDark = state.isDark;
+    var previousCurrentId = state.currentId;
+
+    state.currentId = themeId;
+    state.resolvedId = resolvedId;
+    state.isDark = resolvedTheme.is_dark === true;
+    state.isSystemTheme = isSystem;
+
+    // Update color-scheme meta
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        id: themeId,
-        colors: colors,
-        savedAt: Date.now()
-      }));
+      var metaColorScheme = document.querySelector('meta[name="color-scheme"]');
+      if (!metaColorScheme) {
+        metaColorScheme = document.createElement('meta');
+        metaColorScheme.setAttribute('name', 'color-scheme');
+        document.head.appendChild(metaColorScheme);
+      }
+      metaColorScheme.setAttribute('content', mode);
     } catch (e) {}
-  }
 
-  function clearLocalTheme() {
+    // Update theme-color meta (for mobile browsers)
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      var metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor && resolvedTheme.colors && resolvedTheme.colors['--bg']) {
+        metaThemeColor.setAttribute('content', resolvedTheme.colors['--bg']);
+      }
     } catch (e) {}
-  }
 
-  // ============================================
-  // 5. تطبيق theme object
-  // ============================================
-  function applyThemeObject(themeObj, source) {
-    if (!themeObj || !themeObj.colors) return false;
-    applyColors(themeObj.colors);
-    applyThemeClass(themeObj);
-    state.currentThemeId = themeObj.id || null;
-    state.currentColors = themeObj.colors;
-    state.source = source || 'unknown';
+    // Dispatch events
+    if (previousCurrentId !== themeId || previousResolvedId !== resolvedId) {
+      dispatchEvent('itws:theme-changed', {
+        themeId: themeId,
+        resolvedId: resolvedId,
+        isSystem: isSystem,
+        isDark: state.isDark,
+        isUserOverride: state.isUserOverride
+      });
+      notifyListeners(themeId, resolvedId, state.isDark, isSystem);
+    }
+
+    if (previousIsDark !== state.isDark) {
+      dispatchEvent('itws:theme-mode-changed', {
+        isDark: state.isDark,
+        mode: mode
+      });
+      notifyModeListeners(state.isDark);
+    }
+
+    if (options.persist) {
+      safeStorageSet(getStorageKey(), themeId);
+      state.isUserOverride = true;
+    }
+
+    log('debug', 'Applied theme', {
+      themeId: themeId,
+      resolvedId: resolvedId,
+      isDark: state.isDark,
+      isSystem: isSystem,
+      persisted: !!options.persist
+    });
+
     return true;
   }
 
-  // ============================================
-  // 6. Boot — قبل CSS (يمنع FOUC)
-  // ============================================
-  function boot() {
-    if (state.initialized) return;
+  /* ============================================================
+     6. LISTENERS
+     ============================================================ */
 
-    // (أ) تطبيق الخط فوراً من AppSettings (لو متاح)
-    var fontFromSettings = null;
-    if (window.AppSettings && window.AppSettings.get) {
-      fontFromSettings = window.AppSettings.get('behavior.font_family', 'Cairo');
-    }
-    if (fontFromSettings) {
-      applyFont(fontFromSettings);
-    } else {
-      applyFont('Cairo');
-    }
-
-    // (ب) ثيم محلي
-    var local = readLocalTheme();
-    if (local && local.colors) {
-      applyColors(local.colors);
-      var localThemeObj = window.ITWS_THEMES && window.ITWS_THEMES[local.id];
-      if (localThemeObj) {
-        applyThemeClass(localThemeObj);
-      }
-      state.currentThemeId = local.id;
-      state.currentColors = local.colors;
-      state.source = 'local';
-      state.initialized = true;
-      logDebug('Boot: applied local theme', local.id);
-      return;
-    }
-
-    // (ج) Fallback من themes-data
-    var fallbackId = window.ITWS_DEFAULT_THEME || 'watanii_dark';
-    var fallback = window.ITWS_THEMES && window.ITWS_THEMES[fallbackId];
-    if (fallback) {
-      applyColors(fallback.colors);
-      applyThemeClass(fallback);
-      state.currentThemeId = fallback.id;
-      state.currentColors = fallback.colors;
-      state.source = 'fallback';
-      state.initialized = true;
-      logDebug('Boot: applied fallback theme', fallbackId);
-      return;
-    }
-
-    state.source = 'css-default';
-    state.initialized = true;
-  }
-
-  // ============================================
-  // 7. جلب الثيم الافتراضي
-  // ============================================
-  function fetchDefaultTheme() {
-    // (أ) من AppSettings (أسرع - localStorage)
-    if (window.AppSettings && window.AppSettings.get) {
-      var themeIdFromSettings = window.AppSettings.get('theme.default_theme', null);
-      if (themeIdFromSettings) {
-        var localDef = window.ITWS_THEMES && window.ITWS_THEMES[themeIdFromSettings];
-        if (localDef) {
-          logDebug('fetchDefaultTheme: from AppSettings', themeIdFromSettings);
-          return Promise.resolve({
-            id: themeIdFromSettings,
-            colors: localDef.colors,
-            is_light: localDef.is_light
-          });
-        }
-      }
-    }
-
-    // (ب) من Supabase (لو AppSettings مش متاح)
-    if (!window.sb) return Promise.resolve(null);
-
-    return window.sb
-      .from('settings')
-      .select('value')
-      .eq('key', 'theme')  // ← إصلاح: 'theme' بدل 'general'
-      .maybeSingle()
-      .then(function (res) {
-        if (res.error || !res.data || !res.data.value) {
-          logDebug('fetchDefaultTheme: no theme key in Supabase');
-          return null;
-        }
-        var themeId = res.data.value.default_theme;
-        if (!themeId) return null;
-
-        var localDef2 = window.ITWS_THEMES && window.ITWS_THEMES[themeId];
-        if (localDef2) {
-          return { id: themeId, colors: localDef2.colors, is_light: localDef2.is_light };
-        }
-
-        // من جدول themes
-        return window.sb
-          .from('themes')
-          .select('id, colors, is_light')
-          .eq('id', themeId)
-          .maybeSingle()
-          .then(function (r2) {
-            if (r2.error || !r2.data) return null;
-            return {
-              id: r2.data.id,
-              colors: r2.data.colors,
-              is_light: r2.data.is_light === true
-            };
-          });
-      })
-      .catch(function (err) {
-        logDebug('fetchDefaultTheme error:', err.message);
-        return null;
-      });
-  }
-
-  // ============================================
-  // 8. Sync — مزامنة الثيم مع Supabase
-  // ============================================
-  function sync() {
-    // لو المستخدم عنده ثيم محلي → متلمسوش
-    if (state.source === 'local') {
-      logDebug('Sync: skipped (user has local theme)');
-      return Promise.resolve();
-    }
-
-    return fetchDefaultTheme().then(function (remote) {
-      if (!remote || !remote.colors) {
-        logDebug('Sync: no remote theme');
-        return;
-      }
-      applyColors(remote.colors);
-      applyThemeClass(remote);
-      state.currentThemeId = remote.id;
-      state.currentColors = remote.colors;
-      state.source = 'default';
-      notifyThemeChanged();
-      logDebug('Sync: applied default theme', remote.id);
+  function notifyListeners(themeId, resolvedId, isDark, isSystem) {
+    var payload = {
+      themeId: themeId,
+      resolvedId: resolvedId,
+      isDark: isDark,
+      isSystem: isSystem,
+      isUserOverride: state.isUserOverride
+    };
+    state.listeners.slice().forEach(function (fn) {
+      try { fn(payload); } catch (e) { log('error', 'Listener error', e); }
     });
   }
 
-  // ============================================
-  // 9. تغيير الثيم (من المستخدم)
-  // ============================================
-  function change(themeId) {
-    if (!themeId) return false;
-
-    // (أ) من themes-data
-    var themeObj = window.ITWS_THEMES && window.ITWS_THEMES[themeId];
-    if (themeObj) {
-      applyThemeObject(themeObj, 'local');
-      writeLocalTheme(themeObj.id, themeObj.colors);
-      updateThemePickerUI(themeObj.id);
-      notifyThemeChanged();
-      logDebug('Change: applied local theme', themeId);
-      return true;
-    }
-
-    // (ب) من Supabase (لو مش موجود محلياً)
-    if (window.sb) {
-      window.sb
-        .from('themes')
-        .select('id, colors, is_light')
-        .eq('id', themeId)
-        .maybeSingle()
-        .then(function (res) {
-          if (res.error || !res.data) {
-            showError('الثيم غير متوفر');
-            return;
-          }
-          var remoteTheme = {
-            id: res.data.id,
-            colors: res.data.colors,
-            is_light: res.data.is_light === true
-          };
-          applyThemeObject(remoteTheme, 'local');
-          writeLocalTheme(remoteTheme.id, remoteTheme.colors);
-          updateThemePickerUI(remoteTheme.id);
-          notifyThemeChanged();
-          logDebug('Change: applied remote theme', themeId);
-        });
-      return true;
-    }
-
-    return false;
+  function notifyModeListeners(isDark) {
+    state.modeListeners.slice().forEach(function (fn) {
+      try { fn(isDark); } catch (e) { log('error', 'Mode listener error', e); }
+    });
   }
 
-  // ============================================
-  // 10. Reset
-  // ============================================
-  function reset() {
-    clearLocalTheme();
-    state.source = 'none';
+  /* ============================================================
+     7. SYSTEM THEME (prefers-color-scheme)
+     ============================================================ */
 
-    return fetchDefaultTheme().then(function (remote) {
-      if (remote && remote.colors) {
-        applyColors(remote.colors);
-        applyThemeClass(remote);
-        state.currentThemeId = remote.id;
-        state.currentColors = remote.colors;
-        state.source = 'default';
-      } else {
-        var fb = window.ITWS_THEMES && window.ITWS_THEMES[window.ITWS_DEFAULT_THEME || 'watanii_dark'];
-        if (fb) {
-          applyColors(fb.colors);
-          applyThemeClass(fb);
-          state.currentThemeId = fb.id;
-          state.currentColors = fb.colors;
-          state.source = 'fallback';
-        }
+  function setupSystemThemeListener() {
+    if (state.systemThemeUnsubscribe) {
+      try { state.systemThemeUnsubscribe(); } catch (e) {}
+      state.systemThemeUnsubscribe = null;
+    }
+
+    state.systemThemeUnsubscribe = H.onSystemThemeChange(function (isDark) {
+      // Only re-apply if user is currently on system theme
+      if (state.isSystemTheme) {
+        log('debug', 'System theme changed, re-applying', { isDark: isDark });
+        applyTheme('system', { persist: false });
       }
-      updateThemePickerUI(state.currentThemeId);
-      notifyThemeChanged();
-      logDebug('Reset to default');
     });
   }
 
-  // ============================================
-  // 11. تحديث UI الـ picker
-  // ============================================
-  function updateThemePickerUI(activeId) {
-    var pickers = document.querySelectorAll('[data-theme-option]');
-    if (!pickers.length) return;
-    pickers.forEach(function (el) {
-      var isActive = el.getAttribute('data-theme-option') === activeId;
-      el.classList.toggle('active', isActive);
-      el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    });
-  }
+  /* ============================================================
+     8. SETTINGS SYNC (default theme from admin)
+     ============================================================ */
 
-  // ============================================
-  // 12. إرسال حدث التغيير
-  // ============================================
-  function notifyThemeChanged() {
+  function getDefaultFromSettings() {
+    var settingsDefault = null;
+
     try {
-      window.dispatchEvent(new CustomEvent('itws:theme-changed', {
-        detail: {
-          themeId: state.currentThemeId,
-          colors: state.currentColors,
-          source: state.source
-        }
-      }));
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        settingsDefault = window.AppSettings.get('theme.default_theme');
+      }
     } catch (e) {}
+
+    if (settingsDefault && H.isValidTheme(settingsDefault)) {
+      return settingsDefault;
+    }
+
+    return H.getDefaultId();
   }
 
-  // ============================================
-  // 13. Realtime subscribe
-  // ============================================
-  function subscribe() {
-    if (!window.sb || state.realtimeSubscribed) return;
+  function getAllowUserOverride() {
+    try {
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        var v = window.AppSettings.get('theme.allow_user_override');
+        return v !== false;
+      }
+    } catch (e) {}
+    return true;
+  }
+
+  function checkSettingsSync() {
+    var newDefaultId = getDefaultFromSettings();
+
+    if (!state.defaultId) {
+      state.defaultId = newDefaultId;
+      return;
+    }
+
+    if (newDefaultId !== state.defaultId) {
+      var previousDefault = state.defaultId;
+      state.defaultId = newDefaultId;
+
+      log('debug', 'Default theme changed', { from: previousDefault, to: newDefaultId });
+
+      // If user has NO override → follow the new default
+      if (!state.isUserOverride) {
+        applyTheme(newDefaultId, { persist: false });
+      }
+
+      // If user override is now disabled → force default
+      if (!getAllowUserOverride() && state.isUserOverride) {
+        safeStorageRemove(getStorageKey());
+        state.isUserOverride = false;
+        applyTheme(newDefaultId, { persist: false });
+      }
+    }
+  }
+
+  function setupSettingsListener() {
+    if (state.settingsUnsubscribe) {
+      try { state.settingsUnsubscribe(); } catch (e) {}
+      state.settingsUnsubscribe = null;
+    }
 
     try {
-      state.channel = window.sb
-        .channel('itws-theme-realtime')
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'key=eq.theme' },
-          function (payload) {
-            if (state.source === 'local') {
-              logDebug('Realtime: skipped (user has local theme)');
-              return;
-            }
-            var newDefault = payload && payload.new && payload.new.value && payload.new.value.default_theme;
-            if (!newDefault || newDefault === state.currentThemeId) return;
-
-            var localDef = window.ITWS_THEMES && window.ITWS_THEMES[newDefault];
-            if (localDef) {
-              applyColors(localDef.colors);
-              applyThemeClass(localDef);
-              state.currentThemeId = localDef.id;
-              state.currentColors = localDef.colors;
-              state.source = 'default';
-              notifyThemeChanged();
-              logDebug('Realtime: applied new default theme', newDefault);
-              return;
-            }
-
-            // لو مش موجود محلياً → من جدول themes
-            window.sb
-              .from('themes')
-              .select('id, colors, is_light')
-              .eq('id', newDefault)
-              .maybeSingle()
-              .then(function (r) {
-                if (r.error || !r.data) return;
-                var themeObj = {
-                  id: r.data.id,
-                  colors: r.data.colors,
-                  is_light: r.data.is_light === true
-                };
-                applyThemeObject(themeObj, 'default');
-                notifyThemeChanged();
-                logDebug('Realtime: applied new theme from DB', newDefault);
-              });
+      if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+        state.settingsUnsubscribe = window.AppSettings.onChange(function (settings, changedKey) {
+          if (changedKey === 'theme' || changedKey === null) {
+            checkSettingsSync();
           }
-        )
-        .subscribe(function (status) {
-          logDebug('Realtime channel:', status);
         });
-      state.realtimeSubscribed = true;
+      }
     } catch (e) {
-      logDebug('Realtime subscribe error:', e.message);
+      log('error', 'Settings listener failed', e);
     }
 
-    // استمع لتغيير الخط من AppSettings
-    if (window.AppSettings && window.AppSettings.onChange) {
-      window.AppSettings.onChange(function (cache, changedKey) {
-        if (changedKey === 'behavior') {
-          var font = window.AppSettings.get('behavior.font_family', 'Cairo');
-          applyFont(font);
-        }
-        if (changedKey === 'theme') {
-          // لو الثيم الافتراضي اتغير من الإعدادات
-          if (state.source !== 'local') {
-            sync();
-          }
-        }
-      });
-    }
+    // Also listen to global event
+    window.addEventListener('itws:settings-changed', function (e) {
+      var key = e && e.detail ? e.detail.key : null;
+      if (key === 'theme' || key === null || key === undefined) {
+        checkSettingsSync();
+      }
+    });
   }
 
-  // ============================================
-  // 14. Helpers
-  // ============================================
-  function logDebug() {
-    if (cfg && cfg.DEBUG) {
-      console.log.apply(console, ['[ThemeManager]'].concat(Array.prototype.slice.call(arguments)));
+  /* ============================================================
+     9. INITIAL THEME RESOLUTION
+     ============================================================ */
+
+  function resolveInitialTheme() {
+    // Priority 1: User override from localStorage
+    var stored = safeStorageGet(getStorageKey());
+    if (stored && H.isValidTheme(stored)) {
+      state.isUserOverride = true;
+      return stored;
     }
+
+    // Priority 2: Default from settings
+    var settingsDefault = null;
+    try {
+      if (window.AppSettings && typeof window.AppSettings.get === 'function') {
+        settingsDefault = window.AppSettings.get('theme.default_theme');
+      }
+    } catch (e) {}
+
+    if (settingsDefault && H.isValidTheme(settingsDefault)) {
+      state.defaultId = settingsDefault;
+      return settingsDefault;
+    }
+
+    // Priority 3: ITWS_DEFAULT_THEME (from themes-data.js)
+    state.defaultId = H.getDefaultId();
+    return state.defaultId;
   }
 
-  function showError(msg) {
-    if (window.Utils && window.Utils.showToast) {
-      window.Utils.showToast(msg, 'error');
-    } else {
-      console.warn('[ThemeManager]', msg);
+  /* ============================================================
+     10. PUBLIC API
+     ============================================================ */
+
+  function change(themeId, options) {
+    options = options || {};
+    options.persist = options.persist !== false; // default true
+
+    if (!H.isValidTheme(themeId)) {
+      log('error', 'Invalid theme: ' + themeId);
+      return false;
     }
+
+    // If user override disabled — deny changes (except system)
+    if (!getAllowUserOverride() && !state.isSystemTheme) {
+      log('debug', 'User override disabled by settings');
+      return false;
+    }
+
+    if (options.persist) {
+      state.isUserOverride = true;
+    }
+
+    return applyTheme(themeId, options);
   }
 
-  // ============================================
-  // 15. Public API
-  // ============================================
-  window.ThemeManager = {
-    booted: true,
-    boot: boot,
-    sync: sync,
+  function reset() {
+    safeStorageRemove(getStorageKey());
+    state.isUserOverride = false;
+
+    var defaultId = getDefaultFromSettings();
+    return applyTheme(defaultId, { persist: false });
+  }
+
+  function getCurrent() {
+    return state.currentId;
+  }
+
+  function getResolved() {
+    return state.resolvedId;
+  }
+
+  function getDefault() {
+    return state.defaultId || getDefaultFromSettings();
+  }
+
+  function isUserOverride() {
+    return state.isUserOverride === true;
+  }
+
+  function isDark() {
+    return state.isDark === true;
+  }
+
+  function isSystem() {
+    return state.isSystemTheme === true;
+  }
+
+  function onChange(callback) {
+    if (typeof callback !== 'function') return function () {};
+    state.listeners.push(callback);
+    return function unsubscribe() {
+      var idx = state.listeners.indexOf(callback);
+      if (idx !== -1) state.listeners.splice(idx, 1);
+    };
+  }
+
+  function onModeChange(callback) {
+    if (typeof callback !== 'function') return function () {};
+    state.modeListeners.push(callback);
+    return function unsubscribe() {
+      var idx = state.modeListeners.indexOf(callback);
+      if (idx !== -1) state.modeListeners.splice(idx, 1);
+    };
+  }
+
+  function getState() {
+    return {
+      currentId: state.currentId,
+      resolvedId: state.resolvedId,
+      defaultId: state.defaultId,
+      isUserOverride: state.isUserOverride,
+      isDark: state.isDark,
+      isSystem: state.isSystemTheme
+    };
+  }
+
+  function clearOverride() {
+    return reset();
+  }
+
+  /* ============================================================
+     11. EXPORT
+     ============================================================ */
+
+  window.ITWSTheme = {
+    _initialized: true,
     change: change,
     reset: reset,
-    subscribe: subscribe,
-    applyColors: applyColors,
-    applyFont: applyFont,
-    getCurrent: function () {
-      return {
-        id: state.currentThemeId,
-        colors: state.currentColors,
-        source: state.source,
-        font: state.currentFont
-      };
-    },
-    getCurrentId: function () {
-      return state.currentThemeId;
-    },
-    refreshPicker: function () {
-      updateThemePickerUI(state.currentThemeId);
-    }
+    applyDefault: reset,
+    clearOverride: clearOverride,
+    getCurrent: getCurrent,
+    getResolved: getResolved,
+    getDefault: getDefault,
+    isUserOverride: isUserOverride,
+    isDark: isDark,
+    isSystem: isSystem,
+    onChange: onChange,
+    onModeChange: onModeChange,
+    getState: getState
   };
 
-  // ============================================
-  // 16. التنفيذ الفوري (قبل CSS)
-  // ============================================
-  boot();
+  // Legacy / shorthand aliases
+  if (!window.theme) {
+    window.theme = window.ITWSTheme;
+  }
+  if (!window.changeTheme) {
+    window.changeTheme = function (id) { return change(id); };
+  }
 
-  // ============================================
-  // 17. بعد DOMContentLoaded
-  // ============================================
-  function onDOMReady() {
-    // تحديث الـ picker (لو موجود)
-    updateThemePickerUI(state.currentThemeId);
+  /* ============================================================
+     12. BOOTSTRAP — RUN SYNCHRONOUSLY NOW
+     ⚠️ This is the critical part for FOUC prevention
+     ============================================================ */
 
-    // Event delegation — يشتغل مع أزرار ديناميكية
-    document.addEventListener('click', function (e) {
-      var target = e.target.closest ? e.target.closest('[data-theme-option]') : null;
-      if (!target) return;
+  function bootstrap() {
+    state.initialized = true;
 
-      var themeId = target.getAttribute('data-theme-option');
-      if (themeId) {
-        change(themeId);
-      }
-    });
+    // Resolve and apply initial theme immediately
+    var initialId = resolveInitialTheme();
+    applyTheme(initialId, { persist: false });
 
-    // مزامنة + realtime
-    sync().then(function () {
-      subscribe();
+    // Setup system listener
+    setupSystemThemeListener();
+
+    log('debug', 'Bootstrap complete', {
+      initialId: initialId,
+      isUserOverride: state.isUserOverride,
+      isDark: state.isDark
     });
   }
 
-  // إخفاء الـ boot loader
-  function hideLoader() {
-    var loader = document.getElementById('themeBootLoader');
-    if (!loader) return;
-    loader.classList.add('hide');
-    setTimeout(function () {
-      if (loader && loader.parentNode) {
-        loader.parentNode.removeChild(loader);
-      }
-    }, 400);
+  // Run NOW (synchronously in <head>)
+  bootstrap();
+
+  /* ============================================================
+     13. DEFERRED SETTINGS SYNC
+     ⚠️ AppSettings not ready yet — attach listener after ready
+     ============================================================ */
+
+  function deferredSetup() {
+    setupSettingsListener();
+    checkSettingsSync();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      onDOMReady();
-      hideLoader();
-    });
+  // If AppSettings is already loaded
+  if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+    deferredSetup();
   } else {
-    onDOMReady();
-    hideLoader();
+    // Wait for settings to be ready
+    var waitForSettings = function () {
+      if (window.AppSettings && typeof window.AppSettings.onChange === 'function') {
+        deferredSetup();
+        return true;
+      }
+      return false;
+    };
+
+    if (!waitForSettings()) {
+      window.addEventListener('itws:settings-loaded', function () {
+        deferredSetup();
+      }, { once: true });
+
+      // Timeout fallback — try again after 2s
+      setTimeout(function () {
+        if (!state.settingsApplied) {
+          deferredSetup();
+        }
+      }, 2000);
+    }
   }
 
-  // أمان إضافي: إخفاء الـ loader بعد 2.5 ثانية
-  setTimeout(hideLoader, 2500);
+  /* ============================================================
+     14. CLEANUP
+     ============================================================ */
+
+  if (typeof window.addEventListener === 'function') {
+    window.addEventListener('beforeunload', function () {
+      if (state.systemThemeUnsubscribe) {
+        try { state.systemThemeUnsubscribe(); } catch (e) {}
+      }
+      if (state.settingsUnsubscribe) {
+        try { state.settingsUnsubscribe(); } catch (e) {}
+      }
+    });
+  }
 
 })();
